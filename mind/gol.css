@@ -1,0 +1,140 @@
+html {
+    background-color: #102020;
+    color: #bbb;
+    image-rendering: pixelated;
+    font-family: "Consolas", monospace;
+    font-size:11px;
+    overflow: hidden;
+  }
+
+.key {
+cursor: pointer;
+font: 16px "Open Sans", "Lucida Grande", "Arial", sans-serif;
+border: 1px solid black;
+border-radius: 5px;
+width: 20px;
+height: 40px;
+text-align: center;
+box-shadow: 2px 2px darkgray;
+display: inline-block;
+position: relative;
+margin-right: 3px;
+user-select: none;
+-moz-user-select: none;
+-webkit-user-select: none;
+-ms-user-select: none;
+}
+
+.key div {
+position: absolute;
+bottom: 0;
+text-align: center;
+width: 100%;
+pointer-events: none;
+}
+
+#c {
+image-rendering: optimizeSpeed;
+}
+input[type="number"]{
+width: 50px; background-color: #000; color:#555;
+font-size: 11px;
+border: none;
+padding: 3px;
+text-align: left;
+}
+
+input[type="radio"]{
+    margin:0;
+    vertical-align: middle;
+}
+input[type="checkbox"]{
+    margin:0;
+    vertical-align: middle;
+}
+.code{
+    background-color: #003;
+    color:#0c1;
+    font-family: 'Consolas', monospace;
+    font-size:10px;
+    border: 1px solid #111;
+    border-radius: 0;
+    width: 100%;
+}
+.code:active{
+    border:1px solid #ccc;
+}
+button{
+width: auto;
+border:1px solid #aaa;
+background-color: #000;
+color:#aaa;
+font-family: 'Consolas', monospace;
+font-size: 11px;
+}
+button:hover{
+color:#ccc;
+background-color: #333;
+}
+
+#gameInfo div{
+    display:inline-block;
+    width: 62px;
+    border:1px solid #000;
+    margin:0px;
+}
+
+.gen-settings{
+    border-bottom:1px solid #253;
+    padding: 8px 0px;
+}
+
+.settings-title{
+    font-size:10px;
+    color:#555;
+    display: inline-block;
+    margin-bottom: 2px;
+}
+
+.radic{
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: 18px;
+}
+
+#canvasDIV{
+    background-color: #003;
+    width: 256px;
+}
+#gameInfo{
+    background-color: #000;
+    width: 256px;
+}
+#totalCells{
+    color:#666;
+}
+#newCells{
+    color:#fff;
+}
+#liveCells{
+    color:#0f0;
+}
+#deadCells{
+    color:#00f;
+}
+
+input[type="range"]::-moz-range-thumb { width:5px;height: 10px; background-color: rgb(15, 116, 40); border-radius: 0px; border-color:#bebebe;}
+input[type="range"]::-moz-range-thumb:hover { background-color: rgba(4, 255, 0, 0.9);}
+
+input[type="range"] {border:1px solid rgb(118, 167, 130); background-color: #161575; height: 5px;width:100px; vertical-align: middle; margin:4px;}
+
+.link{
+    font-size:8px;
+    border:1px solid #0c1;
+    color:#0f0;
+    background-color: #00c;
+    vertical-align: middle;
+    padding: 0px 3px;
+    display: inline-block;
+    float: right;
+    cursor: pointer;
+}

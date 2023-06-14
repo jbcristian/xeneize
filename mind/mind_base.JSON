@@ -1,0 +1,136 @@
+{
+    "presetType": "session",
+    "presetName": "Fractal3D",
+    "isCustom": true,
+    "tracks": [
+        {
+            "type": "MASTER",
+            "id" : 0,
+            "position":0,
+            "volume": 0.5,
+            "pan": 0,
+            "effects": [
+                {
+                    "type": "DELAY",
+                    "power": true,
+                    "position": 0,
+                    "options": {
+                        "delayTime": 0.2,
+                        "delayFeedback": 0.8,
+                        "delayGain": 0.8
+                    }
+                }
+            ]
+        },
+        {
+            "type": "TRACK",
+            "id" : 125,
+            "position":1,
+            "volume": 0.5,
+            "pan": 0,
+            "instrument": {
+                "type": 0,
+                "envelope": {
+                    "a": 0.1,
+                    "d": 0.2,
+                    "s": 0.5,
+                    "r": 0.3,
+                    "l": 0.5
+                },
+                "generator": {
+                    "simple" : {
+                        "waveform" : 0
+                    },
+                    "harmonics" : {
+                        "value" : 2,
+                        "list" : [
+                            [1, 1, 20],
+                            [0.5, 4, 15],
+                            [0.25, 8, 15],
+                            [0.125, 16, 15],
+                            [0.0625, 32, 15]
+                        ]
+                    },
+                    "formants" : {
+                        "harmonics" : 64,
+                        "bandwidth" : 50,
+                        "bwscale" :1,
+                        "attenuator" : 1,
+                        "list" : [
+                            [500, 0.005, 1],
+                            [900, 0.0013, 1],
+                            [2100, 0.0005, 1],
+                            [3700, 0.00033, 1],
+                            [4700, 0.00025, 1]
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "type": "TRACK",
+            "id" : 888,
+            "position":2,
+            "volume": 0.8,
+            "pan": 0,
+            "instrument": {
+                "type": 0,
+                "envelope": {
+                    "a": 0.2,
+                    "d": 0.3,
+                    "s": 0.4,
+                    "r": 0.5,
+                    "l": 0.5
+                },
+                "generator": {
+                    "simple" : {
+                        "waveform" : 1
+                    },
+                    "harmonics" : {
+                        "value" : 2,
+                        "list" : [
+                            [1,1,20],
+                            [0.5,3,15]
+                        ]
+                    },
+                    "formants" : {
+                        "harmonics" : 20,
+                        "bandwidth" : 5,
+                        "bwscale" : 1,
+                        "attenuator" : 1,
+                        "list" : [
+                            [1,0.005,1],
+                            [400,0.0005,1],
+                            [10000,0.00015,1]
+                        ]
+                    }
+                }
+            },
+            "effects": [
+                {
+                    "type": "DELAY",
+                    "power": true,
+                    "position": 0,
+                    "options": {
+                        "delayTime": 0.2,
+                        "delayFeedback": 0.5,
+                        "delayGain": 0.5
+                    }
+                },
+                {
+                    "type": "DELAY",
+                    "power": true,
+                    "position": 1,
+                    "options": {
+                        "delayTime": 0.2,
+                        "delayFeedback": 0.5,
+                        "delayGain": 0.5
+                    }
+                }
+            ]
+        }
+    ],
+    "ui": {
+        "nothing": null
+    }
+}

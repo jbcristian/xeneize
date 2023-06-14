@@ -1,0 +1,760 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="gol.css">
+<!--style>
+      html{
+        image-rendering: pixelated;
+      }
+        #synthUI{
+            width: 500px;
+            background-color: #555;
+        };
+    </style-->
+  <title>Game of Life</title>
+
+  <!--script id="shader-vs" type="x-shader/x-vertex"> 
+  attribute vec3 aPos;
+  attribute vec2 aTexCoord;
+  varying   vec2 vTexCoord;
+void main(void) {
+   gl_Position = vec4(aPos, 1.);
+   vTexCoord = aTexCoord;
+}
+</script> 
+
+<script id="shader-fs" type="x-shader/x-fragment"> 
+precision mediump float;
+  uniform sampler2D uTexSamp;
+  varying vec2 vTexCoord;
+  float d = 1./512.;
+
+  int imn[9];
+
+void main(void) {
+
+  
+   float c = texture2D(uTexSamp, vTexCoord).x;
+   int s = 0;
+   if (texture2D(uTexSamp, vTexCoord + vec2(0., d)).x > 0.) s++;
+   if (texture2D(uTexSamp, vTexCoord - vec2(0., d)).x > 0.) s++;
+   if (texture2D(uTexSamp, vTexCoord + vec2(d, 0.)).x > 0.) s++;
+   if (texture2D(uTexSamp, vTexCoord - vec2(d, 0.)).x > 0.) s++;
+   if (texture2D(uTexSamp, vTexCoord + vec2(d, d)).x > 0.) s++;
+   if (texture2D(uTexSamp, vTexCoord - vec2(d, d)).x > 0.) s++;
+   if (texture2D(uTexSamp, vTexCoord + vec2(d, -d)).x > 0.) s++;
+   if (texture2D(uTexSamp, vTexCoord - vec2(d, -d)).x > 0.) s++;
+   if (c > .0){
+     if ((s == 2) || (s == 3)) gl_FragColor = vec4(1.,0.,0.,1.);
+     else gl_FragColor = vec4(vec3(0.),1.);
+   }
+   else if (s == 3) gl_FragColor = vec4(1.);
+        else gl_FragColor = vec4(vec3(0.),1.);
+    
+
+  
+  //gl_FragColor = texture2D(uTexSamp, vTexCoord);
+}
+</script> 
+ 
+<script id="shader-fs-show" type="x-shader/x-fragment"> 
+precision mediump float;
+  uniform sampler2D uTexSamp;
+  varying vec2 vTexCoord;
+void main(void) {
+   gl_FragColor = texture2D(uTexSamp, vTexCoord);
+}
+</script-->
+
+</head>
+
+<body>
+
+  <canvas id="test1" width="32" height="32" style="width: 32px; display:none;"></canvas>
+
+  <canvas id="c" width="1" height="1" style="width: 256px;"></canvas>
+  <div>
+    <button onclick='play()'>Play/Reset</button>
+    <button onclick='stop()'>Stop</button>
+    <button onclick='playAll()'>Play All</button>
+    <button onclick='stopAll()'>Stop All</button>
+    <br><br>
+    <div id="canvasDiv"></div>
+    <div id="gameInfo">
+      <div style="display: none;"; id="framerate">FPS:</div><div id="totalCells">TTL:</div><div id="newCells">NEW:</div><div id="liveCells">LIVE:</div><div id="deadCells">DEAD:</div>
+    </div>
+    
+    <div id="golOpts" class="gen-settings">
+      <span class="settings-title">Game Settings</span>
+      <br>
+      Grid(px): <input id="game-dimension" type="number" step="2" value="12">
+      <input id="game-display-size" type="number" step="2" value="256" style="display:none;">
+      Density: <input id="game-density" type="number" step="0.01" value="0.2" onchange="setDensity(this.value)">
+    </div>
+    <div class="gen-settings">
+      <input type="checkbox" checked id="play-total" onchange="setCellsToPlay();"> Total |
+      <input type="checkbox" checked id="play-new" onchange="setCellsToPlay();"> New |
+      <input type="checkbox" checked id="play-live" onchange="setCellsToPlay();"> Live |
+      <input type="checkbox" checked id="play-dead" onchange="setCellsToPlay();"> Dead
+      <br><br>
+      Send to Track: <select id="host-tracks" onclick="setTrackSend();"></select><button onclick="reloadHostTracks();">&circlearrowleft;</button>
+    </div>
+    <div id="musOpts" class="gen-settings">
+      <span class="settings-title">Music Settings</span>
+      <br>
+      Speed(ms): <input type="number" value="1000" onchange="setDelay( this.value )">
+      <input type="checkbox" id="affect-speed" onclick="setSpeed();"> Scripted
+      <br><br>
+      <input type="text" id="speed-code" class="code" value="speed = (1+total % 8);">
+    </div>
+    <div class="gen-settings">
+      Pitch Multiplier:<input id="pitch-mult" type="range" value="100" min="1" max ="200" step="1" onchange='updateSlider("pitch-mult-text", "pitch-mult");setEqualDivisionTuning();sendPitch()'><span id="pitch-mult-text">100</span> <div id="link-pitch" powerb="on" onclick="powerb(this);" class="link">LINK</div>
+    </div>
+    <div class="gen-settings">
+      <input type="radio" checked name="pitchOpt" onclick='selF = GetTrueOne("pitchOpt");'> Equal Division Tuning Mapping
+      <div powerb="on" class="link" id="link-equal" onclick="powerb(this);">LINK</div>
+      <br><br>
+      <input onchange="setEqualDivisionTuning();sendEqual();" style="margin-bottom: 10px;vertical-align: bottom;" type="number" id="ed-divs" value="12" step="0.01"><span class="radic">&radic;</span>
+      <input type="number" id="ed-interval" value="2" step="0.01" onchange="setEqualDivisionTuning();sendEqual();">
+      <input type="number" id="ed-nrr" value="30" step="1" min="1" onchange="setEqualDivisionTuning();sendEqual();">
+    </div>
+    <div class="gen-settings">
+      <input type="radio" name="pitchOpt" onclick='selF = GetTrueOne("pitchOpt");'> Cell State Intervals
+      <div>Max Pitch:<input id="max-pitch" type="number" min="1" max="20000" value="2500" onchange="setMaxPitch();"></div>
+
+    </div>
+    <!--div class="gen-settings">
+      <input type="radio" name="pitchOpt" onclick='selF = GetTrueOne("pitchOpt");'> Script
+      <br><br>
+      <input type="text" class="code" id="pitch-code" value="note=;">
+    </div-->
+
+  </div>
+
+</body>
+
+<script>
+
+  var vertexSource = `#version 300 es
+    
+    in vec3 aPos;
+    in vec2 aTexCoord;
+    out vec2 vTexCoord;
+    void main() {
+        gl_Position = vec4(aPos, 1.);
+        vTexCoord = aTexCoord;
+    }
+    `;
+
+  var fragmentSource = `#version 300 es
+    
+    precision mediump float;
+    uniform sampler2D uTexSamp;
+    uniform float dmn;
+    in vec2 vTexCoord;
+    
+    vec4 kolor;
+    
+    out vec4 outColor;
+    
+    void main() {
+      float d = 1./dmn;
+      float c = texture(uTexSamp, vTexCoord).x;
+      int s = 0;
+      if (texture(uTexSamp, vTexCoord + vec2(0., d)).x > 0.) s++;
+      if (texture(uTexSamp, vTexCoord - vec2(0., d)).x > 0.) s++;
+      if (texture(uTexSamp, vTexCoord + vec2(d, 0.)).x > 0.) s++;
+      if (texture(uTexSamp, vTexCoord - vec2(d, 0.)).x > 0.) s++;
+      if (texture(uTexSamp, vTexCoord + vec2(d, d)).x > 0.) s++;
+      if (texture(uTexSamp, vTexCoord - vec2(d, d)).x > 0.) s++;
+      if (texture(uTexSamp, vTexCoord + vec2(d, -d)).x > 0.) s++;
+      if (texture(uTexSamp, vTexCoord - vec2(d, -d)).x > 0.) s++;
+      if (c > .0){
+        if ((s == 2) || (s == 3)) kolor = vec4(0.5,1.,0.,0.);
+        else kolor = vec4(vec3(0.,0.,1.),0.);
+      }
+      else if (s == 3) kolor = vec4(vec3(1.),0.);
+      else kolor = vec4(vec3(0.),0.);
+
+      outColor = kolor;
+      
+      //outColor = texture(uTexSamp, vTexCoord);
+    }
+    `;
+
+  function createShader(gl, type, source) {
+    var shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+
+    var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+    if (success) {
+      return shader;
+    }
+
+    console.log(gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+  }
+
+  function createProgram(gl, vertex, fragment) {
+    var program = gl.createProgram();
+    gl.attachShader(program, vertex);
+    gl.attachShader(program, fragment);
+    gl.linkProgram(program);
+
+    var success = gl.getProgramParameter(program, gl.LINK_STATUS);
+    if (success) {
+      console.log(success)
+      return program;
+    }
+
+    console.log(gl.getProgramInfoLog(program));
+    gl.deleteProgram(program);
+  }
+
+  /*function getShader ( gl, id ){ //THIS IS FROM THE WEBGL1 VERSION
+     var shaderScript = document.getElementById ( id );
+     var str = "";
+     var k = shaderScript.firstChild;
+     while ( k ){
+       if ( k.nodeType == 3 ) str += k.textContent;
+       k = k.nextSibling;
+     }
+     var shader;
+     if ( shaderScript.type == "x-shader/x-fragment" )
+             shader = gl.createShader ( gl.FRAGMENT_SHADER );
+     else if ( shaderScript.type == "x-shader/x-vertex" )
+             shader = gl.createShader(gl.VERTEX_SHADER);
+     else return null;
+     gl.shaderSource(shader, str);
+     gl.compileShader(shader);
+     return shader;
+  }*/
+  var ctxx = document.getElementById('test1');
+  ctxx = ctxx.getContext('2d');
+
+  function loadImg() {
+
+    var img1 = new Image();
+    img1.onload = function () {
+
+      ctxx.drawImage(img1, 0, 0);
+      ctxx.fillStyle = 'rgba(200,0,0,0)';
+      //ctxx.fillRect(0,0,32,32);
+    };
+    img1.src = '12.png';
+
+    main();
+
+  }
+
+  var dimension = 0;
+
+  let gl, prog, prog_show, FBO, FBO2, texture, texture2, animation,
+    delayGL = 1000, density = 0.0, it = 1, frames = 0, time, timer, dmnLoc;
+
+  function main() {
+    clearInterval(timer);
+    dimension = document.getElementById("game-dimension").value;
+    setDensity(document.getElementById('game-density').value);
+
+    dtotalCells = document.getElementById("totalCells");
+    dnewCells = document.getElementById("newCells");
+    dliveCells = document.getElementById("liveCells");
+    ddeadCells = document.getElementById("deadCells");
+    
+    var c;
+    if (document.getElementById("c")) {
+      document.getElementById("c").remove();
+      c = document.createElement("CANVAS");
+      c.id = "c";
+      c.style.width = "256px";
+      document.getElementById('canvasDiv').appendChild(c);
+      console.log("Canvas re-created.")
+    }
+
+    c.width = dimension;
+    c.height = dimension;
+    try {
+      gl = c.getContext("webgl2", { depth: false });
+    } catch (e) { alert(e); }
+    if (!gl) { alert("NA"); }
+
+    /*prog  = gl.createProgram(); //WEBGL!
+    gl.attachShader(prog, getShader( gl, "shader-vs" ));
+    gl.attachShader(prog, getShader( gl, "shader-fs" ));
+    gl.linkProgram(prog);
+    prog_show  = gl.createProgram();
+    gl.attachShader(prog_show, getShader( gl, "shader-vs" ));
+    gl.attachShader(prog_show, getShader( gl, "shader-fs-show" ));
+    gl.linkProgram(prog_show);*/
+
+    var vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexSource);
+    var fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
+    prog = createProgram(gl, vertexShader, fragmentShader);
+
+    dmnLoc = gl.getUniformLocation(prog, "dmn");
+
+    var posBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+    var vertices = new Float32Array([-1, -1, 0, 1, -1, 0, -1, 1, 0, 1, 1, 0]);
+    var aPosLoc = gl.getAttribLocation(prog, "aPos");
+    gl.enableVertexAttribArray(aPosLoc);
+    var aTexLoc = gl.getAttribLocation(prog, "aTexCoord");
+    gl.enableVertexAttribArray(aTexLoc);
+    var texCoords = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
+    var texCoordOffset = vertices.byteLength;
+    gl.bufferData(gl.ARRAY_BUFFER, texCoordOffset + texCoords.byteLength, gl.STATIC_DRAW);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices);
+    gl.bufferSubData(gl.ARRAY_BUFFER, texCoordOffset, texCoords);
+    gl.vertexAttribPointer(aPosLoc, 3, gl.FLOAT, gl.FALSE, 0, 0);
+    gl.vertexAttribPointer(aTexLoc, 2, gl.FLOAT, gl.FALSE, 0, texCoordOffset);
+
+    {
+      var pixels = [], tSize = dimension;
+      for (var i = 0; i < tSize; i++)
+        for (var j = 0; j < tSize; j++)
+          if (Math.random() > density) pixels.push(0, 0, 0, 0);
+          else pixels.push(255, 0, 0, 0);
+
+      var idata = ctxx.getImageData(0, 0, dimension, dimension);
+      var pim = new Uint8Array(idata.data.buffer);
+    }
+    //for(var i = 0; i < idata.data.length;i++){
+    //  pim[i] = idata.data[i];
+    //}
+
+    texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, tSize, tSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(pixels));
+    //alert(pim);
+    //gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, tSize, tSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, pim);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+    texture2 = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture2);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, tSize, tSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(pixels));
+    //gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, tSize, tSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, pim);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+    //gl.uniform1i(gl.getUniformLocation(prog, "uTexSamp"), 0);
+    FBO = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, FBO);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+
+    FBO2 = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, FBO2);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture2, 0);
+
+    timer = setInterval(fr, 500);
+    time = new Date().getTime();
+    animation = "animate";
+    anim();
+  }
+
+  function anim() {
+    draw();
+    switch (animation) {
+      case "animate":
+        setTimeout("requestAnimationFrame(anim)", delayGL);
+        break;
+      case "reset":
+        main();
+        break; //main();
+      case "stop":
+        console.log("Stop.");
+        break;
+    }
+  }
+  function play(){ main(); }
+  function stop(){ animation = "stop"; }
+
+  function playAll(){ parent.playAllGol(); }
+
+  function stopAll(){ parent.stopAllGol(); }
+  function draw() {
+    gl.useProgram(prog);
+    gl.uniform1f(dmnLoc, dimension);
+
+    if (it > 0) {
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, FBO2);
+    }
+    else {
+      gl.bindTexture(gl.TEXTURE_2D, texture2);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, FBO);
+    }
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    //gl.flush();
+    //gl.useProgram(prog_show);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    /*    if(gl.readBuffer(gl.COLOR_ATTACHMENT0)){
+            gl.readBuffer(gl.COLOR_ATTACHMENT0);
+            var data32x4 = new Uint8Array(32*32*4);
+            gl.readPixels(0, 0, 32, 32, gl.RGBA, gl.UNSIGNED_BYTE, data32x4);
+    
+            var blob32x4 = new Blob([data32x4]);
+            var url32x4 = URL.createObjectURL(blob32x4);
+            var link32x4 = document.createElement('a');
+            link32x4.href = url32x4;
+            document.body.appendChild(link32x4);
+            link32x4.click();
+          }
+    */
+
+    datanull = new Uint8Array(dimension * dimension * 4);
+    gl.readPixels(0, 0, dimension, dimension, gl.RGBA, gl.UNSIGNED_BYTE, datanull);
+
+    //stageTest(datanull);
+    playNew(datanull);
+    
+
+    gl.flush();
+    it = -it;
+    frames++;
+  }
+  
+  function setDelay(v) {
+    delayGL = parseInt(v);
+  }
+  function setDensity(v) {
+    density = v.valueOf();
+    animation = "reset";
+  }
+  function fr() {
+    var ti = new Date().getTime();
+    var fps = Math.round(1000 * frames / (ti - time));
+    document.getElementById("framerate").innerHTML = "FPS:" + fps;
+    frames = 0; time = ti;
+  }
+  var datanull;
+  main();
+
+  reloadHostTracks();
+  //loadImg();
+
+  function resetDimension() {
+    dimension = document.getElementById("game-dimension").value;
+    let el = document.getElementById("c");
+    el.width = dimension;
+    el.height = dimension;
+    //el.style.width = "256px";
+    //el.style.height = "256px";
+
+  }
+  //MIDI
+  /*
+  var midi = null;  // global MIDIAccess object
+  var output = null;
+  
+  function onMIDISuccess( midiAccess ) {
+    console.log( "MIDI ready!" );
+    midi = midiAccess;  // store in the global (in real usage, would probably keep in an object instance)
+    output = midiAccess.outputs.get("output-1");
+    //output = midiAccess.outputs.get("zlUDshO766PXszZIjVgBdTtcgpntelj3IaMwQmwV43s=");
+    main();
+    listInputsAndOutputs(midiAccess);
+  }
+  
+  function onMIDIFailure(msg) {
+    console.log( "Failed to get MIDI access - " + msg );
+  }
+  
+  function listInputsAndOutputs( midiAccess ) {
+    for (var entry of midiAccess.inputs) {
+      var input = entry[1];
+      console.log( "Input port [type:'" + input.type + "'] id:'" + input.id +
+        "' manufacturer:'" + input.manufacturer + "' name:'" + input.name +
+        "' version:'" + input.version + "'" );
+    }
+  
+    for (var entry of midiAccess.outputs) {
+      var output = entry[1];
+      console.log( "Output port [type:'" + output.type + "'] id:'" + output.id +
+        "' manufacturer:'" + output.manufacturer + "' name:'" + output.name +
+        "' version:'" + output.version + "'" );
+    }
+  }
+  
+  navigator.requestMIDIAccess({ sysex: true }).then( onMIDISuccess, onMIDIFailure );
+  
+  function stageTest(data){
+    let t = 0;
+    for(let r= 11; r>=0;r--){
+      for(let c = 0; c<12;c++){
+        if(data[t]==0){
+          //console.log(c+" "+r)
+          output.send([128+c,r,0]);
+        }else{
+          output.send([144+c,r,0]);
+        }
+        t+=4;
+      }
+    }
+  }
+  */
+
+var selF = GetTrueOne("pitchOpt");
+
+var dtotalCells, dnewCells, dliveCells, ddeadCells; 
+var total=0, newc=0, live=0, dead=0;
+function playNew(data){
+  total=0, newc=0, live=0, dead=0;//reset
+  let offset = 0; //skip alpha channel
+  for(j=1;j<dimension*dimension*4; j+=4){
+    //if(data[j-1]>0){//  total+=1;//}
+    if(data[j-1]>0 && data[j]>0 && data[j+1]>0){
+      newc+=1;
+    }
+    if(data[j]>0 && data[j+1]==0){
+      live+=1;
+    }
+    if(data[j+1]>0 && data[j-1]==0){
+      dead+=1;
+    }
+  }
+
+  total = newc+live+dead
+
+  if(nspeed){
+    eval(script);
+    setDelay(speed);
+  }
+
+  switch(selF){
+    case 0:
+      playEqual();
+      break;
+    case 1:
+      playCells();
+    case 2:
+      playEqual();
+      console.log("TODO")
+  }
+
+  dtotalCells.innerHTML = "TTL:"+total;
+  dnewCells.innerHTML = "NEW:"+newc;
+  dliveCells.innerHTML = "LIVE:"+live;
+  ddeadCells.innerHTML = "DEAD:"+dead;
+}
+
+var edbase, noteRangeRep,pitchmult;
+function setEqualDivisionTuning(){
+  let divs = document.getElementById("ed-divs").value;
+  let interval = document.getElementById("ed-interval").value;
+  pitchmult = document.getElementById("pitch-mult").value;
+  noteRangeRep = document.getElementById('ed-nrr').value;
+
+  edbase = Math.pow(interval, 1/divs);
+}
+setEqualDivisionTuning();
+
+var playtotal, playnew, playlive, playdead;
+function setCellsToPlay(){
+  playtotal = document.getElementById('play-total').checked;
+  playnew = document.getElementById('play-new').checked;
+  playlive = document.getElementById('play-live').checked;
+  playdead = document.getElementById('play-dead').checked;
+}
+setCellsToPlay();
+
+var maxPitch;
+function setMaxPitch(){
+  maxPitch = document.getElementById('max-pitch').value;
+}
+setMaxPitch();
+
+var nspeed;
+var speed;
+var script;
+function setSpeed(){
+  nspeed = document.getElementById('affect-speed').checked;
+  script = document.getElementById('speed-code').value;
+}
+setSpeed();
+
+var trackSend;
+function setTrackSend(){
+  let opt = document.getElementById('host-tracks').options;
+  let sel = document.getElementById('host-tracks').selectedIndex;
+  trackSend = opt[sel].value;
+}
+setTrackSend();
+
+function playCells(){
+  if(!edbase)setEqualDivisionTuning();
+  if(!playtotal)setCellsToPlay();
+  if(!trackSend)setTrackSend();
+
+  if (total > 0 && animation=="animate") {
+      
+      if(playtotal){
+        let note = total * pitchmult;
+        parent.playNote(note%maxPitch, trackSend,delayGL*.9);
+      }
+      if(playnew){
+        let note = newc * pitchmult;
+        parent.playNote(note%maxPitch, trackSend,delayGL*.9);
+      }
+      if(playlive){
+        let note = live * pitchmult;
+        parent.playNote(note%maxPitch, trackSend,delayGL*.9);
+      }
+      if(playdead){
+        let note = dead * pitchmult;
+        parent.playNote(note%maxPitch, trackSend,delayGL*.9);
+      }
+    }
+}
+
+function playEqual() {
+    //1.08818224346 TRITAVE
+    //1.05946309435 OCTAVE
+    if(!edbase)setEqualDivisionTuning();
+    if(!playtotal)setCellsToPlay();
+    if(!trackSend)setTrackSend();
+
+    if (total > 0 && animation=="animate") {
+      if(playtotal){
+        let note = Math.pow(edbase, total % noteRangeRep) * pitchmult;
+        parent.playNote(note, trackSend,delayGL);
+      }
+      if(playnew){
+        let note = Math.pow(edbase, newc % noteRangeRep) * pitchmult;
+        parent.playNote(note, trackSend,delayGL);
+      }
+      if(playlive){
+        let note = Math.pow(edbase, live % noteRangeRep) * pitchmult;
+        parent.playNote(note, trackSend,delayGL);
+      }
+      if(playdead){
+        let note = Math.pow(edbase, dead % noteRangeRep) * pitchmult;
+        parent.playNote(note, trackSend,delayGL);
+      }
+
+    }
+
+    //var rows = [];
+    //var cols = [];
+    //var rowN = 0;
+    //let jj = 1;
+    /*for(r = 0; r<32; r++){
+        //var rowTotal = 0;
+        let n = Math.ceil( (r+1) / (32/6) );
+        //console.log(n);
+        for(p=0; p<32; p++){
+          let o = Math.ceil( (p+1) / (32/12) );
+          //rowTotal+=drop[p+rowN];
+          let note =  Math.pow(1.05946309435, o)* (Math.pow(2, n))*100. ;
+          let dropc = drop[-1+ (p+1)*(r+1) ];
+          if(dropc >1) {
+            window.setTimeout(function(){
+              playTone( note );
+              console.log(note);
+              
+            }, 100*jj);
+          };
+          jj++;
+          //console.log(note);
+        }
+        //if(rowTotal>1) {
+            //let note =  Math.pow(1.05946309435, (r%p))*1 ;
+            //let note =   10 * (total/rowTotal);
+            //let note =   r*p * (totalw/total) ;
+            //let note = 440;
+            //let note = ( Math.pow((totalw/total)/2, (r%p) ))*.2;
+            //osc = playTone( note );
+            //console.log(note);
+        //}
+        //console.log(rowTotal/255);
+        //rowN+=31;
+    }*/
+
+}
+
+function reloadHostTracks(){
+  let sel = document.getElementById('host-tracks');
+  let i, s = sel.options.length;
+  for(i = s; i>=0; i--){
+    sel.remove(i);
+  }
+  let ids = parent.informTrackIDs();
+  for (id in ids){
+    let opt = document.createElement('OPTION');
+    opt.value = ids[id];
+    opt.innerText = "ID["+ids[id]+"]";
+    sel.appendChild(opt);
+  }
+}
+
+function updateSlider(e,v){
+  document.getElementById(e).innerText = document.getElementById(v).value;
+}
+
+function powerb(el){
+  let s = el.getAttribute("powerb");
+  if(s=="on"){
+    el.setAttribute("powerb","off");
+    el.style.backgroundColor ="#000";
+    el.style.borderColor = "#666";
+    el.style.color = "#666";
+  }
+  else{
+    el.setAttribute("powerb","on");
+    el.style.backgroundColor ="#01d";
+    el.style.borderColor = "#0c1";
+    el.style.color = "#0f0";
+  }
+}
+
+function sendPitch(){
+  if(document.getElementById("link-pitch").getAttribute("powerb")=="on"){
+    let m = document.getElementById('pitch-mult').value;
+    parent.handlePitchMult(m);
+  }
+}
+
+function sendEqual(){
+  if(document.getElementById("link-equal").getAttribute("powerb")=="on"){
+    let n = document.getElementById('ed-divs').value;
+    let t = document.getElementById('ed-interval').value;
+    let r = document.getElementById('ed-nrr').value;
+    parent.handleEqualDivision(n,t,r);
+  }
+}
+
+function recivePitchMult(m){
+  if(document.getElementById("link-pitch").getAttribute("powerb")=="on"){
+    document.getElementById('pitch-mult').value = m;
+    updateSlider("pitch-mult-text", "pitch-mult");
+    setEqualDivisionTuning();
+  }
+}
+
+function reciveEqualDivs(n,t,r){
+  if(document.getElementById("link-equal").getAttribute("powerb")=="on"){
+    document.getElementById('ed-divs').value = n;
+    document.getElementById('ed-interval').value = t;
+    document.getElementById('ed-nrr').value = r;
+    setEqualDivisionTuning();
+  }
+}
+
+function GetTrueOne(rname){
+    let options = document.getElementsByName(rname);
+    let t;
+    for (t=0; t < options.length ; t++){
+        if(options[t].checked==true){
+            return t;
+        }
+    }
+}
+
+</script>
+
+</html>

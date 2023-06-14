@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<title>MIND</title>
+<link rel="stylesheet" type="text/css" href="mind.css">
+<script type="text/javascript" src="mind.js"></script>
+</head>
+<body>
+
+<!--
+    the ui and the synth are created/connected from the preset
+    the preset is created from an object
+    object is stored in browser session until saved as preset
+    object is manipulated with the ui
+-->
+
+<div id="main">
+
+    <div id="global">
+        <div id="logo"></div>
+
+        <div class="header-right">Session: 
+            <div id="load-preset">Load Preset:</div>
+            <input type="file" id="interfaceFileSelect" oninput="getFile(this)">
+            <a id="save-preset"><div class="global-button">SAVE PRESET</div></a>
+        </div>
+
+        
+    </div>
+
+    <div id="client">
+
+        <div id="interface-global"><!--header--->
+            <div id="title"> </div>
+            <div>
+                <select id="select-interface">
+                    <option>Conway's Game of Life</option>
+                    <!--option>Spiral Harp</option>
+                    <option>3D Fractl</option-->
+                </select>
+                <div id="add-interface" class="global-button">ADD INTERFACE</div>
+            </div>
+            
+        </div>
+
+        <div id="interface-window">
+            <div id="iFPlaceholder">[ NO INTERFACE ]</div>
+        </div>
+
+    </div>
+
+    <div id="daw">
+
+        <div id="daw-global">
+            <div id="add-track" class="button-A">ADD TRACK</div>
+            
+        </div>
+        <div id="daw-tracks">
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+let interfaces;
+
+/*function load_i(){
+    /*document.getElementById('interface-window').innerHTML = '<iframe src="simple-piano.html" width="500" height="300"></object>';
+    document.getElementById('interface-window').innerHTML += '<iframe src="conway-game-of-life.html" width="640" height="640"></object>';
+    }
+*/
+
+document.getElementById('add-interface').addEventListener('click', ()=>{
+        addInterface();
+    });
+
+function addInterface(){
+    let fullInterface = document.createElement("DIV");
+    fullInterface.className = "full-interface";
+
+    let interface = document.getElementById('select-interface').selectedIndex;
+    let interfaceToAdd = "";
+    let w, h, title, tID = getRandomID();
+    switch(interface){
+        case 0:
+            title = "Conway's Game of Life";
+            interfaceToAdd = "conway-game-of-life";
+            w = "275"; h = "700";
+            break;
+        case 1:
+            interfaceToAdd = "spiral-harp";
+            break;
+        case 2:
+            interfaceToAdd = "3d-fractal";
+            break;
+        default:
+            interfaceToAdd = "conway-game-of-life";
+            w = "275"; h = "700";
+            break;        
+    }
+
+    fullInterface.style.width = w+"px"; //height is auto
+    document.getElementById('interface-window').appendChild(fullInterface);
+
+    let interfaceHeader = document.createElement('DIV');
+    interfaceHeader.className = "interface-header";
+    interfaceHeader.innerHTML = "[ID "+tID+ " ] "+title;
+
+    let deleteInterfaceButton = document.createElement('DIV');
+    deleteInterfaceButton.className = "delete-interface";
+    deleteInterfaceButton.innerHTML = "X";
+    deleteInterfaceButton.addEventListener('click',()=>{
+       fullInterface.remove();
+       updateInterfaces();
+       console.log("deleted: "+ fullInterface)
+    });
+
+    interfaceHeader.appendChild(deleteInterfaceButton);
+
+    fullInterface.appendChild(interfaceHeader);
+
+    let interfaceiFrame = document.createElement("IFRAME");
+    interfaceiFrame.className = "gol";
+    interfaceiFrame.id = tID;
+    interfaceiFrame.src = interfaceToAdd+".html";
+    interfaceiFrame.width = w;
+    interfaceiFrame.height = h;
+    interfaces+= interfaceiFrame;
+    fullInterface.appendChild(interfaceiFrame);
+    //document.getElementById('interface-window').innerHTML += '<iframe src="'+interfaceToAdd+'.html" width="640" height="640"></object>';
+    updateInterfaces();
+}
+
+function updateInterfaces(){
+    let iw = document.getElementById('iFPlaceholder');
+    if(interfaces.length>0){
+        iw.style.display = "none";
+    }else{
+        iw.style.display = "block";
+    }
+    //console.log(iw);
+}
+
+function getRandomID(){
+    let ids = [];
+    for(let i in interfaces){
+        ids[i]=interfaces.id;
+    }
+    let newID = Math.floor(Math.random()*10000);//0 - 10000
+    let exists = ids.find(checkid);
+    function checkid(id) {
+        return id == newID;
+      }
+    if(!exists){
+        return newID;
+    }else{
+        getRandomID();
+    }
+}
+
+
+//GAME OF LIFE SPECIFIC////////////////
+function playAllGol(){//stop gol
+    let f = document.getElementsByClassName("gol");
+    for(let i = 0; i<f.length; i++){
+        f[i].contentWindow.play();
+    }
+}
+function stopAllGol(){//stop gol
+    let f = document.getElementsByClassName("gol");
+    for(let i = 0; i<f.length; i++){
+        f[i].contentWindow.stop();
+    }
+}
+
+function handlePitchMult(m){
+    let f = document.getElementsByClassName("gol");
+    for(let i = 0; i<f.length; i++){
+        f[i].contentWindow.recivePitchMult(m);
+    }
+}
+
+function handleEqualDivision(n,t,r){//note, interval, repeat
+    let f = document.getElementsByClassName("gol");
+    for(let i = 0; i<f.length; i++){
+        f[i].contentWindow.reciveEqualDivs(n,t,r);
+    }
+}
+//////////////////////////////
+
+//SHARED///////////////
+
+
+</script>
+
+
+
+</body>
+</html>
