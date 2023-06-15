@@ -35,8 +35,6 @@ readTextFile("real_daw.JSON", function(text){
 })*/
 
 let session;
-
-//now is automatic, then well see
 document.onload = fetch("mind_base.JSON").then(response => response.json()).then(json => logPreset(json));
 //fetch("real_daw.JSON").then(response => response.json()).then(json => logPreset(json));
 
@@ -65,8 +63,6 @@ function logPreset(preset){
 }
 
 // UI //
-//some things or controls, arent created from the preset, like the volume indicators
-
 function drawTrack(track){//tracks
     
     let uiTrack = document.createElement('div');
@@ -86,7 +82,6 @@ function drawTrack(track){//tracks
     //if(track.type="MASTER"){setMasterAnalyser()}
     if(track.instrument){//master doest have instrument nor deletable
         drawDeleteTrack(uiTrack,track);//tracks
-        //drawDeleteFX(o,uiName,fx,uiFX,or);
 
         let uiInst = document.createElement('div');
         uiInst.className = "synth-instrument";
@@ -123,9 +118,7 @@ function drawTrack(track){//tracks
 
         let uibuts = uiTypeSel.getElementsByClassName("radioTest");
         for(i in uibuts){
-            uibuts.item(i).oninput = ()=>{
-                setTypeUI();
-            }
+            uibuts.item(i).oninput = ()=>{ setTypeUI(); }
         }
 
         function setTypeUI(){
@@ -133,11 +126,10 @@ function drawTrack(track){//tracks
             uitype2.style.display = "none";
             uitype3.style.display = "none";
             switch(track.instrument.type){
-                case 0:uitype1.style.display = "block";
-                    break;
-                case 1:uitype3.style.display = "block";
-                    break;
-                case 2:uitype2.style.display = "block";
+                case 0:uitype1.style.display = "block";break;
+                case 1:uitype3.style.display = "block";break;
+                case 2:uitype2.style.display = "block";break;
+                default: break;
             }
         }
 
@@ -253,33 +245,19 @@ function drawTrack(track){//tracks
 
         uitype3.onclick = ()=>{
             if(trackSynths){
-                
                 let t = trackSynths.find(getTrackNode);
                 function getTrackNode(t){
                     if(t[2]==track.id){
                         return t
                     };
                 }
-                console.log(t)
+                //console.log(t)
                 t[0] = setHarmonicSynth(track);
                 //t[1] = setFormantsSynth(track);
             }
         }
 
         setTypeUI();
-
-        /*let uiWaveform = document.createElement('div');
-        uiWaveform.className = "waveform";
-        uiInst.appendChild(uiWaveform);
-
-        let uiwaveformtitle = document.createElement('div');
-        uiwaveformtitle.className = "title";
-        uiwaveformtitle.innerText = "Waveform: "
-        uiWaveform.appendChild(uiwaveformtitle);
-
-        let uiwaveselect = document.createElement('div');
-        uiwaveselect.innerText = track.instrument.waveform;
-        uiWaveform.appendChild(uiwaveselect);*/
     }
 
     //EFFECTS UI
@@ -879,14 +857,11 @@ function drawToAnalyser(analyser,data,buffer,canvas) {
 
   canvas.fillStyle = 'rgb(94, 119, 106)';
   canvas.fillRect(0, 0, 100, 10);
-
   //let barWidth ;
   //let barHeight = 10;
   //let x = 0;
-
   //for(let i = 0; i < buffer; i++) {
     //barWidth = data[i]/2;
-
     canvas.fillStyle = 'rgba(0,0,0,1.0)';
     canvas.fillRect(0,0,val*100,10);
     //console.log(val)
@@ -897,6 +872,8 @@ let trackNodes = [];
 let trackAnalysers = [];
 let trackSynths = [];
 let tracksEffects = [];
+
+let tracksChains = [];
 
 function setTracks(){//tracks
     const tracks = session.tracks;
@@ -922,6 +899,8 @@ function setTracks(){//tracks
 
 function initTrack(track){
     //check 3d here probably
+    const trackIn = sessionCtx.createGain();
+
     const trackGain = sessionCtx.createGain();
     const trackPan = sessionCtx.createStereoPanner();
 
@@ -936,12 +915,15 @@ function initTrack(track){
         trackPan.pan.value = track.pan;
     });
 
-    
 
-//CREATE INSTRUMENT
     if(track.type=="TRACK"){
-        trackPan.connect(trackNodes[0][0]);//master
-        //trackPan.connect(tracksEffects[0][0][0]);//master
+        //old
+        //trackPan.connect(trackNodes[0][0]);//master
+        //new
+        //this can fail if master isnt init first, luckily it does
+        trackPan.connect(tracksChains[0][0]);//master IN
+        
+        //CREATE INSTRUMENT
         const synthHarmonic = setHarmonicSynth(track);
         const synthFormant = setFormantsSynth(track);
         trackSynths.push([synthHarmonic,synthFormant,track.id]);
@@ -949,10 +931,14 @@ function initTrack(track){
     else if(track.type=="MASTER"){
         trackPan.connect(sessionCtx.destination);
     }
-    trackNodes.push([trackGain,track.id]);
+
+    //old
+    //trackNodes.push([trackGain,track.id]);
+
+    //new
+    tracksChains.push([trackIn,trackGain,track.id]);
 
     setTrackEffects(track);
-    //cant be problems if atomepoint ids repeat or idk
     //console.log(trackNodes);
 }
 
@@ -1026,31 +1012,49 @@ function setTrackEffects(track){
         
     }
     tracksEffects[track.position] = effects;
-    console.log(tracksEffects[track.position]);
+    //console.log(tracksEffects[track.position]);
     chainTrackEffects(track);
 }
 
 function chainTrackEffects(track){
     let effects = tracksEffects[track.position];
-    let lastNode = trackNodes.find(getTrackNode);
-    function getTrackNode(t){
-        if(t[1]==track.id||t[2]==track.id){//wht t2?
+    //let lastNode = trackNodes.find(getTrackNode);
+
+    let trackChain = tracksChains.find(getTrackChain);
+    function getTrackChain(t){
+        if(t[2]==track.id){
             return t
         };
     }
+
+    /*function getTrackNode(t){
+        if(t[1]==track.id||t[2]==track.id){//wht t2?
+            return t
+        };
+    }*/
     if(effects[0]!=null){
         //noteGain.connect(effects[0][0]);
+        //new
+        trackChain[0].connect(effects[0][0]);
         for(let f = 0; f<effects.length;f++){
             if(f==effects.length-1){
-                effects[f][1].connect(lastNode[0]);
+                //old
+                //effects[f][1].connect(lastNode[0]);
+                //new
+                effects[f][1].connect(trackChain[1]);
             }else{
                 effects[f][1].connect(effects[f+1][0]);
             }
         }
     }else{
-        const noteGain = sessionCtx.createGain();
-        tracksEffects[track.position][0] = [noteGain,noteGain];
-        noteGain.connect(lastNode[0]);
+        //old
+        //const noteGain = sessionCtx.createGain();
+        //tracksEffects[track.position][0] = [noteGain,noteGain];
+        //noteGain.connect(lastNode[0]);
+
+        //new
+        trackChain[0].connect(trackChain[1]);
+
     }
 }
 
@@ -1078,7 +1082,6 @@ function setFormantsSynth(track){
             track.instrument.generator.formants.list[i][2]
         ]);
     }
-
     let synth = new PeriodicWaveInstrument(
         CreateWaveTablesFromFormants(formants, 
 		track.instrument.generator.formants.harmonics, 
@@ -1102,12 +1105,12 @@ function playNote(freq,trackID,nl){
         return t.id==trackID;
     }
     //let lastNode = trackNodes.find(getTrackNode);
-    function getTrackNode(t){
+    /*function getTrackNode(t){
         if(t[1]==trackID||t[2]==trackID){//wht t2?
             return t
         };
-    }
-    let synths = trackSynths.find(getTrackNode);
+    }*/
+    let synths = trackSynths.find(chainById);
 
     switch(track.instrument.type){
         case 0: 
@@ -1237,7 +1240,17 @@ function playNote(freq,trackID,nl){
         noteGain.connect(lastNode[0]);
     }*/
     //console.log(tracksEffects[track.position][0]);
-    noteGain.connect(tracksEffects[track.position][0][0]);
+    //noteGain.connect(tracksEffects[track.position][0][0]);
+    let trackChain = tracksChains.find(chainById);
+    function chainById(t){
+        if(t[2]==trackID){
+            return t
+        }
+    }
+    //new
+    noteGain.connect(trackChain[0]);
+
+
    
 
     for(o in oscs){
