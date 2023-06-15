@@ -40,7 +40,8 @@ document.onload = fetch("mind_base.JSON").then(response => response.json()).then
 
 function logPreset(preset){
     session = preset;
-    trackNodes = [];
+    //trackNodes = [];
+    tracksChains = [];
     trackAnalysers = [];
     trackSynths = [];
     //reload all screen
@@ -411,7 +412,8 @@ function drawDeleteTrack(w,track){//tracks
         delete session.tracks[session.tracks.indexOf(track)];
         let test = session.tracks.filter(function(){return true;});
         session.tracks = [];
-        trackNodes = [];
+        //trackNodes = [];
+        tracksChains = [];
  
         session.tracks = test; //seems to work
         resetPositions(session.tracks);
@@ -868,7 +870,7 @@ function drawToAnalyser(analyser,data,buffer,canvas) {
   //}
 };
 
-let trackNodes = [];
+//let trackNodes = [];
 let trackAnalysers = [];
 let trackSynths = [];
 let tracksEffects = [];
@@ -900,9 +902,12 @@ function setTracks(){//tracks
 function initTrack(track){
     //check 3d here probably
     const trackIn = sessionCtx.createGain();
+    trackIn.gain.value = 1.0;
 
     const trackGain = sessionCtx.createGain();
     const trackPan = sessionCtx.createStereoPanner();
+
+    
 
     trackGain.gain.value = track.volume;
     trackGain.connect(trackPan);
@@ -915,14 +920,12 @@ function initTrack(track){
         trackPan.pan.value = track.pan;
     });
 
+    //test
+    //trackIn.connect(trackGain);
 
     if(track.type=="TRACK"){
-        //old
-        //trackPan.connect(trackNodes[0][0]);//master
-        //new
         //this can fail if master isnt init first, luckily it does
         trackPan.connect(tracksChains[0][0]);//master IN
-        
         //CREATE INSTRUMENT
         const synthHarmonic = setHarmonicSynth(track);
         const synthFormant = setFormantsSynth(track);
@@ -931,10 +934,8 @@ function initTrack(track){
     else if(track.type=="MASTER"){
         trackPan.connect(sessionCtx.destination);
     }
-
     //old
     //trackNodes.push([trackGain,track.id]);
-
     //new
     tracksChains.push([trackIn,trackGain,track.id]);
 
@@ -977,18 +978,6 @@ function setTrackEffects(track){
                     gain.gain.value += (fx.options.gainAmount);
                     effects[f] = [gain,gain];
                     break;
-                /*
-                case "LFO":
-                    let lfoGain = sessionCtx.createGain();
-                    lfoGain.gain.setValueAtTime(fx.options.lfoAmount, 0);
-                    lfoGain.connect(osc.frequency);
-    
-                    let lfo = sessionCtx.createOscillator();
-                    lfo.frequency.setValueAtTime(fx.options.lfoSpeed, 0);
-                    lfo.connect(lfoGain);
-                    oscs.push(lfo);
-                    break;
-                */
     
                 case "DISTORTION":
                     const distortion = sessionCtx.createWaveShaper();
@@ -1011,14 +1000,10 @@ function setTrackEffects(track){
         }
         
     }
-    tracksEffects[track.position] = effects;
+    //tracksEffects[track.position] = [];
+    //tracksEffects[track.position] = effects;
     //console.log(tracksEffects[track.position]);
-    chainTrackEffects(track);
-}
-
-function chainTrackEffects(track){
-    let effects = tracksEffects[track.position];
-    //let lastNode = trackNodes.find(getTrackNode);
+    //chainTrackEffects(track);
 
     let trackChain = tracksChains.find(getTrackChain);
     function getTrackChain(t){
@@ -1032,6 +1017,8 @@ function chainTrackEffects(track){
             return t
         };
     }*/
+    trackChain[0].disconnect();
+
     if(effects[0]!=null){
         //noteGain.connect(effects[0][0]);
         //new
@@ -1053,6 +1040,8 @@ function chainTrackEffects(track){
         //noteGain.connect(lastNode[0]);
 
         //new
+        //not for the master
+
         trackChain[0].connect(trackChain[1]);
 
     }
@@ -1239,8 +1228,7 @@ function playNote(freq,trackID,nl){
     }else{
         noteGain.connect(lastNode[0]);
     }*/
-    //console.log(tracksEffects[track.position][0]);
-    //noteGain.connect(tracksEffects[track.position][0][0]);
+
     let trackChain = tracksChains.find(chainById);
     function chainById(t){
         if(t[2]==trackID){
@@ -1249,9 +1237,6 @@ function playNote(freq,trackID,nl){
     }
     //new
     noteGain.connect(trackChain[0]);
-
-
-   
 
     for(o in oscs){
         oscs[o].start(0);
