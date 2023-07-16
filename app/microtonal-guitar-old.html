@@ -1,0 +1,550 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="microtonal-guitar.css">
+  <title>Microtonal Guitar</title>
+</head>
+
+<body>
+
+    <div>
+        <div class="toptions">
+            <div style="display:inline-block;"  oninput="drawGuitar(true);">
+                Strings: <input type="number" min="1" max="30" id="nStrings" value="6" step="1" >
+            </div>
+            <div style="display:inline-block;"  oninput="drawGuitar(true);">
+                Frets: <input type="number" min="1" max="100" id="nFrets" value="21" step="1">
+            </div>
+            <div style="display:inline-block;"  oninput="drawGuitar(true);">
+                | Divisions: <input type="number" min="1" max="30" id="nDivision" value="12" step="0.01">
+            </div>
+            <div style="display:inline-block;"  oninput="drawGuitar(true);">
+                Interval: <input type="number" min="0" max="11" id="nInterval" value="2" step="0.01">
+            </div>
+            <div style="display:inline-block; width: 0;">
+            </div>
+            <div style="background-color: #555; float:right;"  oninput="drawGuitar(false);">
+                <div style="display:inline-block;">
+                    Width(px): <input type="number" min="100" max="300" id="nWidth" value="120" step="1">
+                </div>
+                <div style="display:inline-block;">
+                    Length(px) <input type="number" min="100" max="2000" id="nLength" value="1000" step="1">
+                </div>
+                <div style="display:inline-block;">
+                    Zoom: <input type="number" min="0.01" max="3" id="nZoom" value=".9" step=".01">
+                </div>
+            </div>
+        </div>
+        <div id="guitar-parent">
+            <div id="full-guitar"></div>
+        </div>
+        <div class="boptions" id="bot-parent">
+            <div id="chord-row"></div>
+            <div id="highlights"></div>
+            <div id="more-opts" style="float:right;">
+                <div style="height:20px;vertical-align: middle;">
+                    Lowest Pitch(Hz): <input type="number" min="1" max="1000" id="lowest-pitch" value="100" step="1" oninput="pmult=this.value;"> 
+                    Play with Cursor: <input type="checkbox" checked id="play-cursor"> 
+                    Volume: <input type="range" min="0"  max="1" value=".5" step="0.01" id="volume-ctrl">
+                </div>
+                <button onclick="randomSynth();">Random Synth</button>
+            </div>
+        </div>
+        
+    </div>
+
+</body>
+
+<script>
+
+  //reloadHostTracks();
+var trackSend;
+function setTrackSend(){
+  let opt = document.getElementById('host-tracks').options;
+  let sel = document.getElementById('host-tracks').selectedIndex;
+  trackSend = opt[sel].value;
+}
+//setTrackSend();
+
+function reloadHostTracks(){
+  let sel = document.getElementById('host-tracks');
+  let i, s = sel.options.length;
+  for(i = s; i>=0; i--){
+    sel.remove(i);
+  }
+  let ids = parent.informTrackIDs();
+  for (id in ids){
+    let opt = document.createElement('OPTION');
+    opt.value = ids[id];
+    opt.innerText = "ID["+ids[id]+"]";
+    sel.appendChild(opt);
+  }
+}
+
+function updateSlider(e,v){
+  document.getElementById(e).innerText = document.getElementById(v).value;
+}
+
+function GetTrueOne(rname){
+    let options = document.getElementsByName(rname);
+    let t;
+    for (t=0; t < options.length ; t++){
+        if(options[t].checked==true){
+            return t;
+        }
+    }
+}
+
+
+let createdStrings = [];
+let adjs = [];
+let guitar, nStrings, nFrets, nDivision, nInterval, nLength,nWidth;
+function drawGuitar(hl){
+    let gtp = 80;
+    createdStrings = [];
+    adjs = [];
+
+    document.getElementById('full-guitar').remove();
+    const fullGuitarUI = document.createElement('div');
+    fullGuitarUI.id = "full-guitar";
+    document.getElementById('guitar-parent').appendChild(fullGuitarUI);
+
+    nZoom = document.getElementById('nZoom').value/1;
+
+    nStrings = document.getElementById('nStrings').value;
+    nInterval = document.getElementById('nInterval').value;
+    nFrets = parseInt(document.getElementById('nFrets').value)+1;
+    nLength = document.getElementById('nLength').value*nZoom;
+    nDivision = document.getElementById('nDivision').value;
+    nWidth = parseInt(document.getElementById('nWidth').value*nZoom);
+
+    createdStrings.length = nStrings;    
+
+    let nuttobridge = document.createElement('div');
+    nuttobridge.style.width = "1px";
+    nuttobridge.style.height = nWidth+"px";
+    nuttobridge.style.position = "absolute";
+    nuttobridge.style.left = parseInt(nLength)+50+"px";
+    nuttobridge.style.top = gtp+"px";
+    nuttobridge.style.borderRight = "5px solid #333";
+    fullGuitarUI.appendChild(nuttobridge);
+
+    let mult = 1/(Math.pow(nInterval,1/nDivision));
+    let edomult = 1/(Math.pow(2,1/12));//later
+    let fretZeroDif = nLength * Math.pow(mult,1);
+
+    //rulers
+    {
+        let intervalRuler = document.createElement('div');
+        let intrulertext = document.createElement('div');
+        intrulertext.innerText = ""+nInterval+":1";
+        intrulertext.style.position = "absolute";
+        intrulertext.style.bottom = "0px";
+        intrulertext.style.left = "5px";
+        intervalRuler.appendChild(intrulertext);
+
+        intervalRuler.style.color ="#f0f";
+        intervalRuler.style.width = fretZeroDif;
+        intervalRuler.style.height ="20px";
+        intervalRuler.style.position = "absolute";
+        intervalRuler.style.top = gtp+nWidth+"px";
+        intervalRuler.style.left = nLength-fretZeroDif+50+"px";
+        intervalRuler.style.border = "1px solid #f0f";
+        intervalRuler.style.borderTop =" none";
+        fullGuitarUI.appendChild(intervalRuler);
+
+        let intervalMark = document.createElement('div');
+        intervalMark.style.left = fretZeroDif-(fretZeroDif*(1/nInterval))+"px";
+        intervalMark.style.top = "0px";
+        intervalMark.style.position = "absolute";
+        intervalMark.style.width ="0px";
+        intervalMark.style.height = "20px";
+        intervalMark.style.border ="none";
+        intervalMark.style.borderRight ="inherit";
+        intervalRuler.appendChild(intervalMark);
+
+        let fixedEdo =document.createElement('div');
+
+        let edotext = document.createElement('div');
+        edotext.innerText = "12ED2";
+        edotext.style.position = "absolute";
+        edotext.style.color = "#0a0"; 
+        edotext.style.bottom = "0px";
+        edotext.style.left = "5px";
+        fixedEdo.appendChild(edotext);
+
+        fixedEdo.style.width = fretZeroDif;
+        fixedEdo.style.height ="20px";
+        fixedEdo.style.position = "absolute";
+        fixedEdo.style.top = gtp+20+nWidth+"px";
+        fixedEdo.style.left = nLength-fretZeroDif+50+"px";
+        fixedEdo.style.border = "1px solid #0F0";
+        fixedEdo.style.borderTop =" none";
+        fullGuitarUI.appendChild(fixedEdo);
+        
+        for(let r =1;r<48;r++){
+            let edomark = document.createElement('div');
+            edomark.className="edoMark";
+            edomark.style.width = "5px";
+            edomark.style.height = "20px";
+            edomark.style.left = fretZeroDif-(fretZeroDif* Math.pow(edomult,r))-5+"px";
+            edomark.style.borderRight = "1px dashed rgba(0,255,0,"+(1-(1*(r/48)))+")";
+
+            edomark.style.position = "absolute";
+            fixedEdo.appendChild(edomark);
+            let markNumber = document.createElement('div');
+            markNumber.innerText = r;
+            markNumber.style.position = "absolute";
+            markNumber.style.top = +25+"px";
+            markNumber.className ="fretNumber";
+            markNumber.style.color = "rgba(0,255,0,"+(1-(1*(r/48)))+")";
+            edomark.appendChild(markNumber);
+            
+        }
+    }
+
+    //frest OK
+    
+    let t = 0;
+    for(let i = 0; i<nFrets; i++){
+       
+        let fret = document.createElement('div');
+        let start = nLength* Math.pow(mult,i);
+        let end = nLength* Math.pow(mult,i+1);
+        let width = start-end;
+        fret.style.width = width+"px";
+        fret.style.height = nWidth+"px";
+        fret.style.top = gtp+"px";
+        fret.className = "fret";
+        fret.style.left = nLength-start+50+"px";
+        if(i==0){
+            fret.style.left = nLength-start+50+width/2+"px";
+            fret.style.backgroundColor = "#333";
+            fret.style.width = width/2+"px";
+        }
+
+        fullGuitarUI.appendChild(fret);
+        let fretNumberUI = document.createElement('div');
+        fretNumberUI.innerText = i;
+        fretNumberUI.style.position = "absolute";
+        fretNumberUI.style.top = -25+"px";
+        fretNumberUI.className ="fretNumber";
+        fretNumberUI.style.left = -8+width+"px";
+        if(i==0){fretNumberUI.style.left = -4+width/2+"px";}
+        fret.appendChild(fretNumberUI);
+
+        for(let s =0;s<nStrings;s++){
+            let top = (nWidth/nStrings)*s+(nWidth/nStrings)/2;
+
+            if(i==nFrets-1&&s<nStrings){
+                let lastString = document.createElement('div');
+                lastString.className = "string";
+                lastString.style.position = "absolute";
+                lastString.style.top = top;
+                lastString.style.width = end+width;
+                fret.appendChild(lastString);
+            }
+
+            let string = document.createElement('div');
+            string.className ="string";
+            string.style.width = "inherit";
+            string.style.position = "absolute";
+            string.style.top = top;
+            string.onmouseenter = ()=>{playTone(createdStrings[s][i][4])}
+            fret.appendChild(string);
+            t++;
+            //tuning adjust
+            if(i==0&&s<nStrings-1){
+                
+                let stringAdjust = document.createElement('div');
+                stringAdjust.className = "stringAdjust";
+                stringAdjust.innerText = "+ ";
+                stringAdjust.style.position = "absolute";
+                stringAdjust.style.top = top-5+"px";
+                stringAdjust.style.left = "-60px";
+                let input = document.createElement('input');
+                input.type = "number";
+                let strPadd = Math.floor(nDivision/2)-Math.round(nInterval/2);
+                input.value = s==1?strPadd-1:strPadd;///////////////////////////////////////////////////////
+                input.style.padding = "0px";
+                input.style.width = "40px";
+                input.oninput = ()=>{rankNotes();highlightNotes();};
+                input.id = "sa-"+i;
+                adjs.push(input);
+                stringAdjust.appendChild(input);
+                fret.appendChild(stringAdjust);
+            }
+            if(createdStrings[s]==undefined){
+                createdStrings[s] = [];
+            }
+            createdStrings[s].push([string,i,s,0,0]);
+        }
+    }
+
+    rankNotes();
+
+    let totalDisplay = document.createElement('div');
+    totalDisplay.innerText = "Total Notes: "+t +" | Total Unrepeated Notes: "+ getTotalNotes();
+    totalDisplay.style.position ="absolute";
+    totalDisplay.style.top = "5px";
+    totalDisplay.style.left = "5px";
+    fullGuitarUI.appendChild(totalDisplay);
+
+    function getTotalNotes(){
+        let last = createdStrings[0].length-1;
+        let rank = createdStrings[0][last][4];
+        
+        return rank;
+    }
+
+    if(hl==true)createHighlightControls();createChordRowControls();
+    highlightNotes();
+    
+}
+
+function createHighlightControls(){
+    document.getElementById('highlights').remove();
+    const highlights = document.createElement('div');
+    highlights.style.width = "500px";
+    highlights.style.border = "1px dotted #666"
+    highlights.id = "highlights";
+    document.getElementById('bot-parent').appendChild(highlights);
+
+    if(nDivision==Math.round(nDivision)){
+        let notes = document.createElement('div');
+        notes.innerText = "Highlight: ";
+        highlights.appendChild(notes);
+
+        for(let d=0;d<nDivision;d++){
+            let note = document.createElement('div');
+            note.innerText = d+ " ";
+            note.className = "highlight-single"
+            note.style.display = "inline-block";
+            note.style.marginRight = "5px";
+            note.style.width = "33px";
+            note.style.wordBreak ="no-break"
+            note.style.textAlign ="right";
+            let checkbox = document.createElement('input');
+            checkbox.className = "cboxhlight"
+            checkbox.type = "checkbox";
+            checkbox.name = "selected-note";
+            checkbox.value = d;
+            checkbox.onclick = ()=>{highlightNotes();}
+            note.appendChild(checkbox);
+            highlights.appendChild(note);
+        }
+    }else{
+        highlights.innerHTML = "These options are only available for integer divisions of integer intervals.";
+    }
+}
+
+function rankNotes(){
+    for(let c = 0; c<createdStrings.length;c++){
+        let offset = 0;
+        for(let o = c; o<createdStrings.length-1;o++){
+            offset+=parseInt(adjs[o].value);
+        }
+        for(let j = 0; j<createdStrings[c].length;j++){
+            createdStrings[c][j][3] = (offset+j)%nDivision;
+            createdStrings[c][j][4] = (offset+j);
+        }
+    }
+}
+
+let toplay = [];
+function highlightNotes(){
+    let st = document.getElementsByClassName('mark-highlight');
+    for(let a = st.length; a>0;a--){
+        st[a-1].remove();
+    }
+    let cr = document.getElementsByClassName('chord-row-number');
+    for(let a = cr.length; a>0;a--){
+        cr[a-1].remove();
+    }
+    let selected = document.getElementsByName("selected-note");
+    let tohl = [];
+    let torow = [];
+    toplay = [];
+
+    for(let s = 0; s<selected.length; s++){
+        if(selected.item(s).checked){
+            for(let k = 0;k<createdStrings.length;k++){
+                for(let i = 0; i<createdStrings[k].length;i++){
+                    if(createdStrings[k][i][3]==selected.item(s).value){
+                        tohl.push(createdStrings[k][i][0]);
+                        if(k==createdStrings.length-1)torow.push([createdStrings[k][i][0],i]);
+                        if(toplay[k]==undefined){
+                            toplay[k] = [];
+                        }
+                        toplay[k].push([ createdStrings[k][i][0], createdStrings[k][i][4]]);
+                    }
+                }
+                toplay[k].sort(function(a, b){return a[1]-b[1]});
+                torow.sort(function(a, b){return a[1]-b[1]});
+            }
+            
+        }
+    }
+    if(tohl.length>0){
+        for(let i = 0; i<tohl.length; i++){
+            let mark = document.createElement('div');
+            //mark.style.position = "absolute";
+            mark.style.backgroundColor = "#ffcb00";
+            mark.style.width = "8px";
+            mark.style.height = "8px";
+            mark.style.borderRadius = "100%";
+            mark.style.display = "inline-block";
+            mark.style.marginTop = "-3px";
+            mark.style.marginLeft = "-1px"; 
+            mark.className = "mark-highlight";
+            mark.onclick = ()=>{toggleColors(mark)};
+            tohl[i].appendChild(mark);
+        }
+    }
+    if(torow.length>0){
+        for(let i = 0; i<torow.length; i++){
+            let mark = document.createElement('div');
+            mark.style.position = "absolute";
+            mark.style.backgroundColor = "#000";
+            mark.style.width = "15px";
+            mark.style.height = "15px";
+            //mark.style.display = "inline-block";
+            mark.style.bottom = "-100px";
+            mark.style.marginLeft = "50%"; 
+            mark.className = "chord-row-number";
+            mark.style.borderTopRightRadius = "0%";
+            mark.style.borderTopLeftRadius = "75%";
+            mark.style.borderBottomLeftRadius = "100%";
+            mark.style.borderBottomRightRadius = "75%";
+            mark.onmouseenter = ()=>{playRowChord(i)};
+            mark.onmouseleave = ()=>{markColorToggle(i);}
+            torow[i][0].parentNode.appendChild(mark);
+        }
+    }
+}
+
+function playRowChord(row){
+    let t = row;
+    console.log(t)
+   for(let p = 0; p<toplay.length;p++){
+        if(toplay[p][t]!=undefined){
+            console.log(toplay[p][t]);
+            //let pp = -1+toplay.length-p;
+            setTimeout(function(){playTone(toplay[p][t][1])}, 50*p);
+            setTimeout(function(){toplay[p][t][0].style.backgroundColor = "#fff";}, 50*p);
+            setTimeout(function(){toplay[p][t][0].style.backgroundColor = "#aaa";},800);
+
+            toplay[p][t][0].firstChild.style.backgroundColor = "#f40";
+        } else {console.log("y?"); continue;}
+   }
+}
+
+function markColorToggle(row){
+    let t = row;
+   for(let p = 0; p<toplay.length;p++){
+        if(toplay[p][t]!=undefined){
+            toplay[p][t][0].firstChild.style.backgroundColor = "rgb(255, 203, 0)";
+        }
+        else continue;
+   }
+}
+
+
+function createChordRowControls(){
+    document.getElementById('chord-row').remove();
+    const chordRow = document.createElement('div');
+    chordRow.style.width = "500px";
+    chordRow.style.marginTop = "5px";
+    chordRow.style.border = "1px dotted #444"
+    chordRow.id = "chord-row";
+    document.getElementById('bot-parent').appendChild(chordRow);
+
+    let notes = document.createElement('div');
+    notes.innerText = "Chord Pattern: ";
+    chordRow.appendChild(notes);
+
+    for(let i = 0; i<nStrings; i++){
+        let input = document.createElement('input');
+        input.type = "number";
+        input.name = "row-phase-number";
+        input.value = 0;
+        input.min = 0;
+        input.step = 1;
+        input.style.width = "40px"
+        chordRow.appendChild(input);
+    }
+
+}
+
+drawGuitar(true);
+
+function toggleColors(el){
+    el.style.backgroundColor = "red";
+}
+
+function createGuitarWaveform(context){
+    //var real = new Float32Array([0.,0.1,0.2,0.3,0.4,0.5,0.6,0.5,0.4,0.3,0]);
+    var real = new Float32Array([0.,0.1,0.2,0.8,-0.4,0.5,0.6,0.5,-0.4,-0.3,0]);
+    var imag = new Float32Array(real.length).fill(0);
+
+    var wave = context.createPeriodicWave(real,imag);
+    return wave;
+}
+
+function randomSynth(){
+    let len = Math.round(Math.random()*10)*Math.round(Math.random()*10);
+    var real = new Float32Array(len);
+    var imag = new Float32Array(real.length).fill(0);
+    
+    for(let l = 0; l<len;l++){
+        //real[l] = (1/(l+1))*((Math.random()*2)-1);
+        real[l] = ((Math.random()*2)-1);
+    }
+    //console.log(real);
+    guitarWaveform = audioContext.createPeriodicWave(real,imag);
+}
+
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+const masterVol = audioContext.createGain();
+masterVol.connect(audioContext.destination);
+masterVol.gain.value = 0.5;
+
+const volumeCtrl = document.getElementById("volume-ctrl");
+volumeCtrl.addEventListener('input', function () {
+    masterVol.gain.value = this.value;
+});
+
+var guitarWaveform = createGuitarWaveform(audioContext);
+let pmult = 100;
+let sus = 0.2,nl=.5,att=0.0,rel=.8;
+
+
+
+function playTone(rank){
+    let base =  Math.pow(nInterval,1/nDivision);
+    let freq = (Math.pow(base, rank)*pmult);
+
+    let osc = audioContext.createOscillator();
+    osc.setPeriodicWave(guitarWaveform);
+    //osc.waveform  = "sine"
+    let noteGain = audioContext.createGain();
+        noteGain.gain.setValueAtTime(0, 0);
+        noteGain.gain.linearRampToValueAtTime(sus, audioContext.currentTime + nl * att);
+        noteGain.gain.setValueAtTime(sus, audioContext.currentTime + nl - nl * rel);
+        noteGain.gain.linearRampToValueAtTime(0, audioContext.currentTime + nl);
+
+    osc.frequency.value = freq;
+    osc.start(0);
+    osc.stop(audioContext.currentTime + nl);
+    osc.connect(noteGain);
+
+    noteGain.connect(masterVol);
+}
+
+
+
+//osc.start(0);
+
+</script>
+
+</html>

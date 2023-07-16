@@ -37,8 +37,8 @@
             <div>
                 <select id="select-interface">
                     <option>Conway's Game of Life</option>
-                    <!--option>Spiral Harp</option>
-                    <option>3D Fractl</option-->
+                    <option>Microtonal Guitar</option>
+                    <!---option>3D Fractl</option-->
                 </select>
                 <div id="add-interface" class="global-button">ADD INTERFACE</div>
             </div>
@@ -93,7 +93,8 @@ function addInterface(){
             w = "275"; h = "700";
             break;
         case 1:
-            interfaceToAdd = "spiral-harp";
+            interfaceToAdd = "../app/microtonal-guitar";
+            w = "1000"; h = "500";
             break;
         case 2:
             interfaceToAdd = "3d-fractal";

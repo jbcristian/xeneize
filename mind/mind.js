@@ -907,8 +907,6 @@ function initTrack(track){
     const trackGain = sessionCtx.createGain();
     const trackPan = sessionCtx.createStereoPanner();
 
-    
-
     trackGain.gain.value = track.volume;
     trackGain.connect(trackPan);
     document.getElementById('volume'+track.id).addEventListener('click', ()=>{

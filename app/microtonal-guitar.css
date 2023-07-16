@@ -3,38 +3,45 @@ html {
     color: #000;
     font-family: "Consolas", monospace;
     font-size:11px;
-    overflow: hidden;
+    min-width: 1240px;
   }
 
 .toptions{
     background: #444;
     color: #ccc;
-    width: 990px;
     border: 1px solid #333;
-    padding: 5px;
+    /*padding: 5px;*/
 }
 
 .boptions{
     background: #2d221f;
     color: #ccc;
-    width: 990px;
     border: 1px solid #333;
     padding: 5px;
     overflow-y: scroll;
     overflow-x: hidden;
-    height: 60px;
 }
 
 
 #full-guitar{
-    width: 1000px;
-    min-width: 1000px;
     min-height: 335px;
     position: relative;
     border:1px solid #000;
     background-color: #555;
-    background-image: linear-gradient(to bottom,rgb(118, 138, 147),rgb(53, 42, 49));
+    background-image: linear-gradient(to bottom,rgb(118, 138, 147),rgb(44 43 67));
     overflow: scroll;
+    /*padding-left:100px;*/
+}
+
+.first-block::after{
+    content: '';
+    width: 2px;
+    display: inline-block;
+    height: inherit;
+    background-color: #9f9688;
+    box-shadow: 0 0 4px 0px #000;
+    position:absolute;
+    right: 0px;
 }
 
 .fret{
@@ -48,13 +55,35 @@ html {
     font-size: 10px;
 }
 
+.mark-highlight{
+    display:block;
+    position:absolute;
+    top:50%;
+    left:50%;
+    margin-left:-6px;
+    margin-top:-4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 100%;
+    background-color: #ffcc00;
+    z-index: 10;
+    font-size:10px;
+    font-weight: bold;
+    line-height: 10px;
+    box-shadow: 0 0 10px #000;
+    text-align: center;
+    border:1px solid #000;
+}
+
 .string{
-    height: 3px;
+    height: 1px;
     padding:0px 1px;
     z-index: 10;
-    background-color: #aaa;
-    box-shadow: 0px 0px 5px #111;
+    background-color: #b8b8b8;
+    box-shadow: 0px 0px 2px #111;
     text-align: center;
+    border: 1px dotted #4f4f4f;
+    
 }
 .string:hover{
     cursor: pointer;
@@ -69,6 +98,24 @@ html {
     right: 2px;
     border:2px dashed #ccc;
     z-index: 150;
+}
+
+.string-block{
+    background-color: #7b5929;
+    text-align: center;
+    box-shadow: inset -13px 0px 20px #5f4b3a;
+}
+
+.string-block::after{
+    z-index: 1;
+    content: '';
+    width: 2px;
+    display: inline-block;
+    height: inherit;
+    background-color: #aba8a3;
+    box-shadow: 0 0 3px 0px #000;
+    position:absolute;
+    right: -2px;
 }
 
 .edoMark{
@@ -91,7 +138,7 @@ html {
 }
 
 input[type="number"]{
-width: 50px; background-color: #000; color:#999;
+width: 30px; background-color: #000; color:#999;
 font-size: 11px;
 border: none;
 padding: 3px;
@@ -125,3 +172,18 @@ input[type="range"]::-moz-range-thumb { width:5px;height: 10px; background-color
 input[type="range"]::-moz-range-thumb:hover { background-color: rgba(4, 255, 0, 0.9);}
 
 input[type="range"] {border:1px solid rgb(118, 167, 130); background-color: #161575; height: 5px;width:100px; vertical-align: middle; margin:4px;}
+
+input[type="text"]{
+   background-color: #000; color:#999;
+    font-size: 11px;
+    border: none;
+    padding: 3px;
+    text-align: left;
+}
+
+select{
+    background-color: #000;
+    border:1px solid #333;
+    color:#aaa;
+    font-size:12px;
+}
