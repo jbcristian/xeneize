@@ -1,0 +1,189 @@
+html {
+    background-color: #666;
+    color: #000;
+    font-family: "Consolas", monospace;
+    font-size:11px;
+    min-width: 1240px;
+  }
+
+.toptions{
+    background: #444;
+    color: #ccc;
+    border: 1px solid #333;
+    /*padding: 5px;*/
+}
+
+.boptions{
+    background: #2d221f;
+    color: #ccc;
+    border: 1px solid #333;
+    padding: 5px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+
+#full-guitar{
+    min-height: 335px;
+    position: relative;
+    border:1px solid #000;
+    background-color: #555;
+    background-image: linear-gradient(to bottom,rgb(118, 138, 147),rgb(44 43 67));
+    overflow: scroll;
+    /*padding-left:100px;*/
+}
+
+.first-block::after{
+    content: '';
+    width: 2px;
+    display: inline-block;
+    height: inherit;
+    background-color: #9f9688;
+    box-shadow: 0 0 4px 0px #000;
+    position:absolute;
+    right: 0px;
+}
+
+.fret{
+    background-color: #866e40;
+    box-shadow: 0px 0px 10px rgba(17, 0, 0, 0.596);
+    position:absolute;
+    border:1px solid #000;
+}
+.fretNumber{
+    color:#ddd;
+    font-size: 10px;
+}
+
+.mark-highlight{
+    display:block;
+    position:absolute;
+    top:50%;
+    left:50%;
+    margin-left:-6px;
+    margin-top:-4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 100%;
+    background-color: #ffcc00;
+    z-index: 10;
+    font-size:10px;
+    font-weight: bold;
+    line-height: 10px;
+    box-shadow: 0 0 10px #000;
+    text-align: center;
+    border:1px solid #000;
+}
+
+.string{
+    height: 1px;
+    padding:0px 1px;
+    z-index: 10;
+    background-color: #b8b8b8;
+    box-shadow: 0px 0px 2px #111;
+    text-align: center;
+    border: 1px dotted #4f4f4f;
+    
+}
+.string:hover{
+    cursor: pointer;
+    background-color: #ccc;
+}
+.string:hover::after{
+    content: '';
+    width: 1px;
+    height: 4px;
+    position:absolute;
+    top:-2px;
+    right: 2px;
+    border:2px dashed #ccc;
+    z-index: 150;
+}
+
+.string-block{
+    background-color: #7b5929;
+    text-align: center;
+    box-shadow: inset -13px 0px 20px #5f4b3a;
+}
+
+.string-block::after{
+    z-index: 1;
+    content: '';
+    width: 2px;
+    display: inline-block;
+    height: inherit;
+    background-color: #aba8a3;
+    box-shadow: 0 0 3px 0px #000;
+    position:absolute;
+    right: -2px;
+}
+
+.edoMark{
+    bottom:0px;
+}
+
+.edoMark:hover{
+    border-color:#fff;
+    cursor: pointer;
+}
+.edoMark:hover::after{
+    content: '';
+    width: 1px;
+    height: 20px;
+    position:absolute;
+    top:-20px;
+    right: -1px;
+    border:inherit;
+    z-index: 150;
+}
+
+input[type="number"]{
+width: 30px; background-color: #000; color:#999;
+font-size: 11px;
+border: none;
+padding: 3px;
+text-align: left;
+}
+
+input[type="radio"]{
+    margin:0;
+    vertical-align: middle;
+}
+input[type="checkbox"]{
+    margin:0;
+    vertical-align: middle;
+}
+
+button{
+width: auto;
+border:1px solid #aaa;
+background-color: #000;
+color:#aaa;
+font-family: 'Consolas', monospace;
+font-size: 11px;
+}
+button:hover{
+color:#ccc;
+background-color: #333;
+}
+
+
+input[type="range"]::-moz-range-thumb { width:5px;height: 10px; background-color: rgb(15, 116, 40); border-radius: 0px; border-color:#bebebe;}
+input[type="range"]::-moz-range-thumb:hover { background-color: rgba(4, 255, 0, 0.9);}
+
+input[type="range"] {border:1px solid rgb(118, 167, 130); background-color: #161575; height: 5px;width:100px; vertical-align: middle; margin:4px;}
+
+input[type="text"]{
+   background-color: #000; color:#999;
+    font-size: 11px;
+    border: none;
+    padding: 3px;
+    text-align: left;
+}
+
+select{
+    background-color: #000;
+    border:1px solid #333;
+    color:#aaa;
+    font-size:12px;
+}
