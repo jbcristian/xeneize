@@ -37,8 +37,8 @@
             <div>
                 <select id="select-interface">
                     <option>Conway's Game of Life</option>
-                    <option>Microtonal Guitar</option>
-                    <!---option>3D Fractl</option-->
+                    <option>SFINX Microtonal Guitar</option>
+                    <!--option>R30</option-->
                 </select>
                 <div id="add-interface" class="global-button">ADD INTERFACE</div>
             </div>
@@ -86,20 +86,26 @@ function addInterface(){
     let interface = document.getElementById('select-interface').selectedIndex;
     let interfaceToAdd = "";
     let w, h, title, tID = getRandomID();
+    let interfaceClassName;
     switch(interface){
         case 0:
             title = "Conway's Game of Life";
             interfaceToAdd = "conway-game-of-life";
+            interfaceClassName = "gol"
             w = "275"; h = "700";
             break;
         case 1:
             title = "SFINX";
             interfaceToAdd = "sfinx";
+            interfaceClassName = "sfinx";
             w = "1000"; h = "500";
             break;
-        case 2:
-            interfaceToAdd = "3d-fractal";
-            break;
+        /*case 2:
+            title = "R30";
+            interfaceToAdd = "r30";
+            interfaceClassName = "r30";
+            w = "275"; h = "700";
+            break;*/
         default:
             interfaceToAdd = "conway-game-of-life";
             w = "275"; h = "700";
@@ -127,7 +133,7 @@ function addInterface(){
     fullInterface.appendChild(interfaceHeader);
 
     let interfaceiFrame = document.createElement("IFRAME");
-    interfaceiFrame.className = "gol";
+    interfaceiFrame.className = interfaceClassName;
     interfaceiFrame.id = tID;
     interfaceiFrame.src = interfaceToAdd+".html";
     interfaceiFrame.width = w;
@@ -196,6 +202,29 @@ function handleEqualDivision(n,t,r){//note, interval, repeat
 //////////////////////////////
 
 //SHARED///////////////
+
+
+
+
+
+
+function generate4RandomwNotes(){
+    let notes = [];
+    for(let i = 0; i<4;i++){
+        notes.push(  Math.floor(Math.random()*12) );
+    }
+
+    handleSfinxData(notes);
+}
+
+
+
+
+
+function handleSfinxData(notes){
+    let hehe = document.getElementsByClassName("sfinx");
+    if(hehe[0]) hehe[0].contentWindow.receiveNotes(notes);
+}
 
 
 </script>

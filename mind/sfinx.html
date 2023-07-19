@@ -8,7 +8,7 @@
 
     <div>
         <div class="toptions">
-            <div style="background-color:rgb(85, 77, 34); display:inline-block; padding:2px;">
+            <!--div style="background-color:rgb(85, 77, 34); display:inline-block; padding:2px;">
                 <div style="display:inline-block;">
                     <select id="preset-list" oninput="applyPreset();">
                     </select>
@@ -16,7 +16,7 @@
                 <div style="display:inline-block;">
                    <button style="position: relative;" onclick="openSavePreset(this);">Save New</button>
                 </div>
-            </div>
+            </div-->
             <div style="background-color:#255; display:inline-block; padding:2px;">
                 <div style="display:inline-block;"  oninput="prepareGuitar();">
                     Strings: <input type="number" min="1" max="30" id="nStrings" value="6" step="1" >
@@ -30,16 +30,16 @@
                     <input type="radio" name="tuningType" id="edTuning" checked> EQUAL DIVISIONS
                 </div>
                 <div style="display:inline-block;"  oninput="prepareGuitar();">
-                    Divisions: <input type="number" min="1" max="30" id="nDivision" value="12" step="0.01">
+                    <input type="number" min="1" max="30" id="nDivision" value="12" step="0.01">
                 </div>
                 <div style="display:inline-block;"  oninput="prepareGuitar();">
-                    Interval: <input type="number" min="0" max="11" id="nInterval" value="2" step="0.01">
+                    &radic;<input type="number" min="0" max="11" id="nInterval" value="2" step="0.01">
                 </div>
                 <div style="display:inline-block; font-size:8px;">
-                    <input type="radio" name="tuningType" id="drTuning"> DECIMAL RATIO:
+                    <input type="radio" name="tuningType" id="drTuning"> DECIMAL RATIOS:
                 </div>
                 <div style="display:inline-block;"  oninput="prepareGuitar();">
-                    Intervals List: <input type="text"  id="intervalsList" value="1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,1.8,1.9,2">
+                    <input type="text"  id="intervalsList" value="1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,1.8,1.9,2">
                 </div>
             </div>
             <!--div style="background-color: #2e365d; display:inline-block; padding: 2px;"  oninput="createGuitarII();">
@@ -59,7 +59,7 @@
                     &LeftRightArrow; (px) <input type="number" min="100" max="2000" id="nLength" value="1000" step="1">
                 </div>
                 <div style="display:inline-block;">
-                    Zoom <input type="number" min="0.01" max="3" id="nZoom" value="1" step=".01">
+                    Zoom <input type="number" min="0.01" max="3" id="nZoom" value=".75" step=".01">
                 </div>
             </div>
         </div>
@@ -108,7 +108,7 @@
                     Volume: <input type="range" min="0"  max="1" value=".5" step="0.01" id="volume-ctrl"><br>
                 </div>
 
-                <!--button onclick="randomSynth();">Random Synth</button-->
+                <button onclick="randomSynth();">Random Synth</button>
             </div>
         </div>
         
@@ -939,28 +939,32 @@ function createGuitarWaveform(context){
     return wave;
 }
 
+
+
 function randomSynth(){
-    let len = Math.round(Math.random()*10)*Math.round(Math.random()*100);
+    let len = 4096;
     var real = new Float32Array(len);
-    var imag = new Float32Array(real.length).fill(0);
-    
+    //var imag = new Float32Array(real.length).fill(0);
+    var imag = new Float32Array(len);
+
     for(let l = 0; l<len;l++){
-        real[l] = (2/(l+1))*((Math.random()*2)-1);
-        //real[l] = ((Math.random()*2)-1);
+        //real[l] = (30/(l+1))*((Math.random()*2)-1);
+        imag[l] = ((Math.random()*2)-1)/(Math.random()*l*l+1);
+        real[l] = ((Math.random()*2)-1)/(Math.random()*l*l+1);
     }
     console.log(real);
     guitarWaveform = audioContext.createPeriodicWave(real,imag);
 
-    let lenr = Math.round(Math.random()*10)*Math.round(Math.random()*100);
-    var realr = new Float32Array(lenr);
+    //let lenr = Math.round(Math.random()*10)*Math.round(Math.random()*100);
+    /*var realr = new Float32Array(len);
     var imagr = new Float32Array(realr.length).fill(0);
     
-    for(let l = 0; l<lenr;l++){
+    for(let l = 0; l<len;l++){
         realr[l] = (2/(l+1))*((Math.random()*2)-1);
         //realr[l] = ((Math.random()*2)-1);
     }
     console.log(realr);
-    guitarWaveformII = audioContext.createPeriodicWave(realr,imagr);
+    guitarWaveformII = audioContext.createPeriodicWave(realr,imagr);*/
     
 }
 
@@ -1049,7 +1053,7 @@ function playToneII(rank){
     osc.connect(noteGain);
     noteGain.connect(masterVol);
 
-    let osct = audioContext.createOscillator();
+    /*let osct = audioContext.createOscillator();
     osct.setPeriodicWave(guitarWaveformII);
     //osc.waveform  = "triangle"
     let noteGaint = audioContext.createGain();
@@ -1063,7 +1067,7 @@ function playToneII(rank){
     osct.stop(audioContext.currentTime + nl*.5);
     osct.connect(noteGaint);
 
-    noteGaint.connect(masterVol);
+    noteGaint.connect(masterVol);*/
 }
 
 
@@ -1186,6 +1190,28 @@ function openSavePreset(b){
 
 window.onload = ()=>{
     getPresets();fillPresetList();
+}
+
+
+
+
+function receiveNotes(notes){
+
+    
+
+    let selected = document.getElementsByName("selected-note");
+
+    for(let s = 0; s<selected.length; s++){
+        selected.item(s).checked = false;
+    }
+
+    for(let n = 0; n<notes.length;n++){
+        console.log(notes[n]%nDivision)
+        selected.item(notes[n]%nDivision).checked = true;
+    }
+
+    highlightNotes();
+
 }
 
 

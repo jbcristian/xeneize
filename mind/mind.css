@@ -56,7 +56,7 @@ body{margin:0;padding:0;}
     /*! width: 1024px; */
     padding: 25px;
     background-color: #222;
-    max-width: 1200px;
+    /*max-width: 1200px;*/
     height: 865px;
     overflow-y:scroll;
 }
@@ -72,8 +72,8 @@ body{margin:0;padding:0;}
     /*! float: right; */
     /*! padding: 20px; */
 }
-
-#track0{/*! background-color:rgba(64,0,0,0.6); */}
+/*
+#track0{ background-color:rgba(64,0,0,0.2); }*/
 
 .metercont{float:right;vertical-align: bottom;line-height:0;margin-top:10px}
 
@@ -87,13 +87,13 @@ body{margin:0;padding:0;}
 
 .track div:hover{background-color:rgba(50,50,50,0.25);}
 
-.synth-instrument{
-    /*! background: rgba(10,30,70,0.3); */
-}
-
+/*.synth-instrument{
+    ! background: rgba(10,30,70,0.3); 
+}*/
+/*
 .synth-effect{
-    /*! background: rgba(0,20,20,1); */
-}
+    ! background: rgba(0,20,20,1); 
+}*/
 
 .title{
     font-size:11px;
@@ -119,10 +119,10 @@ body{margin:0;padding:0;}
 }
 
 .trackTitle {font-weight: bold;color:#ddd;}
-
+/*
 .titlebig{
-    /*! height: 24px; */
-}
+    ! height: 24px; 
+}*/
 
 .radioset form {display: inline-block;margin-left:5px;}
 
@@ -218,7 +218,7 @@ input[type="radio"] {
     margin:5px;
     overflow: hidden;
     border:1px dashed #333;
-
+    vertical-align: top;
   }
 
   iframe{border:none;}

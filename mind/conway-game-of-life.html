@@ -612,6 +612,8 @@ function playCells(){
     }
 }
 
+let sendNotes = true;
+
 function playEqual() {
     //1.08818224346 TRITAVE
     //1.05946309435 OCTAVE
@@ -619,25 +621,32 @@ function playEqual() {
     if(!playtotal)setCellsToPlay();
     if(!trackSend)setTrackSend();
 
+    let notesToSend = [];
+
     if (total > 0 && animation=="animate") {
       if(playtotal){
         let note = Math.pow(edbase, total % noteRangeRep) * pitchmult;
         parent.playNote(note, trackSend,delayGL);
+        notesToSend.push(total% noteRangeRep);
       }
       if(playnew){
         let note = Math.pow(edbase, newc % noteRangeRep) * pitchmult;
         parent.playNote(note, trackSend,delayGL);
+        notesToSend.push(newc% noteRangeRep);
       }
       if(playlive){
         let note = Math.pow(edbase, live % noteRangeRep) * pitchmult;
         parent.playNote(note, trackSend,delayGL);
+        notesToSend.push(live% noteRangeRep);
       }
       if(playdead){
         let note = Math.pow(edbase, dead % noteRangeRep) * pitchmult;
         parent.playNote(note, trackSend,delayGL);
+        notesToSend.push(dead% noteRangeRep);
       }
-
     }
+
+    if(sendNotes) sendToSfinx(notesToSend);
 
     //var rows = [];
     //var cols = [];
@@ -753,6 +762,13 @@ function GetTrueOne(rname){
             return t;
         }
     }
+}
+
+
+
+
+function sendToSfinx(notes){
+  parent.handleSfinxData(notes);
 }
 
 </script>
