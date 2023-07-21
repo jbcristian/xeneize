@@ -104,7 +104,7 @@ void main(void) {
       Speed(ms): <input type="number" value="1000" onchange="setDelay( this.value )">
       <input type="checkbox" id="affect-speed" onclick="setSpeed();"> Scripted
       <br><br>
-      <input type="text" id="speed-code" class="code" value="speed = (1+total % 8);">
+      <input type="text" id="speed-code" class="code" value="speed = (1+(total % 8))*200;">
     </div>
     <div class="gen-settings">
       Pitch Multiplier:<input id="pitch-mult" type="range" value="100" min="1" max ="200" step="1" onchange='updateSlider("pitch-mult-text", "pitch-mult");setEqualDivisionTuning();sendPitch()'><span id="pitch-mult-text">100</span> <div id="link-pitch" powerb="on" onclick="powerb(this);" class="link">LINK</div>
@@ -633,6 +633,7 @@ function playEqual() {
         let note = Math.pow(edbase, newc % noteRangeRep) * pitchmult;
         parent.playNote(note, trackSend,delayGL);
         notesToSend.push(newc% noteRangeRep);
+  
       }
       if(playlive){
         let note = Math.pow(edbase, live % noteRangeRep) * pitchmult;

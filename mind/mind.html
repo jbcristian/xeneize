@@ -38,6 +38,7 @@
                 <select id="select-interface">
                     <option>Conway's Game of Life</option>
                     <option>SFINX Microtonal Guitar</option>
+                    <option>Spiral Harp</option>
                     <!--option>R30</option-->
                 </select>
                 <div id="add-interface" class="global-button">ADD INTERFACE</div>
@@ -100,6 +101,12 @@ function addInterface(){
             interfaceClassName = "sfinx";
             w = "1000"; h = "500";
             break;
+        case 2:
+            title = "Spiral Harp";
+            interfaceToAdd = "spiral-harp-m";
+            interfaceClassName = "spiralharp";
+            w = "540"; h = "920";
+            break;
         /*case 2:
             title = "R30";
             interfaceToAdd = "r30";
@@ -107,8 +114,6 @@ function addInterface(){
             w = "275"; h = "700";
             break;*/
         default:
-            interfaceToAdd = "conway-game-of-life";
-            w = "275"; h = "700";
             break;        
     }
 
@@ -138,6 +143,7 @@ function addInterface(){
     interfaceiFrame.src = interfaceToAdd+".html";
     interfaceiFrame.width = w;
     interfaceiFrame.height = h;
+    interfaceiFrame.style.overflow = "hidden";
     interfaces+= interfaceiFrame;
     fullInterface.appendChild(interfaceiFrame);
     //document.getElementById('interface-window').innerHTML += '<iframe src="'+interfaceToAdd+'.html" width="640" height="640"></object>';
@@ -172,7 +178,7 @@ function getRandomID(){
 }
 
 
-//GAME OF LIFE SPECIFIC////////////////
+// GAMEOFLIFESPECIFIC////////////////
 function playAllGol(){//stop gol
     let f = document.getElementsByClassName("gol");
     for(let i = 0; i<f.length; i++){
@@ -206,14 +212,12 @@ function handleEqualDivision(n,t,r){//note, interval, repeat
 
 
 
-
-
+//for making examples of javascript randomness, use it in the console
 function generate4RandomwNotes(){
     let notes = [];
     for(let i = 0; i<4;i++){
         notes.push(  Math.floor(Math.random()*12) );
     }
-
     handleSfinxData(notes);
 }
 
@@ -221,11 +225,16 @@ function generate4RandomwNotes(){
 
 
 
+
+
+///SFINX
 function handleSfinxData(notes){
     let hehe = document.getElementsByClassName("sfinx");
     if(hehe[0]) hehe[0].contentWindow.receiveNotes(notes);
-}
 
+    let SH = document.getElementsByClassName("spiralharp");
+    if(SH[0]) SH[0].contentWindow.receiveNotes(notes);
+}
 
 </script>
 

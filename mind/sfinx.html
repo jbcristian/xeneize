@@ -42,15 +42,6 @@
                     <input type="text"  id="intervalsList" value="1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,1.8,1.9,2">
                 </div>
             </div>
-            <!--div style="background-color: #2e365d; display:inline-block; padding: 2px;"  oninput="createGuitarII();">
-                
-                <div style="display:inline-block;">
-                    12ED2 Ruler Position: <input type="number" id="rulerPosition" value="1" min="0" max="10" step="0.01"  >
-                </div>
-                <div style="display:inline-block;">
-                    Relative Size: <input type="number" id="measureUnit" value="60" min="0" max="1000" step="0.01"  >
-                </div>
-            </div-->
             <div style="background-color: #555; padding:2px; float:right;"  oninput="createGuitarII();">
                 <div style="display:inline-block;">
                      &UpDownArrow; (px) <input type="number" min="100" max="300" id="nWidth" value="120" step="1">
@@ -79,23 +70,34 @@
                     Calc Ruler: <input type="checkbox" id="calcRuler"><br>
                     Scale/Size: <input type="number" min="1" max="1000" value="60" step="0.001" id="scaleUnit">Units
                 </div>
-            </div>
-            <div style="display:inline-block; vertical-align: top; border:1px dotted #555">
-                Arpeggiator:<br>
-                Up<input type="radio" name="arpeggio" checked> |
-                Down<input type="radio" name="arpeggio" > |
-                Converge<input type="radio" name="arpeggio" > |
-                Diverge<input type="radio" name="arpeggio" >
-                <!--Random<input type="radio" name="arpeggio"-->
                 <br>
-                Speed(s): <input type="number" id="arpSpeed" value="0.25" min="0" max="10" step="0.01">
+                <div onclick="v=GetTrueOne('how-to-highlight')";>
+                    If receiving Notes, highlight:<br/>
+                    Exact <input type="radio"checked name="how-to-highlight"> | Equave <input type="radio" name="how-to-highlight">
+                </div>
             </div>
-            
-            <div id="more-opts" style="display: inline-block; vertical-align: top; border:1px dotted #555">
-                <div style="vertical-align: middle;">
+            <div style="display:inline-block; vertical-align: top; ">
+                <div style="border:1px dotted #555;">
+                    Arpeggiator:<br>
+                    Up<input type="radio" name="arpeggio" checked> |
+                    Down<input type="radio" name="arpeggio" > |
+                    Converge<input type="radio" name="arpeggio" > |
+                    Diverge<input type="radio" name="arpeggio" >
+                    <!--Random<input type="radio" name="arpeggio"-->
+                    <br>
+                    Speed(s): <input type="number" id="arpSpeed" value="0.25" min="0" max="10" step="0.01">
+                </div>
+                <div style="border:1px dotted #555;">
                     Lowest Pitch(Hz): <input type="number" min="1" max="1000" id="lowest-pitch" value="100" step="1" oninput="pmult=this.value;"><br>
-                    Note Length: <input type="number" min="0.01" max="5" id="note-length" value="0.5" step="0.01" oninput="nl=parseFloat(this.value);"><br>
-                    Play with Cursor: <input type="checkbox" checked id="play-cursor" onchange="playWithCursor=this.checked"> <br>      
+                    <!--Note Length: <input type="number" min="0.01" max="5" id="note-length" value="0.5" step="0.01" oninput="nl=parseFloat(this.value);"><br-->
+                    Play with Cursor: <input type="checkbox" checked id="play-cursor" onchange="playWithCursor=this.checked"> <br>
+                    Send to Track: <select id="host-tracks" onclick="setTrackSend();"></select><button onclick="reloadHostTracks();">&circlearrowleft;</button>
+                </div>
+
+                
+            </div>
+            <!--
+            <div id="more-opts" style="display: inline-block; vertical-align: top; border:1px dotted #555">
                     Synth Sound:<select id="synth-sound" onchange="setSound();">
                         <option>Electric I</option>
                         <option>Electric II</option>
@@ -109,7 +111,9 @@
                 </div>
 
                 <button onclick="randomSynth();">Random Synth</button>
-            </div>
+
+                
+            </div>-->
         </div>
         
     </div>
@@ -118,14 +122,14 @@
 
 <script>
 
-//reloadHostTracks();
+reloadHostTracks();
 var trackSend;
 function setTrackSend(){
   let opt = document.getElementById('host-tracks').options;
   let sel = document.getElementById('host-tracks').selectedIndex;
   trackSend = opt[sel].value;
 }
-//setTrackSend();
+setTrackSend();
 
 function reloadHostTracks(){
   let sel = document.getElementById('host-tracks');
@@ -274,7 +278,7 @@ function highlightNotes(){
             for(let n =0;n<strings.length;n++){
                 for(let c = 0; c<strings[n].length;c++){
                     if(strings[n][c][4]==selected.item(s).value){
-                        tohl.push([strings[n][c][0],strings[n][c][4]]);
+                        tohl.push([strings[n][c][0],strings[n][c][4],strings[n][c][5]]);
                         if(n==strings.length-1) torow.push([strings[n][c][0],c]);
                         if(toplay[n]==undefined){
                             toplay[n] = [];
@@ -968,7 +972,7 @@ function randomSynth(){
     
 }
 
-let synthSound = document.getElementById('synth-sound').selectedIndex;
+//let synthSound = document.getElementById('synth-sound').selectedIndex;
 
 function setSound(){
     synthSound = document.getElementById('synth-sound').selectedIndex;
@@ -1014,7 +1018,7 @@ function setSound(){
     guitarWaveform = audioContext.createPeriodicWave(real,imag);
     guitarWaveformII = audioContext.createPeriodicWave(realr,imagr);
 }
-
+/*
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
 const masterVol = audioContext.createGain();
@@ -1025,18 +1029,19 @@ const volumeCtrl = document.getElementById("volume-ctrl");
 volumeCtrl.addEventListener('input', function () {
     masterVol.gain.value = this.value;
 });
-
+*/
 var guitarWaveform;
 var guitarWaveformII;
-setSound();
+//setSound();
 let pmult = 100;
 let sus = 0.2,nl=.5,att=0.0,rel=.8;
 
-
-
 function playToneII(rank){
 
-    //console.log(rank)
+    let freq = rank*pmult;
+    parent.playNote(freq, trackSend,nl*1000);
+
+/*
     let freq = rank*pmult;
     let osc = audioContext.createOscillator();
     osc.setPeriodicWave(guitarWaveform);
@@ -1051,7 +1056,7 @@ function playToneII(rank){
     osc.start(0);
     osc.stop(audioContext.currentTime + nl);
     osc.connect(noteGain);
-    noteGain.connect(masterVol);
+    noteGain.connect(masterVol);*/
 
     /*let osct = audioContext.createOscillator();
     osct.setPeriodicWave(guitarWaveformII);
@@ -1073,7 +1078,7 @@ function playToneII(rank){
 
 
 
-
+//#region  PRESET
 
 let presets = [];
 function getPresets(){
@@ -1189,31 +1194,82 @@ function openSavePreset(b){
 
 
 window.onload = ()=>{
-    getPresets();fillPresetList();
+    //getPresets();fillPresetList();
 }
+//#endregion
 
 
-
+let v = GetTrueOne('how-to-highlight');
 
 function receiveNotes(notes){
 
+    if(v){
+        let selected = document.getElementsByName("selected-note");
+        //reset all
+        for(let s = 0; s<selected.length; s++){
+            selected.item(s).checked = false;
+        }
+
+        //set new
+        for(let n = 0; n<notes.length;n++){
+            console.log(notes[n]%nDivision)
+            selected.item(notes[n]%nDivision).checked = true;
+        }
+        highlightNotes();
+    }
+
+    else{//this is copied from  highlight function...
+        let st = document.getElementsByClassName('mark-highlight');
+        for(let a = st.length; a>0;a--){
+            st[a-1].remove();
+        }
+        let cr = document.getElementsByClassName('chord-row-number');
+        for(let a = cr.length; a>0;a--){
+            cr[a-1].remove();
+        }
+        let selected = notes;
+        let tohl = [];
+        toplay = [];
+
+        for(let s = 0; s<selected.length; s++){
+
+            for(let n =0;n<strings.length;n++){
+                if(toplay[n]==undefined){
+                    toplay[n] = [];
+                }
+                for(let c = 0; c<strings[n].length;c++){
+                    if(strings[n][c][5]==selected[s]){
+                        tohl.push([strings[n][c][0],strings[n][c][4]]);                    
+                        toplay[n].push( [strings[n][c][0], strings[n][c][5],strings[n][c][4]]);
+                    }
+                }
+                toplay[n].sort(function(a, b){return a[1]-b[1]});
+
+            }
+        }    
+
+        if(tohl.length>0){
+            for(let i = 0; i<tohl.length; i++){
+                let mark = document.createElement('div');
+                mark.innerText = tohl[i][1];
+                //mark.style.backgroundColor = colors[parseInt(tohl[i][1])];
+                mark.style.zIndex = "10";
+                mark.className = "mark-highlight";
+                //mark.onclick = ()=>{toggleColors(mark)};
+                tohl[i][0].appendChild(mark);
+            }
+        }
+
+        switch(GetTrueOne('color-opt')){
+            case 0: colorSingle(); break;
+            case 1: colorByRank(); break;
+            case 2: colorByRow(); break;
+            //default: colorSingle(); break;
+        }
+    }
+
     
-
-    let selected = document.getElementsByName("selected-note");
-
-    for(let s = 0; s<selected.length; s++){
-        selected.item(s).checked = false;
-    }
-
-    for(let n = 0; n<notes.length;n++){
-        console.log(notes[n]%nDivision)
-        selected.item(notes[n]%nDivision).checked = true;
-    }
-
-    highlightNotes();
-
 }
-
 
 
 
