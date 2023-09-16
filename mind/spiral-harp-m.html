@@ -20,6 +20,19 @@
             position: relative;
         }
 
+        #tools-button{
+            position:absolute;
+            bottom: 0px;
+            right: 0px;
+            width: 12px;
+            height: 12px;
+            background-color: #444;
+            color:#ccc;
+            line-height: 12px;
+            font-size: 12px;
+            text-align: center;
+        }
+
         .sharp {
             background-color: #00071D;
             position: relative;
@@ -57,7 +70,7 @@
             font-weight: bold;
             font-size: 10px;
             line-height: 18px;
-            width: 69px;
+            width: 40px;
         }
 
         input[type=text] {
@@ -132,6 +145,10 @@
             background-color:#111;
             color:#666;
         }
+
+        .graph-bars{display: inline-block;}
+
+        #len-comp-graph{border-top:1px solid #333; padding-top:5px; min-height: 100px; background-color: #000;  overflow-x: scroll;}
     </style>
 </head>
 
@@ -146,16 +163,18 @@
                     <div style="color:#666;" id="guiRat"></div>
                 </div>
                 <canvas id="cvs" width=512 height=512></canvas>
+                
             </div>
-            <!--div class="sect"> CENT RULER</div-->
             <div id="scaleGUI">
                 <br />
             </div>
-            <div class="sect"> SPIRAL SETTINGS</div>
+            <div class="sect" style="position: relative;"> SPIRAL SETTINGS
+                <div id="tools-button" onclick="toggleTools();">&NestedGreaterGreater;</div>
+            </div>
             <div class="settings" >
                 <label for="sides">Sides:</label>
-                <input type="number" id="sides" value="16" min="-100.0" max="100.0" step="0.1"
-                    onclick="drawSpiralRect()">
+                <input type="number" id="sides" value="16" min="-100.0" max="100.0" step="0.01"
+                    onchange="drawSpiralRect()">
 
                 <label for="segments">Segments:</label>
                 <input type="number" id="segments" value="100" min="1.0" max="500.0" step="1"
@@ -237,120 +256,40 @@
             </div>
 
         </div>
-        <!--div class="rg">
+        <div class="rg">
             
-            <!div class="sect">KEY/MOUSE SYNTH</div>
+            <div class="sect">HARP STRINGS LENGTH COMPARISION</div>
             <div class="settings">
-                <div id="osc-opts" style="padding-bottom:10px;">
-                    <label style="font-weight: bold;" for="osc-opts">Oscillator:</label>
-                    <input type="radio" id="km-sin" name="waveform" value="sine">
-                    <label for="km-sin">Sin</label>
-                    <input type="radio" id="km-square" name="waveform" value="square">
-                    <label for="km-square">Square</label>
-                    <input type="radio" id="km-tri" name="waveform" value="triangle" checked>
-                    <label for="km-tri">Triangle</label>
-                    <input type="radio" id="km-saw" name="waveform" value="sawtooth">
-                    <label for="km-saw">Saw</label>
-                    ||
-                    <input type="radio" id="km-strings" name="waveform" value="strings">
-                    <label for="km-strings">Strings</label>
-                    <input type="radio" id="km-plucked" name="waveform" value="plucked">
-                    <label for="km-plucked">Keys</label>
-                    <input type="radio" id="km-xen" name="waveform" value="xen">
-                    <label for="km-xen">Xentone</label>
+                <div style="padding-bottom:10px;">
+                   Spiral Sides:::  From: <input id="min-graph" type="number" value="0"> To: <input id="max-graph" type="number" value="50"> In Steps: <input id="step-graph" type="number" value="0.1"> Strings: <input id="strings-graph" type="number" step="1" value="10">
+                   <br><br>
+                    Graphic Height:<input id="height-graph" type="number" value="1">
+                    <input type="checkbox" id="color-by-equave"> Color by Equave: <input id="equave-graph" type="number" value="2" step=".01" onchange="clearDraw();drawtotal();">
+                    <button onclick="drawtotal();">DRAW</button> <button onclick="clearDraw();">CLEAR</button>
                 </div>
-                <div id="envelope-opts" style="border-top:1px solid #333; padding-top:5px;">
-                    <strong>Envelope</strong><br>
-                    <label for="km-attack-ctrl">Attack: </label>
-                    <input type="range" id="km-attack-ctrl" value="0.05" min="0" max="0.5" step="0.01"> &nbsp;
-                    <label for="km-release-ctrl">Release: </label>
-                    <input type="range" id="km-release-ctrl" value="0.5" min="0" max="0.5" step="0.01"> &nbsp;
-                    <label for="km-note-length-ctrl">Note Length: </label>
-                    <input type="range" id="km-note-length-ctrl" value="0.5" min="0.2" max="2" step="0.05">
+                <div id="len-comp-graph">
                 </div>
-                <div id="km-vibrato-opts" style="border-top:1px solid #333; padding-top:5px;">
-                    <strong>Vibrato</strong><br>
-                    <label for="km-vibrato-amount-ctrl">Amount: </label>
-                    <input type="range" id="km-vibrato-amount-ctrl" value="0" min="0" max="5" step="0.001"> &nbsp;
-                    <label for="km-vibrato-speed-ctrl">Speed: </label>
-                    <input type="range" id="km-vibrato-speed-ctrl" value="0" min="0" max="30" step="0.5">
-                </div>
-                <div id="km-delay-opts" style="border-top:1px solid #333; padding-top:5px;">
-                    <strong>Delay</strong><br>
-                    <label for="km-delay-time-ctrl">Time:</label>
-                    <input id="km-delay-time-ctrl" type="range" min="0" max="1" step="0.05" value="0.1">
-                    <label for="km-feedback-ctrl">Feedback:</label>
-                    <input id="km-feedback-ctrl" type="range" min="0" max=".9" step="0.05" value="0.5">
-                    <label for="km-delay-amount-ctrl">Amount:</label>
-                    <input id="km-delay-amount-ctrl" type="range" min="0" max="1" step="0.05" value=".2">
+
+                <div style="border-top:1px solid #333; padding-top:5px;">
+                    Update Harp on Hover: <input id="draw-harp" type="checkbox" > | Reading: <span id="shownumber">N</span>
                 </div>
             </div>
 
-            <div class="sect">SECUENCER SYNTH</div>
+            <div class="sect">MATRIX</div>
             <div class="settings">
-                <div id="s-osc-opts" style="padding-bottom:10px;">
-                    <label style="font-weight: bold;" for="s-osc-opts">Oscillator:</label>
-                    <input type="radio" id="s-sin" name="s-waveform" value="sine">
-                    <label for="s-sin">Sin</label>
-                    <input type="radio" id="s-square" name="s-waveform" value="square">
-                    <label for="s-square">Square</label>
-                    <input type="radio" id="s-tri" name="s-waveform" value="triangle">
-                    <label for="s-tri">Triangle</label>
-                    <input type="radio" id="s-saw" name="s-waveform" value="sawtooth">
-                    <label for="s-saw">Saw</label>
-                    ||
-                    <input type="radio" id="s-strings" name="s-waveform" value="strings" checked >
-                    <label for="s-strings">Strings</label>
-                    <input type="radio" id="s-plucked" name="s-waveform" value="plucked">
-                    <label for="s-plucked">Keys</label>
-                    <input type="radio" id="s-xen" name="s-waveform" value="xen">
-                    <label for="s-xen">Xentone</label>
-                </div>
-                <div id="s-envelope-opts" style="border-top:1px solid #333; padding-top:5px;">
-                    <strong>Envelope</strong><br>
-                    <label for="s-attack-ctrl">Attack: </label>
-                    <input type="range" id="s-attack-ctrl" value="0.1" min="0" max="0.5" step="0.01"> &nbsp;
-                    <label for="s-release-ctrl">Release: </label>
-                    <input type="range" id="s-release-ctrl" value="0.5" min="0" max="0.5" step="0.01"> &nbsp;
-                    <label for="s-note-length-ctrl">Note Length: </label>
-                    <input type="range" id="s-note-length-ctrl" value="0.6" min="0.2" max="2" step="0.05">
-                </div>
-                <div id="s-vibrato-opts" style="border-top:1px solid #333; padding-top:5px;">
-                    <strong>Vibrato</strong><br>
-                    <label for="s-vibrato-amount-ctrl">Amount: </label>
-                    <input type="range" id="s-vibrato-amount-ctrl" value="0" min="0" max="5" step="0.001"> &nbsp;
-                    <label for="s-vibrato-speed-ctrl">Speed: </label>
-                    <input type="range" id="s-vibrato-speed-ctrl" value="0" min="0" max="30" step="0.5">
-                </div>
-                <div id="s-delay-opts" style="border-top:1px solid #333; padding-top:5px;">
-                    <strong>Delay</strong><br>
-                    <label for="s-delay-time-ctrl">Time:</label>
-                    <input id="s-delay-time-ctrl" type="range" min="0" max="1" step="0.05" value=".3">
-                    <label for="s-feedback-ctrl">Feedback:</label>
-                    <input id="s-feedback-ctrl" type="range" min="0" max=".9" step="0.05" value=".5">
-                    <label for="s-delay-amount-ctrl">Amount:</label>
-                    <input id="s-delay-amount-ctrl" type="range" min="0" max="1" step="0.05" value=".3">
-                </div>
+                Acumulatted:<br>
+                <div id="acu-int"></div>
+                <br>
+                Separate:<br>
+                <div id="sep-int"></div>
             </div>
-
 
             <div class="sect" style="background-color: #111;">
                 <br>
-                This program uses spirals to generate musical tunings,
-                you can use the output text to make tuning files for your synths and music.
-                The interactive spider web lets you play with the generated scale to find microtonal chords and
-                progressions,
-                it uses the browser's built in synth from the Audio API.
-                I mapped the keyboard keys to the harp from 0 9 8 7 .... V C X Z, and the "Key range" slider lets you
-                move around.
-
-                The delay is buggy.
-                The distortion slider is off here.
-                This is part of another bigger program, the code is a sketch.
-
+                This program uses spirals
                 <a href="http://youtube.com/@jbcristian">JBC</a><br><br>
             </div>
-        </div-->
+        </div>
     </div>
 
 
@@ -656,9 +595,11 @@
         document.getElementById("scaleGUI").appendChild(mark);
     }
 
+    
+
     function createDiv(x, y, n, d, a) {
         let spiralSides = Math.round(parseFloat(document.getElementById('sides').value));
-        let es = parseFloat(document.getElementById('sides').value) == spiralSides ? "#2c694d" : "#692c4d";
+        
         let box = document.createElement("div");
         box.className = "string";
         box.id = n;
@@ -668,12 +609,35 @@
         box.style.left = x + "px";
         box.style.top = y + "px";
         box.style.height = d + "px";
+
+
         box.style.width = "12px";
         box.style.backgroundColor = "none";
         box.style.borderLeft = "2px solid";
-        box.style.borderLeftColor = es;
-        box.style.borderBottomLeftRadius = "20px";
-        box.style.borderTopLeftRadius = "20px";
+
+        let cbq = document.getElementById('color-by-equave').checked;//ineff
+        if(cbq){
+            let colorv = strings[0]/d;
+            if (colorv > 2) {
+                while (colorv > 2) {
+                    colorv /= 2;
+                }
+            }
+            else if (colorv < 1) {
+                while (colorv < 1) {
+                    colorv *= 2;
+                }
+            }
+
+            box.style.borderLeftColor = "hsl("+colorv*360+",100%,50%)";//es;
+        }
+        else{
+            let es = parseFloat(document.getElementById('sides').value) == spiralSides ? "#2c694d" : "#692c4d";
+            box.style.borderLeftColor = es;
+        }
+        
+        //box.style.borderBottomLeftRadius = "20px";
+        //box.style.borderTopLeftRadius = "20px";
         document.getElementById("sweb").appendChild(box);
     }
 
@@ -683,8 +647,9 @@
     }
 
     function playTone(freq, id, ins) {
+        let pmult = parseFloat(document.getElementById('pmult').value);
 
-        parent.playNote(freq,ins,100);
+        parent.playNote(freq*pmult,ins,500);
         
         guiStr.innerHTML = "N: " + (parseFloat(id) - 1);
         guiLen.innerHTML = "L: " + strings[id - 1];
@@ -696,10 +661,10 @@
     }
 
     function light(id) {
-        document.getElementById(id).style.borderLeftColor = "#fff";
+        document.getElementById(id).style.borderRightColor = "#fff";
         setTimeout(reset, 100);
         function reset() {
-            document.getElementById(id).style.borderLeftColor = getColor();
+            document.getElementById(id).style.borderRightColor = "none";//getColor();
         }
     }
 
@@ -859,6 +824,153 @@ function reloadHostTracks(){
 function receiveNotes(notes){
     for(let n = 0; n<notes.length;n++){
         playTone(pitches[notes[n]], notes[n]+1,track2Send)
+    }
+}
+
+
+function toggleTools(){
+    if(window.frameElement.width == "1024"){
+        window.frameElement.width = "540";
+    }
+    else{
+        window.frameElement.width = "1024";
+    }
+    
+}
+
+
+
+
+//ANALYSIS
+
+const graph = document.getElementById('len-comp-graph');
+let colors = ["red","orange","yellow","green","blue","purple"];
+
+function drawBar(i,ns,gh){
+    let equave = parseFloat(document.getElementById('equave-graph').value);
+    let points = [];
+    let radius = 0;
+    let angle = 0;
+
+    let bars = document.createElement('div');
+    bars.className = "graph-bars";
+   // bars.style.display = "inline-block";
+    bars.style.verticalAlign ="top";
+    bars.onmouseenter = ()=> {
+        document.getElementById('shownumber').innerText = i;
+        if(document.getElementById('draw-harp').checked){
+            document.getElementById('sides').value = i;
+            resetScale();drawSpiralRect();
+            clearAcu();drawAcu();
+        }
+        
+        //document.getElementById('segments')
+
+    }
+    graph.appendChild(bars);
+    for (let n = 0; n <= ns; n++) {
+
+        angle += (Math.PI * 2) / i;
+        let x = 512/2 + radius * Math.cos(angle);
+        let y = 512/2 + radius * Math.sin(angle);
+
+        points[n] = [x-256, y-256];
+        radius += 1;
+        //radius *= spiralPad;
+        if (n > 0) {
+            let x1, x2, y1, y2;
+            x1 = points[n - 1][0];
+            x2 = points[n][0];
+            y1 = points[n - 1][1];
+            y2 = points[n][1];
+            let dist = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+
+            let colorv = dist;
+            if (colorv > equave) {
+                while (colorv > equave) {
+                    colorv /= equave;
+                }
+            }
+            else if (colorv < 1) {
+                while (colorv < 1) {
+                    colorv *= equave;
+                }
+            }
+            dist*=gh;
+            let bar = document.createElement('div');
+            bar.style.height = dist+"px";
+            bar.style.width = "1px";
+            //bar.style.borderColor = 
+            bar.style.backgroundColor = "hsl("+colorv*360+",100%,50%)";//colors[n%colors.length];
+            //bar.style.borderBottom = "1px solid";
+
+            bars.appendChild(bar);
+        }
+    }
+}
+
+function clearDraw(){
+    let bars = document.getElementsByClassName('graph-bars');
+    for(let i= bars.length; i>0;i--){
+        bars[i-1].remove()
+    }
+}
+
+function drawtotal(){
+    let min = parseFloat(document.getElementById('min-graph').value);
+    let max = parseFloat(document.getElementById('max-graph').value);
+    let step = parseFloat(document.getElementById('step-graph').value);
+    let nstrings = parseInt(document.getElementById('strings-graph').value);
+    let ghei = parseFloat(document.getElementById('height-graph').value);
+    for(let i = min; i<max; i+=step){
+        drawBar(i,nstrings,ghei);
+    }
+}
+
+
+function clearAcu(){
+    let bars = document.getElementsByClassName('acu-mark');
+    for(let i= bars.length; i>0;i--){
+        bars[i-1].remove()
+    }
+}
+
+
+const acugraph = document.getElementById('acu-int');
+acugraph.style.position = "relative";
+function drawAcu(){
+    let hor = 512;//pixel width
+
+    let equave = parseFloat(document.getElementById('equave-graph').value);
+
+    //let total = [];
+    let fst = strings[0];
+    for(let i = 0; i<strings.length;i++){
+
+        let newl = strings[i]/fst;
+
+        let m = newl;
+            if (m > equave) {
+                while (m > equave) {
+                    m /= equave;
+                }
+            }
+            else if (m < 1) {
+                while (m < 1) {
+                    m *= equave;
+                }
+            }
+
+        
+        let mark = document.createElement('div');
+        mark.className = "acu-mark";
+        mark.style.position = "absolute";
+        mark.style.left = (-512+(m*hor))+"px";
+        mark.style.height = "10px";
+
+        mark.style.borderLeft = "1px solid hsl("+m*360+",100%,50%)";
+        acugraph.appendChild(mark);
+        //total.push( [strings[i-1]/fst, exe ])
     }
 }
 

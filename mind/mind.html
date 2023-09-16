@@ -83,6 +83,8 @@ document.getElementById('add-interface').addEventListener('click', ()=>{
 function addInterface(){
     let fullInterface = document.createElement("DIV");
     fullInterface.className = "full-interface";
+    fullInterface.style.width = "auto";
+    //fullInterface.style.resize = "both";
 
     let interface = document.getElementById('select-interface').selectedIndex;
     let interfaceToAdd = "";
@@ -117,7 +119,7 @@ function addInterface(){
             break;        
     }
 
-    fullInterface.style.width = w+"px"; //height is auto
+    //fullInterface.style.width = w+"px"; //height is auto
     document.getElementById('interface-window').appendChild(fullInterface);
 
     let interfaceHeader = document.createElement('DIV');
