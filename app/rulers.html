@@ -26,6 +26,7 @@
             }
             #accumulate{position:relative;width:auto;border-color:#ccc;height: 20px;margin:2px 0px;}
             .intervals-ui{position: relative; width:auto; border-color:#333; height:20px; display: block; margin:2px 0px;}
+            .intervals-ui:hover{background-color: rgba(0,0,100,.2);}
             #full-spectrum{width: auto; border:1px solid #ccc; height: 50px; position: relative;}
             .full-spectrum-mark{position:absolute; margin:0;padding:0; width: 1px; height: 20px; background-color: #ccc;}
             .matrix-mark-data{border:none;font-size:10px;color:#0d9a5c;position:absolute;left:2px; top:0px; margin:0;padding:0;}
@@ -77,8 +78,8 @@
                     <!--default values-->
                 </div>
 
-                <div>From: <input id="alpha" type="number" value="0" step="0.01" onchange="drawNumberList();">
-                 Equave: <input id="g-equave" type="number" min="1.01" value="2" step="0.01" onchange="drawNumberList();">
+                <div>From: <input id="alpha" type="number" value="0" step="0.01" >
+                 Equave: <input id="g-equave" type="number" min="1.01" value="2" step="0.01">
                  <!--Reduce by: <input type="radio" name="reduce-by"> Octave | <input type="radio" name="reduce-by" checked> Equave-->
                 </div>
                 
@@ -107,6 +108,7 @@
         
     </div>
     <div id="full-spectrum"></div>
+    <div id="stored"></div>
 </body>
 <script>
 
@@ -210,11 +212,21 @@ const graph = document.getElementById('left-graph');
 const newn = document.getElementById('new-numbers');
 
 let gOriginal = [];
-let gMinus = [];
-let gBased = [];
 let gInEquave = [];
 let sorted = [];
 
+//start optim
+let testgEquave = parseFloat(document.getElementById('g-equave').value);
+document.getElementById('g-equave').onchange = ()=>{
+    testgEquave = parseFloat(document.getElementById('g-equave').value);
+    drawNumberList();
+
+}
+let testAlpha = parseFloat(document.getElementById('alpha').value);
+document.getElementById('alpha').onchange = ()=>{
+    testAlpha = parseFloat(document.getElementById('alpha').value);
+    drawNumberList();
+}
 
 function drawNumberList(){
     clearByClass('left-graph-bar');
@@ -226,14 +238,12 @@ function drawNumberList(){
     //ayayay
 
     gOriginal = [];
-    gMinus = [];
-    gBased = [];
     gInEquave = [];
     
 
-    const gEquave = parseFloat(document.getElementById('g-equave').value);
+    const gEquave = testgEquave;//optimized
     const entries = getList();    
-    let min = Math.min(...entries), max = Math.max(...entries), alpha = document.getElementById('alpha').value;
+    let min = Math.min(...entries), max = Math.max(...entries), alpha = testAlpha;
     max = Math.max(max, alpha);
     min = Math.min(min,alpha);
 
@@ -243,8 +253,8 @@ function drawNumberList(){
             if(ent!=0)absentries.push(ent);
         }
 
-    const sizeDif = entries.length-absentries.length;
-    console.log(sizeDif);
+    //const sizeDif = entries.length-absentries.length;
+    //console.log(sizeDif);
     
     const h = graphHeight/(Math.abs(max-min));
     for(n in entries){
@@ -352,7 +362,7 @@ function drawClosedEquave(base){
     }
     let newbase = fclosed[(base)%fclosed.length];
     for(n in fclosed) fclosed[n]/=newbase;
-    console.log(fclosed)
+    //console.log(fclosed)
     const closed = getClosedEquave(fclosed);
    
 
@@ -366,16 +376,13 @@ function drawClosedEquave(base){
         const left = ((closed[n]-1)/(eq-1))*graphWidth+"px"
         mark.style.left = left;
 
-
         let markdata = document.createElement('div');
         markdata.className = "matrix-mark-data";
         markdata.innerHTML = '<span class="color-original">'+sorted[n][0]+'</span>';
-
         mark.appendChild(markdata);
 
         markdata = document.createElement('div');
         markdata.className = "matrix-mark-data color-inequave";
-
         markdata.style.top = "10px";
         markdata.innerHTML = '<span>'+Math.floor(closed[n]*100)/100+'</span>';
 
@@ -389,7 +396,6 @@ function drawClosedEquave(base){
         accuMark.style.left = left;
 
         accu.appendChild(accuMark);
-
     }
 }
 
@@ -444,7 +450,7 @@ function drawFullSpectrum(){
     //lin log
 }
 
-
+//numbers should get here already normalized,(>= 1)
 function getClosedEquave(numbers){
     let eq = parseFloat(document.getElementById('g-equave').value);
     let closed;
@@ -509,6 +515,14 @@ function drawRuler(){
 
 }
 drawRuler();
+
+
+function actionByID(hl){
+    //action is highlight and or plau
+
+}
+
+
 
 window.onload = function(){
     insertNumbersList(defaultNumbers);

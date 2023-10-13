@@ -161,6 +161,7 @@ background-color: #000;
 color:#aaa;
 font-family: 'Consolas', monospace;
 font-size: 11px;
+padding:1px 5px;
 }
 button:hover{
 color:#ccc;
@@ -187,3 +188,58 @@ select{
     color:#aaa;
     font-size:12px;
 }
+
+#scales-zone{
+    position:absolute;
+    bottom:20px;
+    z-index:10;
+}
+.scaleui{
+    display: inline-block;
+    font-size:10px;
+    background-color: rgba(0,0,0,0.5);
+    color:#ccc;
+    border:1px solid #666;
+    padding:0px 10px ;margin:2px;
+    cursor: pointer;
+}
+.scaleui:hover{
+    background-color: rgba(0,0,100,0.5);
+}
+
+.bsmall{font-size: 9px;}
+
+label.label input[type="file"] {
+    position: absolute;
+    top: -1000px;
+  }
+  .label {
+    width: auto;
+    border:1px solid #aaa;
+    background-color: #000;
+    color:#aaa;
+    font-family: 'Consolas', monospace;
+    font-size: 9px;
+    display: inline-block;
+    padding:1px 5px;
+  }
+  .label:hover {
+    color:#ccc;
+    background-color: #333;
+  }
+  .label:active {
+    background: #9fa1a0;
+  }
+  .label:invalid+span {
+    color: #000000;
+  }
+  .label:valid+span {
+    color: #ffffff;
+  }
+
+  #info{
+    font-size:11px; background-color: #000;width: 100%; height: auto; text-align: right;color:#999;
+  }
+  #info a{
+    color:#554d22;
+  }
