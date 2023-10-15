@@ -1247,6 +1247,7 @@ function drawScale(scale){
         let rows = document.getElementsByName('row-phase-number');
         for(let r = 0;r<rows.length;r++){
             rows[r].value = scale.rowpattern[r];
+            rowPattern[r] = scale.rowpattern[r];
         }
     }
     document.getElementById('scales-zone').appendChild(scaleui);
