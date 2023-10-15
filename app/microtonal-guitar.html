@@ -163,6 +163,7 @@ let adjs = [];
 let guitar, nStrings, nFrets, nDivision, nInterval, nLength, nWidth;
 let presetTuningPattern = [];
 let userpresets = [];
+let defaultpreset = [];
 
 function createHighlightControls(){
     document.getElementById('highlights').remove();
@@ -1145,25 +1146,8 @@ function savePreset(n){
     let tuningPat = tuningPatterns;
     let lowestPitch = document.getElementById('lowest-pitch').value;
 
-    /*
-    let scales = function(){
-        let string = "";
-        for(let i = 0;i<scalePatterns.length;i++){
-            for(let r = 0;r<scalePatterns[i].length;r++){
-                string+= scalePatterns[i][r]+",";
-                if(r==scalePatterns[i].length-1)string+="-";
-            }
-        }
-        return string;
-    }();
-
-    let value = ""+name+"|"+nStrings+"|"+nFrets+"|"+tuningType+"|"+nDivision+"|"+nInterval+"|["+intervalsList+"]|"+nWidth+"|"+nLength+"|"+nZoom+"|"+lowestPitch+"|"+tuningPat+"|"+scales+"";
-
-    //if(localStorage.getItem(name)) localStorage.removeItem(name);
-    localStorage.setItem(name,value);*/
-
     let p = document.getElementById('preset-list').selectedIndex;
-    let scales = userpresets[p].scales||[];
+    let scales = defaultpreset.scales||[];
 
     let newinst = new InstrumentPreset();
     newinst.name = n; newinst.zoom = nZoom;
@@ -1172,7 +1156,7 @@ function savePreset(n){
     newinst.divisions = nDivision; newinst.equave = nInterval;
     newinst.tuningpattern = tuningPat; newinst.lowestpitch = lowestPitch;
     newinst.dratios = intervalsList;
-    newinst.scales = scales;
+    newinst.scales = scales; newinst.type = tuningType;
     let exs = false;
     for(let i = 0;i<userpresets.length;i++){
         if(userpresets[i].name == n) {
@@ -1181,6 +1165,7 @@ function savePreset(n){
         }
     }
     if(!exs) userpresets.push(newinst);
+    //console.log(userpresets)
     localStorage.setItem("SFINX-PRESET",JSON.stringify(userpresets));
 }
 
@@ -1192,8 +1177,8 @@ function applyPreset(){
 
     let tt = document.getElementsByName('tuningType');
     switch(userpresets[p].type){
-        case "0": tt[0].checked = true; tt[1].checked=false; break;
-        case "1": tt[0].checked = false; tt[1].checked=true; break;
+        case 0: tt[0].checked = true; tt[1].checked=false; break;
+        case 1: tt[0].checked = false; tt[1].checked=true; break;
         default: break;
     }
     document.getElementById('nDivision').value = userpresets[p].divisions;
@@ -1205,8 +1190,9 @@ function applyPreset(){
     document.getElementById('lowest-pitch').value = userpresets[p].lowestpitch;
 
     presetTuningPattern = userpresets[p].tuningpattern;
-
+    defaultpreset = userpresets[p];
     prepareGuitar();
+    
     presetTuningPattern = [];//yhnks
     //drawScales();
 }
@@ -1271,11 +1257,16 @@ function drawScales(){
     for(let a = cr.length; a>0;a--){
         cr[a-1].remove();
     }
-    let p = document.getElementById('preset-list').selectedIndex;
-    if(userpresets[p]){
-        for(let s=0;s<userpresets[p].scales.length;s++){
-            drawScale(userpresets[p].scales[s]);
+    //let p = document.getElementById('preset-list').selectedIndex;
+    if(defaultpreset.scales!=undefined){
+        if(defaultpreset.scales.length>0){
+            console.log("eh")
+            for(let s=0;s<defaultpreset.scales.length;s++){
+                
+                drawScale(defaultpreset.scales[s]);
+            }
         }
+
     }
     
 }
@@ -1332,14 +1323,15 @@ function saveScale(nn){
     scale.rowpattern = row;
 
     let exs = false;
-    for(let i = 0;i<userpresets[p].scales.length;i++){
-        if(userpresets[p].scales[i].name == nn) {
-            userpresets[p].scales[i] = scale;
+    for(let i = 0;i<defaultpreset.scales.length;i++){
+        if(defaultpreset.scales[i].name == nn) {
+            defaultpreset.scales[i] = scale;
             exs=true;
             drawScales();
+            console.log("samwnew")
         }
     }
-    if(!exs) userpresets[p].scales.push(scale),drawScale(scale);
+    if(!exs) defaultpreset.scales.push(scale),drawScale(scale);
 }
 
 
