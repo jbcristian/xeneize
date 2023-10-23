@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <head>
   <link rel="stylesheet" type="text/css" href="microtonal-guitar.css">
-  <title>Microtonal Guitar</title>
+  <title>SFINX</title>
 </head>
 
 <body>
 
-    <div>
+    <div style="min-width: 1310px;">
         <div class="toptions">
             <div style="background-color:rgb(85, 77, 34); display:inline-block; padding:2px;">
                 <div style="display:inline-block;">
@@ -15,6 +15,16 @@
                 </div>
                 <div style="display:inline-block;">
                    <button style="position: relative;" onclick="openSavePreset(this);">Save New</button>
+                </div>
+                <div style="display:inline-block;vertical-align: text-bottom;">
+                    <label class="label">
+                        <input type="file" oninput="getFile(this)"/>
+                        IMP
+                      </label>
+                    <a id="export-presets">
+                        <button class="bsmall" >EXP</button>
+                    </a>
+                    
                 </div>
             </div>
             <div style="background-color:#255; display:inline-block; padding:2px;">
@@ -33,24 +43,16 @@
                     Divisions: <input type="number" min="1" max="30" id="nDivision" value="12" step="0.01">
                 </div>
                 <div style="display:inline-block;"  oninput="prepareGuitar();">
-                    Interval: <input type="number" min="0" max="11" id="nInterval" value="2" step="0.01">
+                    Equave: <input type="number" min="0" max="11" id="nInterval" value="2" step="0.01">
                 </div>
                 <div style="display:inline-block; font-size:8px;">
                     <input type="radio" name="tuningType" id="drTuning"> DECIMAL RATIO:
                 </div>
                 <div style="display:inline-block;"  oninput="prepareGuitar();">
-                    Intervals List: <input type="text"  id="intervalsList" value="1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,1.8,1.9,2">
+                    Intervals List: <input type="text"  id="intervalsList" value="">
                 </div>
             </div>
-            <!--div style="background-color: #2e365d; display:inline-block; padding: 2px;"  oninput="createGuitarII();">
-                
-                <div style="display:inline-block;">
-                    12ED2 Ruler Position: <input type="number" id="rulerPosition" value="1" min="0" max="10" step="0.01"  >
-                </div>
-                <div style="display:inline-block;">
-                    Relative Size: <input type="number" id="measureUnit" value="60" min="0" max="1000" step="0.01"  >
-                </div>
-            </div-->
+
             <div style="background-color: #555; padding:2px; float:right;"  oninput="createGuitarII();">
                 <div style="display:inline-block;">
                      &UpDownArrow; (px) <input type="number" min="100" max="300" id="nWidth" value="120" step="1">
@@ -63,8 +65,9 @@
                 </div>
             </div>
         </div>
-        <div id="guitar-parent">
+        <div id="guitar-parent" style="position:relative;">
             <div id="full-guitar"></div>
+            <div id="scales-zone"></div>
         </div>
         <div class="boptions" id="bot-parent" >
             <div id="generated-opts" style="display:inline-block;">
@@ -107,13 +110,13 @@
                     <br><br>
                     Volume: <input type="range" min="0"  max="1" value=".5" step="0.01" id="volume-ctrl"><br>
                 </div>
-
                 <!--button onclick="randomSynth();">Random Synth</button-->
             </div>
         </div>
-        
+        <div id="info">
+            SFINX by <a href="https://www.youtube.com/@j.b.cristian" target="_blank">@JBCristian</a> - <a href="https://www.behance.net/gallery/175519835/SFINX-Xenharmonic-Guitar-App" target="_blank">HELP</a> - <a href="https://kepleriandreams.github.io" target="_blank">kepleriandreams.github.io</a>
+        </div>
     </div>
-
 </body>
 
 <script>
@@ -159,6 +162,8 @@ function GetTrueOne(rname){
 let adjs = [];
 let guitar, nStrings, nFrets, nDivision, nInterval, nLength, nWidth;
 let presetTuningPattern = [];
+let userpresets = [];
+let defaultpreset = [];
 
 function createHighlightControls(){
     document.getElementById('highlights').remove();
@@ -166,6 +171,32 @@ function createHighlightControls(){
     highlights.style.width = "500px";
     highlights.style.border = "1px dotted #666"
     highlights.id = "highlights";
+
+    const savescalebutton = document.createElement('button');
+    savescalebutton.innerText = "Save scale";
+    savescalebutton.style.position = "relative"; savescalebutton.style.float = "right";
+    savescalebutton.className ="savescale";
+    savescalebutton.onclick = ()=>{
+        openSaveScale(savescalebutton);
+    }
+    highlights.appendChild(savescalebutton);
+
+    const trans = document.createElement('div');
+    trans.style.position ="relative"; trans.style.float = "right"; trans.style.clear="both";
+    highlights.appendChild(trans)
+
+    const transl = document.createElement('button');
+    transl.innerText = "<";
+    transl.className = "bsmall";
+    transl.onclick = ()=> transpose(-1);
+    trans.appendChild(transl);
+
+    const transr = document.createElement('button');
+    transr.innerText = ">";
+    transr.className = "bsmall";
+    transr.onclick = ()=> transpose(1);
+    trans.appendChild(transr);
+
     document.getElementById('generated-opts').appendChild(highlights);
     //if(nDivision==Math.round(nDivision)){
         let notes = document.createElement('div');
@@ -327,6 +358,7 @@ function colorByRow(){
     for(let p=0;p<toplay.length;p++){
         for(let t = 0;t<toplay[p].length;t++){
             let nt = (t+rowPattern[rowPattern.length-1-p])%toplay[p].length;
+            if (nt<0) nt=(toplay[p].length)+nt;
             if(toplay[p][nt]!=undefined){
                 toplay[p][nt][0].getElementsByClassName('mark-highlight')[0].style.backgroundColor = colors[t%colors.length];
             }else {console.log("skipped"); continue; }
@@ -357,6 +389,7 @@ function colorSingle(){
 function markColorToggle(row){
    for(let p = 0; p<toplay.length;p++){
     let nt = (row+rowPattern[rowPattern.length-1-p])%toplay[p].length;
+    if (nt<0) nt=(toplay[p].length)+nt;
         if(toplay[p][nt]!=undefined){
             toplay[p][nt][0].getElementsByClassName('mark-highlight')[0].style.border = "1px solid #000";
         }
@@ -385,7 +418,7 @@ function createChordRowControls(){
         input.type = "number";
         input.name = "row-phase-number";
         input.value = val;
-        input.min = 0;
+        //input.min = 0;
         input.step = 1;
         input.style.width = "40px"
         chordRow.appendChild(input);
@@ -399,16 +432,17 @@ function createChordRowControls(){
 let measures = [];
 let strings = [];
 let tuningPatterns = [];
+//let scalePatterns = [];
 let notesPool = [];
 let intervals;
 let gtp = 0;
 function prepareGuitar(){
     strings = [];
     tuningPatterns = [];
+    //scalePatterns = [];
     notesPool = [];
     intervals = [];
     adjs = [];
-    presetTuningPattern = [];//yhnks
 
     nZoom = document.getElementById('nZoom').value/1;
     nStrings = document.getElementById('nStrings').value;
@@ -437,6 +471,11 @@ function prepareGuitar(){
     const fullGuitarUI = document.createElement('div');
     fullGuitarUI.id = "full-guitar";
     document.getElementById('guitar-parent').appendChild(fullGuitarUI);
+
+    document.getElementById('scales-zone').remove();
+    const scalesZoneUI = document.createElement('div');
+    scalesZoneUI.id = "scales-zone";
+    document.getElementById('guitar-parent').appendChild(scalesZoneUI);
 
     let controlsFrame = document.createElement('DIV');
     controlsFrame.style.position = "absolute";
@@ -498,7 +537,7 @@ function mapNotes(stringsAmount,tuningPatterns,intervalsLength){
         let offset = 0;
         for(let o = c; o<tuningPatterns.length;o++){
             offset+=tuningPatterns[tuningPatterns.length-o-1];
-        }console.log(offset)
+        }//console.log(offset)
         for(let j = strings[c].length-1; j>=0;j--){
             let test = (offset+j)%intervalsLength;
             strings[c][j][4] = test;
@@ -855,7 +894,7 @@ function createGuitarII(hl){
     guitarContainer.appendChild(fullFrame);
     
     if(hl)createHighlightControls();createChordRowControls();createColorOpts();
-    highlightNotes();
+    highlightNotes();drawScales();
 }
 
 function rerrangeIntervals(intervals,newindex,tuningPattern){
@@ -918,8 +957,8 @@ function playRowChord(row){
    for(let d = 0; d<toplay.length;d++){
         let p = order[d];
         //console.log(p);
-
         let nt = (row+rowPattern[rowPattern.length-1-p])%toplay[d].length;
+        if (nt<0) nt=(toplay[d].length)+nt;
         if(toplay[p][nt]!=undefined){
             let topl = toplay[d][nt];
             setTimeout( ()=> { playToneII(notesPool[ toplay[p][nt][1]-1 ]) }, 1000*arpSpeed*d); 
@@ -948,7 +987,7 @@ function randomSynth(){
         real[l] = (2/(l+1))*((Math.random()*2)-1);
         //real[l] = ((Math.random()*2)-1);
     }
-    console.log(real);
+    //console.log(real);
     guitarWaveform = audioContext.createPeriodicWave(real,imag);
 
     let lenr = Math.round(Math.random()*10)*Math.round(Math.random()*100);
@@ -959,7 +998,7 @@ function randomSynth(){
         realr[l] = (2/(l+1))*((Math.random()*2)-1);
         //realr[l] = ((Math.random()*2)-1);
     }
-    console.log(realr);
+    //console.log(realr);
     guitarWaveformII = audioContext.createPeriodicWave(realr,imagr);
     
 }
@@ -1028,12 +1067,9 @@ setSound();
 let pmult = 100;
 let sus = 0.2,nl=.5,att=0.0,rel=.8;
 
-
-
 function playToneII(rank){
-
     //console.log(rank)
-    let freq = rank*pmult;
+    let freq = rank*pmult/2;
     let osc = audioContext.createOscillator();
     osc.setPeriodicWave(guitarWaveform);
     //osc.waveform  = "triangle"
@@ -1066,36 +1102,33 @@ function playToneII(rank){
     noteGaint.connect(masterVol);
 }
 
-
-
-
-
-
-let presets = [];
-function getPresets(){
-    let rawpresets = [
-        "12ED2 Guitar|6|19|0|12|2| |100|1000|1|100|5,3,5,5,5",
-        "12ED2 Bass|4|19|0|12|2| |120|1000|1|80|5,5,5"
-    ];
-    let size = localStorage.length;
-    if(size>0){
-        for(let i=0;i<size;i++){
-            rawpresets.push(localStorage.getItem(localStorage.key(i)));
-        }
+function transpose(d){
+    let ranks = document.getElementsByName('selected-note');
+    let list = [];
+    for(let r = 0;r<ranks.length;r++){
+        if(ranks.item(r).checked) list.push(r); ranks.item(r).checked = false;
     }
-    for(let i=0;i<rawpresets.length;i++){
-        let parsed = rawpresets[i].split("|");
-        presets.push(parsed);
+    for(let r = 0;r<list.length;r++){
+        let n = (list[r]+d)%ranks.length;
+        if(n<0) n = ranks.length -1;
+       ranks.item(n).checked = true;
     }
+    highlightNotes();
 }
 
+let presets = [];
 function fillPresetList(){
-    let sel = document.getElementById('preset-list');
-    for(let i =0;i<presets.length;i++){
+    let sels = document.getElementById('preset-list');
+    //empty list
+    for(let a = sels.length; a>0;a--){
+        sels[a-1].remove();
+    }
+
+    for(let i =0;i<userpresets.length;i++){
         let opt = document.createElement('option');
         opt.value = i;
-        opt.innerText = presets[i][0];
-        sel.appendChild(opt);
+        opt.innerText = userpresets[i].name;
+        sels.appendChild(opt);
     }
 }
 
@@ -1113,41 +1146,58 @@ function savePreset(n){
     let tuningPat = tuningPatterns;
     let lowestPitch = document.getElementById('lowest-pitch').value;
 
-    let value = ""+name+"|"+nStrings+"|"+nFrets+"|"+tuningType+"|"+nDivision+"|"+nInterval+"|["+intervalsList+"]|"+nWidth+"|"+nLength+"|"+nZoom+"|"+lowestPitch+"|"+tuningPat+"";
+    let p = document.getElementById('preset-list').selectedIndex;
+    let scales = defaultpreset.scales||[];
 
-    localStorage.setItem(name,value);
+    let newinst = new InstrumentPreset();
+    newinst.name = n; newinst.zoom = nZoom;
+    newinst.strings = nStrings; newinst.frets = nFrets;
+    newinst.width = nLength; newinst.height = nWidth;
+    newinst.divisions = nDivision; newinst.equave = nInterval;
+    newinst.tuningpattern = tuningPat; newinst.lowestpitch = lowestPitch;
+    newinst.dratios = intervalsList;
+    newinst.scales = scales; newinst.type = tuningType;
+    let exs = false;
+    for(let i = 0;i<userpresets.length;i++){
+        if(userpresets[i].name == n) {
+            userpresets[i] = newinst;
+            exs=true;
+        }
+    }
+    if(!exs) userpresets.push(newinst);
+    //console.log(userpresets)
+    localStorage.setItem("SFINX-PRESET",JSON.stringify(userpresets));
 }
 
 //var presetTuningPattern = [];
 function applyPreset(){
-    let p = document.getElementById('preset-list').selectedIndex;
-    document.getElementById('nStrings').value = presets[p][1];
-    document.getElementById('nFrets').value = presets[p][2];
+    let p = document.getElementById('preset-list').selectedIndex||0;
+    document.getElementById('nStrings').value = userpresets[p].strings;
+    document.getElementById('nFrets').value = userpresets[p].frets;
 
     let tt = document.getElementsByName('tuningType');
-    switch(presets[p][3]){
+    switch(userpresets[p].type){
         case 0: tt[0].checked = true; tt[1].checked=false; break;
         case 1: tt[0].checked = false; tt[1].checked=true; break;
         default: break;
     }
-    document.getElementById('nDivision').value = presets[p][4];
-    document.getElementById('nInterval').value = presets[p][5];
-    document.getElementById('intervalsList').value = presets[p][6];
-    document.getElementById('nWidth').value = presets[p][7];
-    document.getElementById('nLength').value = presets[p][8];
-    document.getElementById('nZoom').value = presets[p][9];
-    document.getElementById('lowest-pitch').value = presets[p][10];
+    document.getElementById('nDivision').value = userpresets[p].divisions;
+    document.getElementById('nInterval').value = userpresets[p].equave;
+    document.getElementById('intervalsList').value = userpresets[p].dratios;
+    document.getElementById('nWidth').value = userpresets[p].height;
+    document.getElementById('nLength').value = userpresets[p].width;
+    document.getElementById('nZoom').value = userpresets[p].zoom;
+    document.getElementById('lowest-pitch').value = userpresets[p].lowestpitch;
 
-    let splited = presets[p][11].split(',');
-    for(let i = 0;i<splited.length;i++){
-        presetTuningPattern.push(parseInt(splited[i]));
-    }
+    presetTuningPattern = userpresets[p].tuningpattern;
+    defaultpreset = userpresets[p];
     prepareGuitar();
+    
+    presetTuningPattern = [];//yhnks
+    //drawScales();
 }
 
 function openSavePreset(b){
-    console.log(b.children.length);
-    
     if(b.children.length==0){
         let main = document.createElement('div');
         main.style.zIndex = "10";
@@ -1170,10 +1220,7 @@ function openSavePreset(b){
                 savePreset(inp.value);
                 main.remove();
                 ev.stopPropagation();
-            } else {
-                alert("Non-empty names only.");
-            }
-            
+            } else { alert("Non-empty names only."); }
         }
         main.appendChild(sub);
 
@@ -1183,13 +1230,190 @@ function openSavePreset(b){
     }
 }
 
+function drawScale(scale){
+    const scaleui = document.createElement('div');
+    scaleui.className = "scaleui";
+    scaleui.innerText = scale.name;
+    scaleui.onclick = ()=>{
+        let highlights = document.getElementsByName('selected-note');//selectable
+        for(let s = 0;s<highlights.length;s++){
+            highlights.item(s).checked = false;
+        }
+        for(let i = 0;i<scale.ranks.length;i++){
+            let n = parseInt(scale.ranks[i]);
+            highlights.item(n).checked = true;
+        }
+        highlightNotes();
+        let rows = document.getElementsByName('row-phase-number');
+        for(let r = 0;r<rows.length;r++){
+            rows[r].value = scale.rowpattern[r];
+            rowPattern[r] = scale.rowpattern[r];
+        }
+    }
+    document.getElementById('scales-zone').appendChild(scaleui);
+}
 
-window.onload = ()=>{
-    getPresets();fillPresetList();
+function drawScales(){
+    let cr = document.getElementsByClassName('scaleui');
+    for(let a = cr.length; a>0;a--){
+        cr[a-1].remove();
+    }
+    //let p = document.getElementById('preset-list').selectedIndex;
+    if(defaultpreset.scales!=undefined){
+        if(defaultpreset.scales.length>0){
+            console.log("eh")
+            for(let s=0;s<defaultpreset.scales.length;s++){
+                
+                drawScale(defaultpreset.scales[s]);
+            }
+        }
+
+    }
+    
+}
+
+function openSaveScale(b){
+    //console.log(b.children.length);
+    if(b.children.length==0){
+        let main = document.createElement('div');
+        main.style.zIndex = "10";main.style.backgroundColor ="#333";
+        main.style.position = "absolute";main.style.padding = "10px";
+        main.style.top = "15px"; main.style.left ="-50px";
+        main.innerText = "Scale Name:"
+        b.appendChild(main);
+
+        let inp = document.createElement('input');
+        inp.type = "text";
+        inp.id = "tmpPresetName";
+        main.appendChild(inp);
+
+        let sub = document.createElement('button');
+        sub.innerText = "SAVE";
+        sub.onclick = (ev)=>{
+            if(inp.value.length>0){
+                //savePreset(inp.value);//save with current name
+                saveScale(inp.value);
+                main.remove();
+                ev.stopPropagation();
+            } else { alert("Non-empty names only."); }
+        }
+        main.appendChild(sub);
+
+        document.getElementById('guitar-parent').onclick = ()=>{
+            main.remove();
+        }
+    }
+}
+
+function saveScale(nn){
+    let p = document.getElementById('preset-list').selectedIndex;
+    let ranks = document.getElementsByName('selected-note');
+
+    let scale = new ScalePreset();
+    scale.name = nn;
+    let list = [];
+    for(let r = 0;r<ranks.length;r++){
+        if(ranks.item(r).checked) list.push(r);
+    }
+    scale.ranks = list;
+    let row = [];
+    let rows = document.getElementsByName('row-phase-number');
+    for(let r = 0;r<rows.length;r++){
+        row.push(parseInt(rows[r].value));
+    }
+    scale.rowpattern = row;
+
+    let exs = false;
+    for(let i = 0;i<defaultpreset.scales.length;i++){
+        if(defaultpreset.scales[i].name == nn) {
+            defaultpreset.scales[i] = scale;
+            exs=true;
+            drawScales();
+            console.log("samwnew")
+        }
+    }
+    if(!exs) defaultpreset.scales.push(scale),drawScale(scale);
 }
 
 
 
+function ScalePreset(){
+    this.name = "Scale",
+    this.ranks = [0,1],
+    this.rowpattern = [0,1]
+}
+
+function InstrumentPreset(){
+    this.type = 0,
+    this.name = "Preset",
+    this.strings = 6,
+    this.frets = 19,
+    this.divisions = 12,
+    this.equave = 2,
+    this.lowestpitch = 1,
+    this.zoom = 1,
+    this.width = 1000,
+    this.height = 100,
+    this.tuningpattern = [],
+    this.dratios = [1.3, 1.5, 2.0],
+    this.scales = []
+}
+
+function loadPresets(){
+    if(!localStorage.getItem("SFINX-PRESET")){
+        let guitar = new InstrumentPreset();
+        guitar.type = 0;
+        guitar.name = "12ED2 Guitar";
+        guitar.strings = 6; guitar.frets = 19;
+        guitar.lowestpitch = 164.1;
+        guitar.divisions = 12; guitar.equave = 2;
+        guitar.tuningpattern = [5,5,5,4,5];
+        guitar.dratios = [];
+        userpresets.push(guitar);
+
+        let bass = new InstrumentPreset();
+        bass.type = 0;
+        bass.name = "12ED2 Bass";
+        bass.lowestpitch = 164.1; bass.height = 120;
+        bass.strings = 4; bass.frets = 21;
+        bass.tuningpattern = [5,5,5];
+        bass.divisions = 12; bass.equave = 2;
+        bass.dratios = [];
+        userpresets.push(bass);
+
+        localStorage.setItem("SFINX-PRESET",JSON.stringify(userpresets));
+
+    }else{
+        userpresets = JSON.parse(localStorage.getItem("SFINX-PRESET"));
+        fillPresetList();
+    }
+}
+
+
+window.onload = ()=>{
+    loadPresets();
+    applyPreset();
+    //export
+    const savePresetButton = document.getElementById('export-presets');
+    savePresetButton.addEventListener('click', function(){
+        let jsn = JSON.stringify(userpresets);
+        let blob = new Blob([jsn]);
+        let url = URL.createObjectURL(blob);
+        savePresetButton.href = url;
+        savePresetButton.download = "sfinx.JSON";
+        console.log(blob);
+    });
+}
+
+function getFile(elm){//import
+    new Response(elm.files[0]).json().then(json =>{
+        userpresets = json;
+        localStorage.setItem("SFINX-PRESET",JSON.stringify(userpresets));
+        fillPresetList();
+    }, err => {
+        //not json
+    });
+}
 
 </script>
 
