@@ -5,8 +5,7 @@
 </head>
 
 <body>
-
-    <div style="min-width: 1310px;">
+    <div id="app">
         <div class="toptions">
             <div style="background-color:rgb(85, 77, 34); display:inline-block; padding:2px;">
                 <div style="display:inline-block;">
@@ -69,36 +68,51 @@
             <div id="full-guitar"></div>
             <div id="scales-zone"></div>
         </div>
-        <div class="boptions" id="bot-parent" >
-            <div id="generated-opts" style="display:inline-block;">
+        <div class="boptions auto-grid" id="bot-parent" >
+            <div id="generated-opts" class="options-group">
                 <div id="chord-row"></div>
                 <div id="highlights"></div>
                 <div id="color-opts"></div>
             </div>
-            <div id="rulers-opts" style="display:inline-block; vertical-align: top; border:1px dotted #555;">
+            <div id="rulers-opts" class="options-group">
                 <div>
-                    Show Rulers: <input type="checkbox" id="showRulers" checked oninput="rulersToggle();"><br>
-                    12ED2 Ruler Position: <input type="number" min="0" max="10" value="0" step="0.05" id="rulerPosition" oninput="drawRulers();"><br>
-                    Calc Ruler: <input type="checkbox" id="calcRuler"><br>
+                    Show Rulers: <input type="checkbox" id="showRulers" checked oninput="rulersToggle();">
+                </div>
+                <div>
+                    12ED2 Ruler Position: <input type="number" min="0" max="10" value="0" step="0.05" id="rulerPosition" oninput="drawRulers();">
+                </div>
+                <div>
+                    Calc Ruler: <input type="checkbox" id="calcRuler">
+                </div>
+                <div>
                     Scale/Size: <input type="number" min="1" max="1000" value="60" step="0.001" id="scaleUnit">Units
                 </div>
             </div>
-            <div style="display:inline-block; vertical-align: top; border:1px dotted #555">
+            <div class="options-group">
+              <div>
                 Arpeggiator:<br>
                 Up<input type="radio" name="arpeggio" checked> |
                 Down<input type="radio" name="arpeggio" > |
                 Converge<input type="radio" name="arpeggio" > |
                 Diverge<input type="radio" name="arpeggio" >
                 <!--Random<input type="radio" name="arpeggio"-->
-                <br>
+              </div>
+              <div>
                 Speed(s): <input type="number" id="arpSpeed" value="0.25" min="0" max="10" step="0.01">
+              </div>
             </div>
             
-            <div id="more-opts" style="display: inline-block; vertical-align: top; border:1px dotted #555">
-                <div style="vertical-align: middle;">
-                    Lowest Pitch(Hz): <input type="number" min="1" max="1000" id="lowest-pitch" value="100" step="1" oninput="pmult=this.value;"><br>
-                    Note Length: <input type="number" min="0.01" max="5" id="note-length" value="0.5" step="0.01" oninput="nl=parseFloat(this.value);"><br>
-                    Play with Cursor: <input type="checkbox" checked id="play-cursor" onchange="playWithCursor=this.checked"> <br>      
+            <div id="more-opts" class="options-group">
+                <div>
+                    Lowest Pitch(Hz): <input type="number" min="1" max="1000" id="lowest-pitch" value="100" step="1" oninput="pmult=this.value;">
+                </div>
+                <div>
+                    Note Length: <input type="number" min="0.01" max="5" id="note-length" value="0.5" step="0.01" oninput="nl=parseFloat(this.value);">
+                </div>
+                <div>
+                    Play with Cursor: <input type="checkbox" checked id="play-cursor" onchange="playWithCursor=this.checked">
+                </div>
+                <div>
                     Synth Sound:<select id="synth-sound" onchange="setSound();">
                         <option>Electric I</option>
                         <option>Electric II</option>
@@ -107,8 +121,9 @@
                         <option>Acoustic III</option>
                         <option>Acousti IV</option>
                     </select>
-                    <br><br>
-                    Volume: <input type="range" min="0"  max="1" value=".5" step="0.01" id="volume-ctrl"><br>
+                </div>
+                <div>
+                    Volume: <input type="range" min="0"  max="1" value=".5" step="0.01" id="volume-ctrl">
                 </div>
                 <!--button onclick="randomSynth();">Random Synth</button-->
             </div>
@@ -168,8 +183,6 @@ let defaultpreset = [];
 function createHighlightControls(){
     document.getElementById('highlights').remove();
     const highlights = document.createElement('div');
-    highlights.style.width = "500px";
-    highlights.style.border = "1px dotted #666"
     highlights.id = "highlights";
 
     const savescalebutton = document.createElement('button');
@@ -229,9 +242,6 @@ function createHighlightControls(){
 function createColorOpts(){
     document.getElementById('color-opts').remove();
     const colorOpts = document.createElement('div');
-    colorOpts.style.width = "500px";
-    colorOpts.style.marginTop = "5px";
-    colorOpts.style.border = "1px dotted #444"
     colorOpts.id = "color-opts";
     document.getElementById('generated-opts').appendChild(colorOpts);
 
@@ -402,9 +412,6 @@ function createChordRowControls(){
     rowPattern = [];
     document.getElementById('chord-row').remove();
     const chordRow = document.createElement('div');
-    chordRow.style.width = "500px";
-    chordRow.style.marginTop = "5px";
-    chordRow.style.border = "1px dotted #444"
     chordRow.id = "chord-row";
     document.getElementById('generated-opts').appendChild(chordRow);
 

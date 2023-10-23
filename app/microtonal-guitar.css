@@ -3,8 +3,39 @@ html {
     color: #000;
     font-family: "Consolas", monospace;
     font-size:11px;
-    min-width: 1240px;
   }
+
+html, body{
+    margin:0;
+    height: 100%;
+}
+
+#app{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#guitar-parent{
+    flex-grow: 1;
+}
+
+.auto-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-gap: 1rem;
+}
+
+.options-group{
+    display: inline-block;
+    vertical-align: top;
+    border: 1px dotted #555;
+    padding: 5px;
+}
+
+.options-group > div{
+    margin-bottom: 5px;
+}
 
 .toptions{
     background: #444;
@@ -18,18 +49,17 @@ html {
     color: #ccc;
     border: 1px solid #333;
     padding: 5px;
-    overflow-y: scroll;
-    overflow-x: hidden;
 }
 
 
 #full-guitar{
+    height: 100%;
     min-height: 335px;
     position: relative;
     border:1px solid #000;
     background-color: #555;
     background-image: linear-gradient(to bottom,rgb(118, 138, 147),rgb(44 43 67));
-    overflow: scroll;
+    overflow-x: scroll;
     /*padding-left:100px;*/
 }
 
