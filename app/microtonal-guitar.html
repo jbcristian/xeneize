@@ -1176,6 +1176,13 @@ function savePreset(n){
     localStorage.setItem("SFINX-PRESET",JSON.stringify(userpresets));
 }
 
+function calculateFitToScreen() {
+  const appWidth = document.getElementById("app").clientWidth;
+  const initialWidth = Math.max(1000, Math.floor(appWidth * 0.85));
+  document.getElementById("nLength").value = initialWidth;
+  document.getElementById("nWidth").value = Math.floor(initialWidth * 0.15);
+}
+
 //var presetTuningPattern = [];
 function applyPreset(){
     let p = document.getElementById('preset-list').selectedIndex||0;
@@ -1195,6 +1202,9 @@ function applyPreset(){
     document.getElementById('nLength').value = userpresets[p].width;
     document.getElementById('nZoom').value = userpresets[p].zoom;
     document.getElementById('lowest-pitch').value = userpresets[p].lowestpitch;
+
+    if(userpresets[p].zoom === defaultZoom)
+      calculateFitToScreen();
 
     presetTuningPattern = userpresets[p].tuningpattern;
     defaultpreset = userpresets[p];
@@ -1349,7 +1359,7 @@ function ScalePreset(){
     this.ranks = [0,1],
     this.rowpattern = [0,1]
 }
-
+const defaultZoom = 1;
 function InstrumentPreset(){
     this.type = 0,
     this.name = "Preset",
@@ -1358,7 +1368,7 @@ function InstrumentPreset(){
     this.divisions = 12,
     this.equave = 2,
     this.lowestpitch = 1,
-    this.zoom = 1,
+    this.zoom = defaultZoom,
     this.width = 1000,
     this.height = 100,
     this.tuningpattern = [],
