@@ -12,13 +12,12 @@
         html {
             font-family: Consolas;
             margin: 0;
-            background-color: black;
-        }
+            background-color: black;}
+        body{overflow: hidden;}
 
         #program {
             padding: 20px;
-            position: relative;
-        }
+            position: relative;}
 
         #tools-button{
             position:absolute;
@@ -38,54 +37,48 @@
             position: relative;
             top: 0;
             left: 0;
-            width: 532px;
+            width: 512px;
             color: #666;
-            overflow: hidden;
-        }
+            overflow: hidden;}
 
         .settings {
             background-color: #222;
             width: 512px;
             color: #666;
             font-size: 10px;
-            padding: 10px;
-        }
+            /*padding: 10px;*/}
 
         .string {
-            position: absolute;
-        }
+            position: absolute;}
 
         .string:hover {
-            box-shadow: -2px 0px 1px #885;
-            cursor: pointer;
-        }
+            box-shadow: 0px -2px 1px #885;
+            cursor: pointer;}
         .string:active {
             cursor:grab;
-            box-shadow: -2px 0px 1px #855;
-        }
+            box-shadow: -2px 0px 1px #855;}
 
         input[type=number] {
             border: 0;
             background-color: #888;
-            font-weight: bold;
-            font-size: 10px;
-            line-height: 18px;
-            width: 40px;
-        }
+            font-weight: bolder;
+            font-family:Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            line-height: 12px;
+            width: 40px;}
 
         input[type=text] {
             border: 0;
             background-color: #888;
-            font-weight: bold;
-            font-size: 10px;
-            line-height: 18px;
-            width: 200px;
-        }
+            font-weight: bolder;
+            font-family:Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            line-height: 12px;
+            width: 200px;}
 
         input[type=range] {
             width: 100px;
-            vertical-align: middle;
-        }
+            vertical-align: middle;}
 
         button {
             border: 0;
@@ -93,14 +86,11 @@
             font-weight: bold;
             font-size: 10px;
             line-height: 18px;
-            border:1px solid #111;
-        }
+            border:1px solid #111;}
         button:hover{
-            border:1px solid #444;
-        }
+            border:1px solid #444;}
         input[type=checkbox]{
-            vertical-align: middle;
-        }
+            vertical-align: middle;}
         .sect {
             background-color: #000;
             font-family: Consolas;
@@ -108,52 +98,133 @@
             color: #666;
             line-height: 15px;
             width: 512px;
-            padding-left: 20px;
-        }
+            /*padding-left: 20px;*/}
 
         .gui {
             font-size: 10px;
             margin: 20px;
             color: #444;
-            position: absolute;
-        }
+            position: absolute;}
 
         .lf {
             position: absolute;
             top: 0px;
             left: 0px;
-            border:1px dashed #333;
-        }
+            border:1px dashed #333;}
 
         .rg {
             position: absolute;
             top: 0px;
-            left: 532px;
-            border:1px dashed #333;
-        }
+            left: 512px;
+            border:1px dashed #333;}
 
         #scaleGUI {
             background-color:#07142A;
-            position: relative;
-            width: 532px;
+            padding: 5px 0px 5px 0px;
+            width: 512px;
             height: 45px;
             border-top:1px dashed #333;
+            text-align: center;
         }
 
         .autoList{
             font-size: 9px;
             background-color:#111;
-            color:#666;
-        }
+            color:#666;}
 
         .graph-bars{display: inline-block;}
 
+        .graph-bars div{margin:1px 2px;}
+
         #len-comp-graph{border-top:1px solid #333; padding-top:5px; min-height: 100px; background-color: #000;  overflow-x: scroll;}
+
+        #interface-settings{
+            font-size:10px; color:rgb(255, 235, 235);background-color: #333;}
+
+        #interface-settings select{
+            font-size:10px;}
+
+        #space{
+            width: 492px;
+            display: inline-block;
+            position: relative;
+            border-top:1px dashed grey;
+            height: 1px;
+        }
+        #pitch-set{
+            font-size: 10px;
+            color: grey;
+            vertical-align: middle;
+            /*display: flex;*/
+        }
+        #pitch-set input[type=number]{
+            background-color: unset;
+            color:#885;
+            border: none;
+        }
+        #pitch-set input[type=radio]{
+            vertical-align: middle;
+        }
+
     </style>
 </head>
 
 <body style="margin:0" onkeypress="playKeyboard(event)">
+    <div id="interface-settings" style="display: none; ">          
+
+        <div class="interf-main" style="display: flex;">
+            <div style="flex:1">
+                <label for="playWithMouse">Play with mouse: </label>
+                <input type="checkbox" id="playWithMouse" name="playWithMouse" checked>
+            </div>
+
+            <div style="flex:1">
+                Send to Track: <select id="host-tracks" onclick="setTrackSend();"></select><button onclick="reloadHostTracks();">&circlearrowleft;</button>
+            </div>
+
+            <div style="flex:2"></div>
+            
+        </div>
+
+        <div style="display: flex;">
+            <div style="flex:1;">
+                <label for="playWithKeyb">Play with Keyboard:</label>
+                <input type="checkbox" id="playWithKeyb" name="playWithKeyb" checked>
+            </div>
+
+            <div style="flex:1;">
+                Send to Track: <select id="host-tracks-k" onclick="setTrackSend();"></select><button onclick="reloadHostTracks();">&circlearrowleft;</button>
+            </div>
+
+            <div style="flex:2;">
+                <label for="noteShift">Key Range:</label>
+                <input type="range" id="noteShift" name="noteShift" value="0" min="0" max="100" step="1">
+            </div>
+        
+        </div>
+
+        <div style="display: flex;">
+            <div style="flex:1;">
+                Sequencer:
+            </div>
+            <div style="flex:1;">
+                    Send to Track: <select id="host-tracks-seq" onclick="setTrackSend();"></select><button onclick="reloadHostTracks();">&circlearrowleft;</button>
+            </div>
+            <div style="flex:2;">
+            </div>
+        </div>
+
+        <label for="pmult">Pitch:</label>
+        <input type="range" id="pmult" value="2" min="0.01" max="10.0" step="0.01" onclick="drawSpiralRect()" onchange="updateHighestPitch()">
+
+        <label for="highest-pitch-ui">HIGHEST PITCH: </label>
+        <samp id="highest-pitch-ui"></samp>
+
+        <br>
+
+    </div>
     <div id="program">
+        
         <div class="lf">
             <div id="sweb" class="sharp">
                 <div class="gui">
@@ -166,10 +237,23 @@
                 
             </div>
             <div id="scaleGUI">
-                <br />
+                <div id="pitch-set">
+                    <div style="float: left;">
+                        <input type="radio" name="aligned" onclick="drawSpace()" >
+                        Min Pitch:
+                        <input type="number" id="min-pitch" value="1" min="1" onchange="calcPitches();">
+                    </div>
+                    <div style="float: right;">
+                        <input type="radio" name="aligned" checked onclick="drawSpace()">
+                        Max Pitch:
+                        <input type="number" id="max-pitch" value="8000" max="22000" onchange="calcPitches();">
+                    </div>
+                </div>
+                
+                <div id="space"></div>
             </div>
             <div class="sect" style="position: relative;"> SPIRAL SETTINGS
-                <div id="tools-button" onclick="toggleTools();">&NestedGreaterGreater;</div>
+                <!--div id="tools-button" onclick="toggleTools();">&NestedGreaterGreater;</div-->
             </div>
             <div class="settings" >
                 <label for="sides">Sides:</label>
@@ -184,38 +268,16 @@
                 <input type="number" id="spiralPad" value="1" min="0" max="2" step=".001" onclick="drawSpiralRect()">
 
                 <label for="radius">Size:</label>
-                <input type="range" id="radius" value="2" min="0.01" max="10" step="0.01" onclick="drawSpiralRect()">
-                <br>
+                <input type="range" id="radius" value="2" min="0.01" max="50" step="0.01" onclick="drawSpiralRect()">
+                <br><br>
+                <label for="initRadius">Init Radius:</label>
+                <input type="number" id="initRadius" value="0" min="0" max="100" step="1" onclick="drawSpiralRect()">
                 <!--div style="padding-top:3px; text-align: right;">SCALE OUTPUT:
                 <a id="saveScaleA"><button>Save As</button></a>
                 <samp id="scalafile"></samp></div-->
             </div>
-            <div class="sect">PLAY SETTINGS</div>
-            <div class="settings" style="background-color: #07142A;">
-               
-                <label for="pmult">Pitch:</label>
-                <input type="range" id="pmult" value="2" min="0.01" max="10.0" step="0.01" onclick="drawSpiralRect()" onchange="updateHighestPitch()">
 
-                <label for="highest-pitch-ui">HIGHEST PITCH: </label>
-                <samp id="highest-pitch-ui"></samp>
-
-                <br>
-                
-                <div style="border-top:1px solid #333; padding-top:5px;">
-                    <label for="playWithMouse">Play with mouse: </label>
-                    <input type="checkbox" id="playWithMouse" name="playWithMouse" checked> || 
-
-                    <label for="playWithKeyb">Play with Keyboard:</label>
-                    <input type="checkbox" id="playWithKeyb" name="playWithKeyb" checked>
-
-                    <label for="noteShift">Key Range:</label>
-                    <input type="range" id="noteShift" name="noteShift" value="0" min="0" max="100" step="1">
-                </div>
-                <div style="border-top:1px solid #333; padding-top:5px;">
-                    Mouse/Key Send to Track: <select id="host-tracks" onclick="setTrackSend();"></select><button onclick="reloadHostTracks();">&circlearrowleft;</button> | 
-                    Sequencer Send to Track: <select id="host-tracks-seq" onclick="setTrackSend();"></select><button onclick="reloadHostTracks();">&circlearrowleft;</button>
-                </div>
-            </div>
+            
 
             <div class="sect"> SEQUENCER SETTINGS</div>
             <div class="settings">
@@ -257,7 +319,11 @@
 
         </div>
         <div class="rg">
-            
+            <div class="sect">HARP ANALYSIS</div>
+            <div class="settings">
+                <input type="number" value="0.01" min="0.001" max="10" step=0.01 id="testnumber" onchange="drawSpiralRect()">
+                <canvas id="graph1" width=400 height=100 style="background-color: black;"></canvas>
+            </div>
             <div class="sect">HARP STRINGS LENGTH COMPARISION</div>
             <div class="settings">
                 <div style="padding-bottom:10px;">
@@ -295,376 +361,582 @@
 
 </body>
 <script>
-    let canvas = document.getElementById('cvs'),
-        ctx = canvas.getContext('2d'),
-        guiFreq = document.getElementById('guiFreq'),
-        guiRat = document.getElementById('guiRat'),
-        guiStr = document.getElementById('guiStr'),
-        guiLen = document.getElementById('guiLen');
+let canvas = document.getElementById('cvs'),
+    ctx = canvas.getContext('2d'),
+    guiFreq = document.getElementById('guiFreq'),
+    guiRat = document.getElementById('guiRat'),
+    guiStr = document.getElementById('guiStr'),
+    guiLen = document.getElementById('guiLen');
 
-    let strings = [], pitches = [];
+let strings = [], pitches = [];
 
-    let cred = "#692c4d"; let cgrn = "#2c694d";
+let cred = "#692c4d"; let cgrn = "#2c694d";
 
-    let segments; let spiralSides; let spiralPad; let rs; let scale;
+let segments; let spiralSides; let spiralPad; let rs; let scale; let initRadius;
 
-    function switchBase(ns) {
-        let set = [];
-        let b = ns[0];
-        for (let i = 0; i < ns.length; i++) {
-            set[i] = ns[i] / b;
-        }
-        return set;
+function switchBase(ns) {
+    let set = [];
+    let b = ns[0];
+    for (let i = 0; i < ns.length; i++) {
+        set[i] = ns[i] / b;
     }
+    return set;
+}
 
-    function playHarmonicSequence(id) {
-        let closed = getClosedOctave();
-        let searchFor = inputRead('searchFor');
-        let harmonicsList = [];
-        (function(){
-            for(x of searchFor){
-                let v = closed[id-1]*x;
-                harmonicsList.push(v);
-            }
-        })();
-        let tol = document.getElementById('searchForTolerance').value;
-        let sequenceList = [];
-        for (let i = 0; i < closed.length; i++) {
-            for (let h = 0; h < harmonicsList.length; h++) {
-                if (Math.abs(closed[i] - harmonicsList[h]) <= tol) {
-                    sequenceList.push(i);
-                }
-            }
+function playHarmonicSequence(id) {
+    let closed = getClosedOctave();
+    let searchFor = inputRead('searchFor');
+    let harmonicsList = [];
+    (function(){
+        for(x of searchFor){
+            let v = closed[id-1]*x;
+            harmonicsList.push(v);
         }
-        stopSounds();
-        playOrder(sequenceList);
-        document.getElementById('sequence').value = sequenceList;
-    }
-
-    function getClosedOctave() { //former getFirstOctave
-        let set = [...pitches];
-
-        for (let c = 0; c < set.length; c++) {
-            if (set[c] > 2) {
-                while (set[c] > 2) {
-                    set[c] /= 2;
-                }
-            }
-            else if (set[c] < 1) {
-                while (set[c] < 1) {
-                    set[c] *= 2;
-                }
+    })();
+    let tol = document.getElementById('searchForTolerance').value;
+    let sequenceList = [];
+    for (let i = 0; i < closed.length; i++) {
+        for (let h = 0; h < harmonicsList.length; h++) {
+            if (Math.abs(closed[i] - harmonicsList[h]) <= tol) {
+                sequenceList.push(i);
             }
         }
-        return set;
     }
+    stopSounds();
+    playOrder(sequenceList);
+    document.getElementById('sequence').value = sequenceList;
+}
 
-    function resetScale() { //this is for not thinking better at the begining.... strings and pitches are global, so when you change the amount of segments the scale gets broken
-        for (let i = 0; i < strings.length; i++) {
-            strings.pop();
-            pitches.pop();
+function getClosedOctave() { //former getFirstOctave
+    let set = [...pitches];
+
+    for (let c = 0; c < set.length; c++) {
+        if (set[c] > 2) {
+            while (set[c] > 2) {
+                set[c] /= 2;
+            }
+        }
+        else if (set[c] < 1) {
+            while (set[c] < 1) {
+                set[c] *= 2;
+            }
         }
     }
+    return set;
+}
 
-    function sequenceArpeggio(s){
-        let d = inputRead('sequence');
-        let dh = document.getElementById('sequence');
-        let so = document.getElementById('sorder');
-        switch(s){
-            case "Up":
-                d.sort(function(a, b){return b - a});
-                dh.value = d;
-                break;
-            case "Down":
-                d.sort(function(a, b){return a - b});
-                dh.value = d;
-                break;
-            case "Converge":
-                dh.value = converge(d.sort(function(a, b){return  a - b}));
-                break;
-            case "Diverge":
-                dh.value = converge(d.sort(function(a, b){return  b - a}));
-                break;
-            case "Random":
-                dh.value = random(d);
-                break;
-        }
-        function converge(c){
-            let nd = [];
-            let h = c;
-            let i = c.length;
-            while(i>0){
-                nd.push(h.pop());
+function resetScale() { //this is for not thinking better at the begining.... strings and pitches are global, so when you change the amount of segments the scale gets broken
+    for (let i = 0; i < strings.length; i++) {
+        strings.pop();
+        pitches.pop();
+    }
+}
+
+function sequenceArpeggio(s){
+    let d = inputRead('sequence');
+    let dh = document.getElementById('sequence');
+    let so = document.getElementById('sorder');
+    switch(s){
+        case "Up":
+            d.sort(function(a, b){return b - a});
+            dh.value = d;
+            break;
+        case "Down":
+            d.sort(function(a, b){return a - b});
+            dh.value = d;
+            break;
+        case "Converge":
+            dh.value = converge(d.sort(function(a, b){return  a - b}));
+            break;
+        case "Diverge":
+            dh.value = converge(d.sort(function(a, b){return  b - a}));
+            break;
+        case "Random":
+            dh.value = random(d);
+            break;
+    }
+    function converge(c){
+        let nd = [];
+        let h = c;
+        let i = c.length;
+        while(i>0){
+            nd.push(h.pop());
+            i--;
+            if(i>0){
+                nd.push(h.shift());
                 i--;
-                if(i>0){
-                    nd.push(h.shift());
-                    i--;
-                }
             }
-            return nd;
         }
-
-        function diverge(c){
-            let k = converge(c);
-            let n = [];
-            for(let i =0;i<k.length;i++){
-                n[i] = k.pop();
-            }
-            return n;
-        }
-
-        function random(c){
-            let a = c.length;
-            let n = [];
-            for(let i=0;i<a;i++){
-                let r = Math.random();
-                if(r>=.5){
-                    n.push(c.pop());
-                }
-                if(r<.5) {
-                    n.push(c.shift());
-                }
-            }
-            return n;
-        }
+        return nd;
     }
 
-    function autoSettingsHF(s){
-        let d = document.getElementById('searchFor');
-        switch(s){
-            case "Min":
-                d.value = "1, 1.166, 1.5";
-                break;
-            case "Maj":
-                d.value = "1, 1.25, 1.5";
-                break;
-            case "Dim":
-                d.value = "1, 1.18920, 1.41421, 1.68179";
-                break;
-            case "Aug":
-                d.value = "1,1.25992,1.58740";
-                break;
-            case "12EDO":
-                d.value = "1.05946,1.12246,1.18920,1.25992,1.33483,1.41421,1.49830,1.58740,1.68179,1.78179,1.88774,2";
-                break;
+    function diverge(c){
+        let k = converge(c);
+        let n = [];
+        for(let i =0;i<k.length;i++){
+            n[i] = k.pop();
         }
+        return n;
     }
 
-    function drawSpiralRect() {
-        let points = [];
-
-        ctx.clearRect(00, 00, 512, 512);
-
-        segments = parseFloat(document.getElementById('segments').value);
-
-        rs = parseFloat(document.getElementById('radius').value); //control size/zoom
-        spiralSides = parseFloat(document.getElementById('sides').value);
-        spiralPad = parseFloat(document.getElementById('spiralPad').value);
-
-        if (document.querySelector(".string")) {
-            let q = document.querySelectorAll(".string");
-            for (let i = 0; i < q.length; i++) {
-                q[i].remove();
+    function random(c){
+        let a = c.length;
+        let n = [];
+        for(let i=0;i<a;i++){
+            let r = Math.random();
+            if(r>=.5){
+                n.push(c.pop());
+            }
+            if(r<.5) {
+                n.push(c.shift());
             }
         }
-        if (document.querySelector(".mark")) {
-            let q = document.querySelectorAll(".mark");
-            for (let i = 0; i < q.length; i++) {
-                q[i].remove();
-            }
-        }
-        if (document.querySelector(".mark12")) {
-            let q = document.querySelectorAll(".mark12");
-            for (let i = 0; i < q.length; i++) {
-                q[i].remove();
-            }
-        }
+        return n;
+    }
+}
 
-        let radius = 0;
-        let angle = 0;
-        //ctx.beginPath();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = spiralSides == Math.round(spiralSides) ? cgrn : cred;
-        ctx.moveTo(canvas.width / 2, canvas.height / 2);
-        for (let n = 0; n <= segments; n++) {
+function autoSettingsHF(s){
+    let d = document.getElementById('searchFor');
+    switch(s){
+        case "Min":
+            d.value = "1, 1.166, 1.5";
+            break;
+        case "Maj":
+            d.value = "1, 1.25, 1.5";
+            break;
+        case "Dim":
+            d.value = "1, 1.18920, 1.41421, 1.68179";
+            break;
+        case "Aug":
+            d.value = "1,1.25992,1.58740";
+            break;
+        case "12EDO":
+            d.value = "1.05946,1.12246,1.18920,1.25992,1.33483,1.41421,1.49830,1.58740,1.68179,1.78179,1.88774,2";
+            break;
+    }
+}
 
+let stringsc = [];
+let pointsc = [];
+let anglesc = [];
+let tris = [];
+function calcSpiral(){
+    pointsc = [];   stringsc = [];
+    anglesc = [];
+
+    segments = parseFloat(document.getElementById('segments').value);
+    initRadius = parseFloat(document.getElementById('initRadius').value);
+    spiralSides = parseFloat(document.getElementById('sides').value);
+    spiralPad = parseFloat(document.getElementById('spiralPad').value);
+
+    let radius = 0;
+    let angle = 0;    
+
+    for (let n = -1; n <= segments; n++) {
+
+        if(n==-1)radius+=initRadius*1;
+        let x = radius * Math.cos(angle);
+        let y = radius * Math.sin(angle);
+
+        if(n>-1){
+            radius += 1 ; //each next circle size//
+            radius *= spiralPad; //margin, expansion, growth
+            pointsc[n] = [x, y]; //or canvas width/height
             angle += (Math.PI * 2) / spiralSides;
-            let x = canvas.width / 2 + radius * Math.cos(angle);
-            let y = canvas.height / 2 + radius * Math.sin(angle);
-            ctx.lineTo(x, y);//not really necesary to draw since at the end i was using divs... and deleting the drawing
+            //tris[n-1]=[x,y,0,0,0,0];
+            anglesc[n]=angle*(180/Math.PI);
+        }      
+        
+        if (n > 0) {// n-1 dont exists at n=0
+            let x1, x2, y1, y2;
+            x1 = pointsc[n - 1][0];
+            x2 = pointsc[n][0];
+            y1 = pointsc[n - 1][1];
+            y2 = pointsc[n][1];
+            let a = distance(x1,x2,y1,y2);
+            stringsc[n - 1] = a;
+        }
+    }
+}
 
-            points[n] = [x - 256, y - 256];
-            radius += rs;
-            radius *= spiralPad;
-            if (n > 0) {// n-1 dont exists at n=0
+function distance(x1,x2,y1,y2){
+    return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+}
+
+function calctris(){
+    let x1,y1, x2,y2, x3 = 0, y3 = 0;
+    tris=[];
+
+    for(let i = 0;i <pointsc.length-1; i++){
+        
+        x1 = pointsc[i][0];
+        y1 = pointsc[i][1];
+        x2 = pointsc[i+1][0];
+        y2 = pointsc[i+1][1];
+
+        let a = distance(x1,x2,y1,y2);
+        let b = distance(x1,x3,y1,y3);
+        let c = distance(x2,x3,y2,y3);
+
+        let aa, ab, ac;
+        aa = Math.acos((a*a+c*c-b*b)/(2*a*c))*(180/Math.PI);
+        ab = Math.acos((a*a+b*b-c*c)/(2*a*b))*(180/Math.PI);
+        ac = Math.acos((b*b+c*c-a*a)/(2*b*c))*(180/Math.PI);
+
+        tris[i]=[x1,y1,x2,y2,x3,y3,aa,ab,ac];
+    }
+
+}
+
+function drawcalc(){
+    rs = parseFloat(document.getElementById('radius').value); //control size/zoom
+
+    ctx.clearRect(0, 0, 512, 512);
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = spiralSides == Math.round(spiralSides) ? cgrn : cred;
+    ctx.moveTo(canvas.width / 2, canvas.height / 2);
+    for (let n = 0; n < pointsc.length; n++) {
+        let x = pointsc[n][0]*rs+256;
+        let y = pointsc[n][1]*rs+256;
+        if(n==0){ctx.moveTo(x, y);}
+        else{
+            ctx.lineTo(x, y); 
+        }
+    }
+    ctx.stroke();
+}
+
+function drawStrings(){
+    rs = parseFloat(document.getElementById('radius').value);
+    if (document.querySelector(".string")) {
+        let q = document.querySelectorAll(".string");
+        for (let i = 0; i < q.length; i++) {
+            q[i].remove();
+        }
+    }
+    for(let n = 0; n<stringsc.length-1; n++){
+        let x1, y1;
+            x1 = pointsc[n][0]*rs+256;
+            y1 = pointsc[n][1]*rs+256;
+            createDiv(x1, y1, n, stringsc[n]*rs,anglesc[n]+tris[n][6]);
+    }
+}
+
+function drawSpiralRect(){
+    calcSpiral();
+    //drawcalc();
+    calctris();
+    calcPitches();
+    drawStrings();
+    drawRest(pointsc);
+    drawSpace();
+
+    drawGraph1();
+    
+}
+
+
+function drawSpiralRectex() {
+    let points = [];
+
+    ctx.clearRect(0, 0, 512, 512);
+
+    segments = parseFloat(document.getElementById('segments').value);
+    initRadius = parseFloat(document.getElementById('initRadius').value);
+
+    rs = parseFloat(document.getElementById('radius').value); //control size/zoom
+    spiralSides = parseFloat(document.getElementById('sides').value);
+    spiralPad = parseFloat(document.getElementById('spiralPad').value);
+
+    if (document.querySelector(".string")) {
+        let q = document.querySelectorAll(".string");
+        for (let i = 0; i < q.length; i++) {
+            q[i].remove();
+        }
+    }
+    if (document.querySelector(".mark")) {
+        let q = document.querySelectorAll(".mark");
+        for (let i = 0; i < q.length; i++) {
+            q[i].remove();
+        }
+    }
+    if (document.querySelector(".mark12")) {
+        let q = document.querySelectorAll(".mark12");
+        for (let i = 0; i < q.length; i++) {
+            q[i].remove();
+        }
+    }
+
+    /*let radius=0;
+    for(let n=0;n<segments;n++){
+        radius += rs;
+        radius *= spiralPad;
+        ctx.strokeStyle = 'orange';
+        //ctx.setLineDash([4,40]);
+        ctx.setLineDash([1,4]);
+        ctx.lineWidth = 1;             
+        ctx.beginPath();                 
+        ctx.arc (256,256,radius,0,2*Math.PI); 
+        ctx.stroke();
+    }*/
+
+    radius = 0;
+    let angle = 0;
+    ctx.beginPath();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = spiralSides == Math.round(spiralSides) ? cgrn : cred;
+    ctx.moveTo(canvas.width / 2, canvas.height / 2);
+    for (let n = -1; n <= segments; n++) {
+
+        if(n==-1)radius+=initRadius*rs;
+        let x = canvas.width / 2 + radius * Math.cos(angle);
+        let y = canvas.height / 2 + radius * Math.sin(angle);
+        if(n==-1){ctx.moveTo(x, y);}
+        else{
+            ctx.lineTo(x, y);
+            radius += rs ; //each next circle size// controls "zoom"
+            radius *= spiralPad; //margin, expansion, growth
+        }
+
+        if(n>-1){
+            points[n] = [x - 256, y - 256]; //or canvas width/height
+            angle += (Math.PI * 2) / spiralSides;
+            
+        }
+        //points[n] = [x - 256, y - 256]; //or canvas width/height
+        
+        
+        
+        if (n > 0) {// n-1 dont exists at n=0
+            let x1, x2, y1, y2;
+            x1 = points[n - 1][0];
+            x2 = points[n][0];
+            y1 = points[n - 1][1];
+            y2 = points[n][1];
+            let dist = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+            strings[n - 1] = dist;
+            //strings[n-1] = strings[n-1]/fString;
+            createDiv(x1, y1, n, dist, angle - (Math.PI) / spiralSides);// the strings are created and hidden if they overflow, but they are all there
+            
+        }
+        
+    }
+    ctx.setLineDash([0]);
+    ctx.stroke();
+    
+    //ctx.closePath();
+    drawRest(points);
+
+    let fString = strings[0]; //
+
+    for (let n = 0; n < strings.length; n++) {
+        pitches[n] = (fString / strings[n]) * 1760 * 2; //this is to control the highest available pitch/ without the later multiplication
+        if (document.getElementById(n + 1)) { //null check,,, +1 because ids starts from 1, setted when creating the div
+            document.getElementById(n + 1).onmouseenter = function () {
+                if(document.getElementById('playWithMouse').checked){
+                    playTone(pitches[n], n + 1, trackSend);
+                }
+                light(n + 1);
+            };
+            document.getElementById(n + 1).onclick = function () {
+                playHarmonicSequence(n + 1);
+            };
+        }
+    }
+    scale = [];
+    let largest = ((pitches[0]) / (pitches[segments - 1]));//the highest pitch ratio, that is the lowest numbered string id, 1
+    for (let n = strings.length - 1; n >= 0; n--) {
+        scale[n] = ((pitches[n]) / (pitches[segments - 1]));//
+        createRulerMark(scale[n], largest,n + 1);
+    }
+
+    for(let n = 1;n<=largest; n*=2){
+        createRuler12(largest/n, largest, n);
+    }
+    //saveScala();
+    //console.log(pitches)//final scale in hertz
+}
+/*
+    let g = [];//array for storing distances
+    function test() {
+        c = []; //points, or coordinates
+        p = 10; //pieces or segments of the spiral
+        s = 6; //sides of the spiral
+        m = 1; //margin of the spiral
+        let r = 0; //radius
+        let a = 0; //angle
+
+        for (let n = 0; n <= p; n++) {
+            angle += (Math.PI * 2) / s;
+            let x = r * Math.cos(a);
+            let y = r * Math.sin(a);
+
+            c[n] = [x, y];
+            r +=z
+            r *= m;
+            if (n > 0) {
                 let x1, x2, y1, y2;
-                x1 = points[n - 1][0];
-                x2 = points[n][0];
-                y1 = points[n - 1][1];
-                y2 = points[n][1];
-                let dist = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-                strings[n - 1] = dist;
-                //strings[n-1] = strings[n-1]/fString;
-                createDiv(x, y, n, dist, angle + (Math.PI) / spiralSides);// the strings are created and hidden if they overflow, but they are all there
+                x1 = c[n - 1][0];
+                x2 = c[n][0];
+                y1 = c[n - 1][1];
+                y2 = c[n][1];
+                let d = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+                g[n - 1] = d;
             }
         }
-        //ctx.stroke();
-        //ctx.closePath();
-        drawRest(points);
+    }*/
 
-        let fString = strings[0]; //
+function drawRest(points) {
+    ctx.clearRect(00,00,512,512);
+    ctx.beginPath();
+    ctx.lineWidth = 1;
+    let spiralSides = Math.round(parseFloat(document.getElementById('sides').value));
+    let es = parseFloat(document.getElementById('sides').value) == spiralSides ? 2 : 1;
+    ctx.strokeStyle = es == 2 ? cgrn : cred;
+    for (let i = 0; i < stringsc.length - Math.floor(spiralSides); i++) {
+        ctx.moveTo(points[i][0]*rs + 256, points[i][1]*rs + 256);
+        ctx.lineTo(points[i + spiralSides][0]*rs * es + 256, points[i + spiralSides][1] *rs* es + 256);
+        
+    }
+    ctx.stroke();
+}
+/*
+function createRulerMark(d, t,n) {
+    let spiralSides = Math.round(parseFloat(document.getElementById('sides').value));
+    let es = parseFloat(document.getElementById('sides').value) == spiralSides ? "#2c694d" : "#692c4d";
+    let cent = Math.log2(d) * 1200;
+    let centt = Math.log2(t) * 1200;
+    let left = 10 + (((cent - 1) / (centt - 1)) * 512);
+    let mark = document.createElement("div");
+    mark.className = "mark";
+    mark.id="m"+n;
+    mark.style.position = "absolute";
+    mark.style.left = left + "px";
+    mark.style.width = "5px";
+    mark.style.height = "10px";
+    mark.style.backgroundColor = "none";
+    mark.style.borderLeft = "1px solid";
+    mark.style.borderLeftColor = es;
+    document.getElementById("scaleGUI").appendChild(mark);
+}
 
-        for (let n = 0; n < strings.length; n++) {
-            pitches[n] = (fString / strings[n]) * 1760 * 2; //this is to control the highest available pitch/ without the later multiplication
-            if (document.getElementById(n + 1)) { //null check,,, +1 because ids starts from 1, setted when creating the div
-                document.getElementById(n + 1).onmouseenter = function () {
-                    if(document.getElementById('playWithMouse').checked){
-                        playTone(pitches[n], n + 1, trackSend);
-                    }
-                    light(n + 1);
-                };
-                document.getElementById(n + 1).onclick = function () {
-                    playHarmonicSequence(n + 1);
-                };
+function createRuler12(d, t,n) {
+    let cent = Math.log2(d) * 1200;
+    let centt = Math.log2(t) * 1200;
+    let left = 10 + (((cent - 1) / (centt - 1)) * 512);
+    let mark = document.createElement("div");
+    mark.className = "mark12";
+    mark.id="e"+n;
+    mark.style.position = "absolute";
+    mark.style.top = "15px";
+    mark.style.left = left + "px";
+    mark.style.width = "5px";
+    mark.style.height = "20px";
+    mark.style.backgroundColor = "none";
+    mark.style.borderLeft = "1px solid";
+    mark.style.borderLeftColor = "#960";
+    document.getElementById("scaleGUI").appendChild(mark);
+}*/
+
+let pitchesc = [];
+function calcPitches(){
+    pitchesc = [];
+    if(stringsc.length>0){
+        let minormax = GetTrueOne('aligned');
+        let minf, maxf;
+        let sf = stringsc[0];
+        let sl = stringsc[stringsc.length-1];
+
+        minf = document.getElementById('min-pitch');
+        maxf = document.getElementById('max-pitch');
+        for(let i =0;i<stringsc.length;i++){
+            if(minormax==0){
+                pitchesc[i] = sl/stringsc[i] * parseFloat(minf.value);
+            }else{
+                pitchesc[i] = parseFloat(maxf.value) * (sf/stringsc[i]);
             }
         }
-        scale = [];
-        let largest = ((pitches[0]) / (pitches[segments - 1]));//the highest pitch ratio, that is the lowest numbered string id, 1
-        for (let n = strings.length - 1; n >= 0; n--) {
-            scale[n] = ((pitches[n]) / (pitches[segments - 1]));//
-            createRulerMark(scale[n], largest,n + 1);
-        }
-
-        for(let n = 1;n<=largest; n*=2){
-            createRuler12(largest/n, largest, n);
-        }
-        //saveScala();
-        //console.log(pitches)//final scale in hertz
-    }
-
-    function drawRest(points) {
-        //if(Math.round(spiralSides)==spiralSides){
-        //ctx.clearRect(00,00,512,512);
-        ctx.beginPath();
-        ctx.lineWidth = 1;
-        let spiralSides = Math.round(parseFloat(document.getElementById('sides').value));
-        let es = parseFloat(document.getElementById('sides').value) == spiralSides ? 2 : 1;
-        ctx.strokeStyle = es == 2 ? cgrn : cred;
-        for (let i = 0; i < segments - Math.floor(spiralSides); i++) {
-            ctx.moveTo(points[i][0] + 256, points[i][1] + 256);
-            ctx.lineTo(points[i + spiralSides][0] * es + 256, points[i + spiralSides][1] * es + 256);
-            ctx.stroke();
-        } ctx.closePath();
-        //}
-    }
-
-    function createRulerMark(d, t,n) {
-        let spiralSides = Math.round(parseFloat(document.getElementById('sides').value));
-        let es = parseFloat(document.getElementById('sides').value) == spiralSides ? "#2c694d" : "#692c4d";
-        let cent = Math.log2(d) * 1200;
-        let centt = Math.log2(t) * 1200;
-        let left = 10 + (((cent - 1) / (centt - 1)) * 512);
-        let mark = document.createElement("div");
-        mark.className = "mark";
-        mark.id="m"+n;
-        mark.style.position = "absolute";
-        mark.style.left = left + "px";
-        mark.style.width = "5px";
-        mark.style.height = "10px";
-        mark.style.backgroundColor = "none";
-        mark.style.borderLeft = "1px solid";
-        mark.style.borderLeftColor = es;
-        document.getElementById("scaleGUI").appendChild(mark);
-    }
-
-    function createRuler12(d, t,n) {
-        let cent = Math.log2(d) * 1200;
-        let centt = Math.log2(t) * 1200;
-        let left = 10 + (((cent - 1) / (centt - 1)) * 512);
-        let mark = document.createElement("div");
-        mark.className = "mark12";
-        mark.id="e"+n;
-        mark.style.position = "absolute";
-        mark.style.top = "15px";
-        mark.style.left = left + "px";
-        mark.style.width = "5px";
-        mark.style.height = "20px";
-        mark.style.backgroundColor = "none";
-        mark.style.borderLeft = "1px solid";
-        mark.style.borderLeftColor = "#960";
-        document.getElementById("scaleGUI").appendChild(mark);
-    }
+        minf.value = pitchesc[pitchesc.length-1];
+        maxf.value = pitchesc[0];
+    }    
+}
 
     
 
-    function createDiv(x, y, n, d, a) {
-        let spiralSides = Math.round(parseFloat(document.getElementById('sides').value));
-        
-        let box = document.createElement("div");
-        box.className = "string";
-        box.id = n;
-        box.style.position = "absolute";
-        box.style.transformOrigin = "0% 0% 0";
-        box.style.transform = "rotate(" + a + "rad)"
-        box.style.left = x + "px";
-        box.style.top = y + "px";
-        box.style.height = d + "px";
+function createDiv(x, y, n, d, a) {
+    let spiralSides = Math.round(parseFloat(document.getElementById('sides').value));
+    
+    let box = document.createElement("div");
+    box.className = "string";
+    box.id = n;
+    box.style.position = "absolute";
+    box.style.transformOrigin = "0% 0% 0";
+    box.style.transform = "rotate(" + a + "deg)"
+    box.style.left = x + "px";
+    box.style.top = y + "px";
+    box.style.width = d + "px";
 
+    box.style.height = "4px";
+    box.style.backgroundColor = "none";
+    box.style.borderTop = "2px solid";
 
-        box.style.width = "12px";
-        box.style.backgroundColor = "none";
-        box.style.borderLeft = "2px solid";
-
-        let cbq = document.getElementById('color-by-equave').checked;//ineff
-        if(cbq){
-            let colorv = strings[0]/d;
-            if (colorv > 2) {
-                while (colorv > 2) {
-                    colorv /= 2;
-                }
-            }
-            else if (colorv < 1) {
-                while (colorv < 1) {
-                    colorv *= 2;
-                }
-            }
-
-            box.style.borderLeftColor = "hsl("+colorv*360+",100%,50%)";//es;
+    box.onmouseenter = function () {
+        if(document.getElementById('playWithMouse').checked){
+            playTone(pitchesc[n], n + 1, trackSend);
         }
-        else{
-            let es = parseFloat(document.getElementById('sides').value) == spiralSides ? "#2c694d" : "#692c4d";
-            box.style.borderLeftColor = es;
+        //light(n + 1);
+    };
+
+    let cbq = document.getElementById('color-by-equave').checked;//ineff
+    if(cbq){
+        let colorv = stringsc[0]*rs/d;
+        if (colorv > 2) {
+            while (colorv > 2) {
+                colorv /= 2;
+            }
         }
-        
-        //box.style.borderBottomLeftRadius = "20px";
-        //box.style.borderTopLeftRadius = "20px";
-        document.getElementById("sweb").appendChild(box);
+        else if (colorv < 1) {
+            while (colorv < 1) {
+                colorv *= 2;
+            }
+        }
+
+        box.style.borderTopColor = "hsl("+colorv*360+",100%,50%)";//es;
     }
-
-    function updateHighestPitch(){
-        let pmult = parseFloat(document.getElementById('pmult').value);
-        document.getElementById('highest-pitch-ui').innerText = (Math.round(1760 * 2*pmult*100)/100) + " Hz";
+    else{
+        let es = parseFloat(document.getElementById('sides').value) == spiralSides ? "#2c694d" : "#692c4d";
+        box.style.borderTopColor = es;
     }
+    
+    //box.style.borderBottomLeftRadius = "20px";
+    //box.style.borderTopLeftRadius = "20px";
+    document.getElementById("sweb").appendChild(box);
+}
 
-    function playTone(freq, id, ins) {
-        let pmult = parseFloat(document.getElementById('pmult').value);
+function updateHighestPitch(){
+    let pmult = parseFloat(document.getElementById('pmult').value);
+    document.getElementById('highest-pitch-ui').innerText = (Math.round(1760 * 2*pmult*100)/100) + " Hz";
+}
 
-        parent.playNote(freq*pmult,ins,500);
-        
-        guiStr.innerHTML = "N: " + (parseFloat(id) - 1);
-        guiLen.innerHTML = "L: " + strings[id - 1];
-        guiFreq.innerHTML = "F: " + freq * pmult + "Hz";
-        guiRat.innerHTML = "R: " + scale[id - 1];
+function playTone(freq, id, ins) {
 
-        if (id) { light(id); }
-        if ("m"+(id)) { light("m"+(id)); }
-    }
+    parent.playNote(freq,ins,500);
+    
+    guiStr.innerHTML = "N: " + (parseFloat(id) - 1);
+    guiLen.innerHTML = "L: " + stringsc[id - 1];
+    guiFreq.innerHTML = "F: " + freq + "Hz";
+    //guiRat.innerHTML = "R: " + scale[id - 1];
+
+    //if (id) { light(id); }
+    //if ("m"+(id)) { light("m"+(id)); }
+}
 
     function light(id) {
-        document.getElementById(id).style.borderRightColor = "#fff";
+        document.getElementById(id).style.borderBottomColor = "#fff";
         setTimeout(reset, 100);
         function reset() {
-            document.getElementById(id).style.borderRightColor = "none";//getColor();
+            document.getElementById(id).style.borderBottomColor = "none";//getColor();
         }
     }
 
@@ -716,45 +988,46 @@
         }
         if(document.getElementById('playWithKeyb').checked){
             switch (x) {
-                case "0": playTone(pitches[0 + sh], 1 + sh,trackSend); break;
-                case "9": playTone(pitches[1 + sh], 2 + sh,trackSend); break;
-                case "8": playTone(pitches[2 + sh], 3 + sh,trackSend); break;
-                case "7": playTone(pitches[3 + sh], 4 + sh,trackSend); break;
-                case "6": playTone(pitches[4 + sh], 5 + sh,trackSend); break;
-                case "5": playTone(pitches[5 + sh], 6 + sh,trackSend); break;
-                case "4": playTone(pitches[6 + sh], 7 + sh,trackSend); break;
-                case "3": playTone(pitches[7 + sh], 8 + sh,trackSend); break;
-                case "2": playTone(pitches[8 + sh], 9 + sh,trackSend); break;
-                case "1": playTone(pitches[9 + sh], 10 + sh,trackSend); break;
-                case "P": playTone(pitches[10 + sh], 11 + sh,trackSend); break;
-                case "O": playTone(pitches[11 + sh], 12 + sh,trackSend); break;
-                case "I": playTone(pitches[12 + sh], 13 + sh,trackSend); break;
-                case "U": playTone(pitches[13 + sh], 14 + sh,trackSend); break;
-                case "Y": playTone(pitches[14 + sh], 15 + sh,trackSend); break;
-                case "T": playTone(pitches[15 + sh], 16 + sh,trackSend); break;
-                case "R": playTone(pitches[16 + sh], 17 + sh,trackSend); break;
-                case "E": playTone(pitches[17 + sh], 18 + sh,trackSend); break;
-                case "W": playTone(pitches[18 + sh], 19 + sh,trackSend); break;
-                case "Q": playTone(pitches[19 + sh], 20 + sh,trackSend); break;
-                case "L": playTone(pitches[20 + sh], 21 + sh,trackSend); break;
-                case "K": playTone(pitches[21 + sh], 22 + sh,trackSend); break;
-                case "J": playTone(pitches[22 + sh], 23 + sh,trackSend); break;
-                case "H": playTone(pitches[23 + sh], 24 + sh,trackSend); break;
-                case "G": playTone(pitches[24 + sh], 25 + sh,trackSend); break;
-                case "F": playTone(pitches[25 + sh], 26 + sh,trackSend); break;
-                case "D": playTone(pitches[26 + sh], 27 + sh,trackSend); break;
-                case "S": playTone(pitches[27 + sh], 28 + sh,trackSend); break;
-                case "A": playTone(pitches[28 + sh], 29 + sh,trackSend); break;
-                case "M": playTone(pitches[29 + sh], 30 + sh,trackSend); break;
-                case "N": playTone(pitches[30 + sh], 31 + sh,trackSend); break;
-                case "B": playTone(pitches[31 + sh], 32 + sh,trackSend); break;
-                case "V": playTone(pitches[32 + sh], 33 + sh,trackSend); break;
-                case "C": playTone(pitches[33 + sh], 34 + sh,trackSend); break;
-                case "X": playTone(pitches[34 + sh], 35 + sh,trackSend); break;
-                case "Z": playTone(pitches[35 + sh], 36 + sh,trackSend); break;
+                case "0": playTone(pitches[0 + sh], 1 + sh,track3Send); break;
+                case "9": playTone(pitches[1 + sh], 2 + sh,track3Send); break;
+                case "8": playTone(pitches[2 + sh], 3 + sh,track3Send); break;
+                case "7": playTone(pitches[3 + sh], 4 + sh,track3Send); break;
+                case "6": playTone(pitches[4 + sh], 5 + sh,track3Send); break;
+                case "5": playTone(pitches[5 + sh], 6 + sh,track3Send); break;
+                case "4": playTone(pitches[6 + sh], 7 + sh,track3Send); break;
+                case "3": playTone(pitches[7 + sh], 8 + sh,track3Send); break;
+                case "2": playTone(pitches[8 + sh], 9 + sh,track3Send); break;
+                case "1": playTone(pitches[9 + sh], 10 + sh,track3Send); break;
+                case "P": playTone(pitches[10 + sh], 11 + sh,track3Send); break;
+                case "O": playTone(pitches[11 + sh], 12 + sh,track3Send); break;
+                case "I": playTone(pitches[12 + sh], 13 + sh,track3Send); break;
+                case "U": playTone(pitches[13 + sh], 14 + sh,track3Send); break;
+                case "Y": playTone(pitches[14 + sh], 15 + sh,track3Send); break;
+                case "T": playTone(pitches[15 + sh], 16 + sh,track3Send); break;
+                case "R": playTone(pitches[16 + sh], 17 + sh,track3Send); break;
+                case "E": playTone(pitches[17 + sh], 18 + sh,track3Send); break;
+                case "W": playTone(pitches[18 + sh], 19 + sh,track3Send); break;
+                case "Q": playTone(pitches[19 + sh], 20 + sh,track3Send); break;
+                case "L": playTone(pitches[20 + sh], 21 + sh,track3Send); break;
+                case "K": playTone(pitches[21 + sh], 22 + sh,track3Send); break;
+                case "J": playTone(pitches[22 + sh], 23 + sh,track3Send); break;
+                case "H": playTone(pitches[23 + sh], 24 + sh,track3Send); break;
+                case "G": playTone(pitches[24 + sh], 25 + sh,track3Send); break;
+                case "F": playTone(pitches[25 + sh], 26 + sh,track3Send); break;
+                case "D": playTone(pitches[26 + sh], 27 + sh,track3Send); break;
+                case "S": playTone(pitches[27 + sh], 28 + sh,track3Send); break;
+                case "A": playTone(pitches[28 + sh], 29 + sh,track3Send); break;
+                case "M": playTone(pitches[29 + sh], 30 + sh,track3Send); break;
+                case "N": playTone(pitches[30 + sh], 31 + sh,track3Send); break;
+                case "B": playTone(pitches[31 + sh], 32 + sh,track3Send); break;
+                case "V": playTone(pitches[32 + sh], 33 + sh,track3Send); break;
+                case "C": playTone(pitches[33 + sh], 34 + sh,track3Send); break;
+                case "X": playTone(pitches[34 + sh], 35 + sh,track3Send); break;
+                case "Z": playTone(pitches[35 + sh], 36 + sh,track3Send); break;
             }
         }
     }
+
 /*
     function saveScala(){
         function getScale(){
@@ -780,15 +1053,13 @@
         let link = document.getElementById('saveScaleA');
         link.href = url;
         link.download = name+".scl";
-    }*/
-
-
-
-
+    }
+*/
 
 reloadHostTracks();
 var trackSend;
 var track2Send;
+var track3Send;
 function setTrackSend(){
   let opt = document.getElementById('host-tracks').options;
   let sel = document.getElementById('host-tracks').selectedIndex;
@@ -797,14 +1068,19 @@ function setTrackSend(){
   opt = document.getElementById('host-tracks-seq').options;
   sel = document.getElementById('host-tracks-seq').selectedIndex;
   track2Send = opt[sel].value;
+
+  opt = document.getElementById('host-tracks-k').options;
+  sel = document.getElementById('host-tracks-k').selectedIndex;
+  track3Send = opt[sel].value;
 }
 setTrackSend();
 
 function reloadHostTracks(){
-    for(let j = 0;j<2;j++){
-        let name = j==0?'host-tracks':'host-tracks-seq'
+    let sels = document.getElementById('interface-settings').getElementsByTagName('select');
+    for(let j = 0;j<sels.length;j++){
+        //let name = j==0?'host-tracks':'host-tracks-seq'
 
-        let sel = document.getElementById(name);
+        let sel = sels[j];
         let i, s = sel.options.length;
         for(i = s; i>=0; i--){
             sel.remove(i);
@@ -820,13 +1096,11 @@ function reloadHostTracks(){
   
 }
 
-
 function receiveNotes(notes){
     for(let n = 0; n<notes.length;n++){
         playTone(pitches[notes[n]], notes[n]+1,track2Send)
     }
 }
-
 
 function toggleTools(){
     if(window.frameElement.width == "1024"){
@@ -841,7 +1115,34 @@ function toggleTools(){
 
 
 
+
 //ANALYSIS
+
+const graph1 = document.getElementById('graph1');
+const g1ctx = graph1.getContext('2d');
+
+function drawGraph1(){
+    let w = 400;
+    let h = 100;
+
+    let t = parseFloat(document.getElementById('testnumber').value);
+
+    g1ctx.clearRect(0, 0, w, h);
+    g1ctx.beginPath();
+    g1ctx.lineWidth = 1;
+    g1ctx.strokeStyle = "red";
+    g1ctx.moveTo(0, 0);
+    let steps = w / stringsc.length;
+    let maxh = h/stringsc[stringsc.length-1];
+
+    for(let i = 0;i<stringsc.length;i++){
+        g1ctx.lineTo(i*steps,stringsc[i]*maxh);
+        g1ctx.moveTo((i+1)*steps,0);
+    }
+
+    g1ctx.stroke();
+
+}
 
 const graph = document.getElementById('len-comp-graph');
 let colors = ["red","orange","yellow","green","blue","purple"];
@@ -927,14 +1228,12 @@ function drawtotal(){
     }
 }
 
-
 function clearAcu(){
     let bars = document.getElementsByClassName('acu-mark');
     for(let i= bars.length; i>0;i--){
         bars[i-1].remove()
     }
 }
-
 
 const acugraph = document.getElementById('acu-int');
 acugraph.style.position = "relative";
@@ -960,7 +1259,6 @@ function drawAcu(){
                     m *= equave;
                 }
             }
-
         
         let mark = document.createElement('div');
         mark.className = "acu-mark";
@@ -971,6 +1269,61 @@ function drawAcu(){
         mark.style.borderLeft = "1px solid hsl("+m*360+",100%,50%)";
         acugraph.appendChild(mark);
         //total.push( [strings[i-1]/fst, exe ])
+    }
+}
+
+let w = document.getElementById('space');
+function drawSpace(){
+    clearDivsX('space-mark');
+    let ali = GetTrueOne('aligned');
+    let v = 492/(Math.log2(stringsc[stringsc.length-1]/stringsc[0]));
+    for(let i =0;i<stringsc.length;i++){
+        let string = document.createElement('div');
+        string.className = "space-mark";
+        string.style.position = "absolute"
+        string.style.right = Math.log2(stringsc[i]/stringsc[0])*v+"px";
+        string.style.height = "10px";
+        string.style.width = "1px";
+        string.style.backgroundColor = getColor();
+        w.appendChild(string);
+    }
+
+    let x = 1;
+    while (x<stringsc[stringsc.length-1]/stringsc[0]){
+        let string = document.createElement('div');
+        string.className = "space-mark";
+        string.style.position = "absolute"
+        if(ali==0){
+            string.style.right = 492 - Math.log2(x)*v+"px";
+        }else{
+            string.style.right = Math.log2(x)*v+"px";
+        }
+        string.style.height = "10px";
+        string.style.width = "1px";
+        string.style.top = "-10px";
+        string.style.backgroundColor = "#960";
+        w.appendChild(string);
+        x*=2;
+    }
+}
+
+function clearDivsX(x){
+    if (document.querySelector("."+x+"")) {
+        let q = document.querySelectorAll("."+x+"");
+        for (let i = 0; i < q.length; i++) {
+            q[i].remove();
+        }
+    }
+
+}
+
+function getColor2(){
+    if(document.getElementById('cbe').checked){
+
+    }else{
+        let spiralSides = Math.round(parseFloat(document.getElementById('sides').value));
+        let es = parseFloat(document.getElementById('sides').value) == spiralSides ? "#2c694d" : "#692c4d";
+    return es
     }
 }
 

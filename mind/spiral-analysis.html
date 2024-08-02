@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        html {
+            background-color: #111;
+            font-size:12px;
+            color:#666;
+        }
+    </style>
+    
+</head>
+<body>
+
+    <div class="options">
+        <div id="shownumber"></div>
+    </div>
+    <div class="display">
+
+        <div id="graph">
+
+        </div>
+
+    </div>
+
+</body>
+
+<script>
+
+const graph = document.getElementById('graph');
+
+let spiralSides = 10;
+let points = [];
+
+let colors = ["red","orange","yellow","green","blue","purple"];
+
+function draw(i){
+    let radius = 0;
+    let angle = 0;
+    ////ctx.beginPath();
+    //ctx.lineWidth = 2;
+    //ctx.strokeStyle = spiralSides == Math.round(spiralSides) ? cgrn : cred;
+    //ctx.moveTo(canvas.width / 2, canvas.height / 2);
+    let bars = document.createElement('div');
+    bars.style.display = "inline-block";
+    bars.style.verticalAlign ="top";
+    bars.onmouseenter = ()=> {document.getElementById('shownumber').innerText = i;}
+    graph.appendChild(bars);
+    for (let n = 0; n <= 100; n++) {
+
+        angle += (Math.PI * 2) / i;
+        let x = 512/2 + radius * Math.cos(angle);
+        let y = 512/2 + radius * Math.sin(angle);
+        //ctx.lineTo(x, y);//not really necesary to draw since at the end i was using divs... and deleting the drawing
+
+        points[n] = [x-256, y-256];
+        radius += 1;
+        //radius *= spiralPad;
+        if (n > 0) {// n-1 dont exists at n=0
+            let x1, x2, y1, y2;
+            x1 = points[n - 1][0];
+            x2 = points[n][0];
+            y1 = points[n - 1][1];
+            y2 = points[n][1];
+            let dist = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+            //console.log(dist)
+            //strings[n - 1] = dist;
+            //strings[n-1] = strings[n-1]/fString;
+            
+            let bar = document.createElement('div');
+            bar.style.height = dist+"px";
+            bar.style.width = "1px";
+            bar.style.backgroundColor = colors[n%colors.length];
+
+            bars.appendChild(bar);
+            //createDiv(x, y, n, dist, angle + (Math.PI) / spiralSides);// the strings are created and hidden if they overflow, but they are all there
+        }
+    }
+}
+
+function drawtotal(min,max,step){
+    for(let i = min; i<max; i+=step){
+        draw(i);
+    }
+}
+
+</script>
+
+</html>

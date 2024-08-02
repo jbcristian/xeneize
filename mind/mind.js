@@ -980,6 +980,7 @@ function setTrackEffects(track){
                 case "DISTORTION":
                     const distortion = sessionCtx.createWaveShaper();
                     distortion.curve = makeDistortionCurve(fx.options.distortionAmount);
+                    //distortion.curve = createDistortionCurve([1,3,4,7,9,11],fx.options.distortionAmount/100);
                     let os = '';
                     switch(fx.options.oversample){
                         case 0: os = '4x'; break;
@@ -1260,6 +1261,26 @@ function makeDistortionCurve(amount) {
     }
     return curve;
 };
+
+function createDistortionCurve(harmonics,k) {
+    const curveLength = 65536; // The array size determines the resolution
+    const distortionCurve = new Float32Array(curveLength);
+  
+    for (let i = 0; i < curveLength; i++) {
+      const x = (i / curveLength) * 2 - 1; // Normalize input to the range [-1, 1]
+      let distortedValue = 0;
+  
+      for (let h = 0; h < harmonics.length; h++) {
+        const harmonic = harmonics[h];
+        distortedValue += Math.sin(2 * Math.PI * harmonic * x) / harmonic;
+      }
+  
+      distortionCurve[i] = distortedValue*k;
+    }
+  
+    return distortionCurve;
+  }
+  
 
 
 function informTrackIDs(){

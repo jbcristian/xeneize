@@ -5,13 +5,13 @@
     <meta name="author" content="J.B.Cristian">
     <style>
             html{background-color: #111;color:#ccc;margin:0;padding:0;font-family: Consolas,monospace; font-size: 12px;}
-            div{border:1px solid #333; margin:0px;padding:0px;}
+            div{/*border:1px solid #333;*/ margin:0px;padding:0px;}
             input[type="number"]{width: 40px; background-color: #666;}
             .main{display:flex;}
            
-            .left{flex:1;}
-            .right{flex:2;}
-            #left-graph{position: relative; height: 100px;width:auto; background-color: #112;}
+            .left{flex:1; max-width: 420px; border-right: 1px solid #444;}
+            .right{flex:2;padding:0px 50px;overflow:hidden;}
+            #left-graph{position: relative; height: 100px;width:auto; background-color: #113;}
             .left-graph-bar{ position:absolute; width: 8px;margin:0px;padding:0px;border-top: 1px solid #0fc; height: 1px; }
             .alpha-bar{position:absolute; width:100%; margin:0px;padding:0px;border-top:1px dashed #f0f;}
             .left-graph-data{position:absolute; font-size:9px; margin:0px;padding:0px;border:none; }
@@ -22,20 +22,21 @@
             .new-numbers span {flex:1;overflow: hidden; white-space:nowrap;}
             #matrix{ width:auto;border-color:#ccc; position:relative;}
             .matrix-mark{border:0;padding:0;
-                height:20px; width: 2px; background-color: rgba(255,255,255,0.2);
+                border:0;border-left:1px solid rgb(175, 175, 175); padding-left: 2px;
             }
-            #accumulate{position:relative;width:auto;border-color:#ccc;height: 20px;margin:2px 0px;}
-            .intervals-ui{position: relative; width:auto; border-color:#333; height:20px; display: block; margin:2px 0px;}
+            .matrix-mark div{border:0;}
+            #accumulate{position:relative;width:auto;border-color:#ccc;height: 20px;}
+            .intervals-ui{position: relative; width:auto; border-color:#333; display: block; margin:5px 0px; font-size:11px;height: 52px;line-height: 9px;border:1px solid #333;}
             .intervals-ui:hover{background-color: rgba(0,0,100,.2);}
-            #full-spectrum{width: auto; border:1px solid #ccc; height: 50px; position: relative;}
+            #full-spectrum{width: auto; position: relative;}
             .full-spectrum-mark{position:absolute; margin:0;padding:0; width: 1px; height: 20px; background-color: #ccc;}
-            .matrix-mark-data{border:none;font-size:10px;color:#0d9a5c;position:absolute;left:2px; top:0px; margin:0;padding:0;}
+            /*.matrix-mark-data{border:none;font-size:10px;color:#0d9a5c;position:absolute;left:2px; top:0px; margin:0;padding:0;}*/
 
             .full-spectrum-ruler{position:absolute; background-color:#333;margin:0;padding:0;width:1px;border:none;}
 
             .global{display: flex;justify-content: space-between;align-items: center;}
 
-            button {border:none;font-size:11px; background-color: #000;color:#ccc;padding:5px;}
+            button {border:1px solid grey;font-size:11px; background-color: #000;color:#ccc;padding:5px;}
             button:hover{background-color: #333;cursor: pointer;}
 
             .color-original{color:#0fc; }
@@ -43,16 +44,48 @@
             .color-based{color:#444;}
             .color-inequave{color:rgb(255, 255, 253);}
 
-            #ede-ruler{position:relative;}
-            .ruler-mark{border-right:1px dotted orange};
+            #ede-ruler{position:relative;z-index:10;height: 15px;}
+            .ruler-mark span{position:absolute; color:orange;font-size:8px;left:5px;}
+            #full-ruler{position: relative;height: 15px;}
+            .ruler-mark{border-right:1px dashed rgba(255, 166, 0, 0.5)}
+
+            .mark-original{color:#0fc;}
+            .mark-delta{color:#f0f}
+            .mark-decimal{color:#fff;}
+            .mark-fraction{color:#aaa;}
+
+            .accu-mark{background-color:rgba(255,255,255,0.25);height: 20px; width: 1px;}
+
+            #number-to-add{
+                background-color: #555;
+                color:#ddd;
+                font-size:10px;
+                width: 150px;
+            }
+            .input-ext{display:inline-block; position: relative;}
+            .uiselectstep{position:absolute;bottom:-20px;left:-50%;background-color: #333; color:#990; display: flex;font-size:10px;z-index: 100;}
+            .uiselectstep div{flex:1;margin:2px 4px;}
+            .uiselectstep div:hover{cursor: pointer; background-color: #00a;}
+
+            #accumulate{background-color: #000;margin:25px 0px}
+
+            .spectrum-mark{
+                height: 20px; width: 1px; background-color: honeydew;
+            }
+            .intervals-spectrum{height: 30px;}
+
+            .space-mark{font-size:10px;color:palegreen;margin-top:-15px;border-left:1px solid palegreen;}
+
+            .hidden-mark{display:none;}
+            
      </style>
 </head>
-<body>
+<body style="margin:0;">
     <div class="global">
         Intervals Ruler
         <div style="margin:0;padding:0;border:none;display:flex;align-items: center;">
             Base Pitch(Hz): <input type="number" id="base-pitch" value="261">  
-            <input type="checkbox" id="play-with-cursor" checked> Play with Cursor | Volume <input type="range" min="0" max="10" step="0.1" id="master-volume">
+            <input type="checkbox" id="play-with-cursor" checked> Play with Cursor | Volume <div class="input-ext"><input type="range" min="0" max="10" step="0.1" id="master-volume"></div>
         </div>
     </div>
     <div class="main">
@@ -60,15 +93,30 @@
             <div id="insert-opts">
                 <div>
                     Add comma-separated number/s:
-                    <input type="text" id="number-to-add" value="1, 1.08, 1.19, 1.29, 1.40, 1.53, 1.67, 1.80, 1.96, 2.14, 2.33, 2.52, 2.78, 3" style="width:100px;">
-                    <button id="add-number" onclick="insertNumbersList(readNumbersList());drawNumberList();">ADD</button>
+                    <input type="text" id="number-to-add" value="1, 1.08, 1.19, 1.29, 1.40, 1.53, 1.67, 1.80, 1.96, 2.14, 2.33, 2.52, 2.78, 3">
+                    <button id="add-number" onclick="insertNumbersList(readNumbersList());init();">ADD</button> <button id="n-gen-button" onclick="toggleGenerators();">NUMBERS GENERATORS</button>
                 </div>
-                <div>
-                    Generate <input type="number" id="amount-to-add" step="1" value="8"> random numbers in range:<br/>
-                    Min: <input type="number" id="range-min" value="1"> | Max: <input type="number" id="range-max" value="11"> 
-                    Precision: <input type="number" step="1" value="3" id="rnd-precision" min="0">
-                    <button id="add-numbers" onclick="addRandonNumbers();">GENERATE</button>
+
+                <div id="ngenerators">
+                    <div id="n-gen-gen" style="display: none;">
+                        <div style="padding:10px;background-color: #222;margin:10px;">
+                            Progression mapping:<br>
+                            Notes: <input type="number" id="mean-quantity" value="1" onchange="calcMeans();">
+                            <br>
+                            Ratio: <div class="input-ext"><input type="number" id="mean-equave" value="2" step="0.001" onchange="calcMeans();"></div>
+                            <div id="tmean">Auto adapt ruler: <input type="checkbox" id="auto-ruler" checked > Max divisions: <input type="number" id="auto-max-d" value="100" step="1" min="1" max="1000"></div>
+                        </div>
+
+                        <div style="padding:10px;background-color: #222;margin:10px;">
+                            Generate <input type="number" id="amount-to-add" step="1" value="8"> random numbers in range:<br/>
+                            Min: <input type="number" id="range-min" value="1"> | Max: <input type="number" id="range-max" value="11"> 
+                            Precision: <input type="number" step="1" value="3" id="rnd-precision" min="0">
+                            <button id="add-numbers" onclick="addRandonNumbers();">GENERATE</button>
+                        </div>
+
+                    </div>
                 </div>
+                
                 <div>
                     <button id="clear-list" onclick="clearByClass('list-number');clearByClass('left-graph-bar');clearByClass('new-numbers')">CLEAR</button>
                     <button id="sort-asc" onclick="sortList(0)">SORT ASCENDING</button>
@@ -78,8 +126,8 @@
                     <!--default values-->
                 </div>
 
-                <div>From: <input id="alpha" type="number" value="0" step="0.01" >
-                 Equave: <input id="g-equave" type="number" min="1.01" value="2" step="0.01">
+                <div>Delta: <div class="input-ext"><input id="alpha" type="number" value="0" step="0.01" ></div>
+                 Equave: <div class="input-ext"><input id="g-equave" type="number" min="1.01" value="3" step="0.01"></div>
                  <!--Reduce by: <input type="radio" name="reduce-by"> Octave | <input type="radio" name="reduce-by" checked> Equave-->
                 </div>
                 
@@ -89,14 +137,24 @@
             </div>
             <div id="new-numbers"></div>
         </div>
-        <div class="right" style="height:fit-content">
-            <div id="fixed-rulers">
+        <div class="right" style="height:fit-content;">
+            <div id="rightopts" style="display: flex;border-bottom:1px solid #444;">
                 <div id="edos">
-                    <div>ED Ruler: <input type="number" step="0.05" value="13" id="ede-division" onchange="drawRuler()"> Equal Divisions of <input type="number" min="1.001" step="0.05" value="3" id="ede-equave" onchange="drawRuler()"></div>
-                    <div id="ede-ruler">
-
+                    <div>ED Ruler: <div class="input-ext"><input type="number" step="0.05" value="13" id="ede-division" onchange="drawRulers()"></div> Equal Divisions of <div class="input-ext"><input type="number" min="1.001" step="0.05" value="3" id="ede-equave" onchange="drawRulers()"></div>
                     </div>
                 </div>
+                <div onclick="adjustClosed();adjustFullSpectrum();drawRulers();drawSpaces();">
+                    <input type="radio" name="linlog" checked>Lin <input type="radio" name="linlog" >Log
+                </div>
+                <div style="flex:1; text-align: right;" onclick="setVisibleMarks()">
+                    <input name="data-display" type="checkbox" checked id="show-original" onchange="toggleData('.mark-original',this.checked)"> Original
+                    <input name="data-display" type="checkbox" checked id="show-delta" onchange="toggleData('.mark-delta',this.checked)"> Delta
+                    <input name="data-display" type="checkbox" checked id="show-decimal"onchange="toggleData('.mark-decimal',this.checked)"> Decimal
+                    <input name="data-display" type="checkbox" checked id="show-fraction" onchange="toggleData('.mark-fraction',this.checked)"> Fraction <input type="number" value="6" step="1" min="1" max="15">
+                </div>
+            </div>
+            <div id="ede-ruler">
+
             </div>
             <div id="matrix">
 
@@ -107,15 +165,25 @@
         </div>
         
     </div>
-    <div id="full-spectrum"></div>
-    <div id="stored"></div>
+    <div id="full-bot" style="overflow:hidden;padding:0px 25px; border-top:3px double #444;padding-top:10px;">
+        <div>
+            <div id="full-ruler"></div>
+            <div id="full-spectrum"></div>
+        </div>
+        <div id="spec-opts" style="text-align: right;;">
+            Equaves/repeats:<input id="full-equaves" type="number" value="3" step="1" min="1" max="10" onchange="drawFullSpectrum();adjustFullSpectrum();drawRulers();drawSpaces();">
+        </div>
+        
+        
+    </div>
+    <!--div id="stored"></div>
+
+    <input type="number" id="testval" value="1" step="0.001" >
+    <div id="testout"></div-->
 </body>
 <script>
 
-const numbersList = [];
 const numbersListUI = document.getElementById('numbers-list');
-
-const defaultNumbers = readNumbersList();
 
 function insertNumbersList(l){
     for(n in l){
@@ -136,10 +204,376 @@ function insertSingleNumber(v){
     del.onclick = ()=>{
         fullNumberUI.remove();
         clearByClass('left-graph-bar');//inefficient, redraws all
-        drawNumberList();
+        //drawNumberList();
+        init();
     }
     fullNumberUI.appendChild(del);
     numbersListUI.appendChild(fullNumberUI);
+}
+
+function sortList(order){
+    let currentNumbers = getList();
+    let ordered = [];
+    switch(order){
+        case 0:
+            ordered = currentNumbers.sort((a,b)=>a-b);
+            break;
+        case 1:
+            ordered = currentNumbers.sort((a,b)=>b-a);
+            break;
+    }
+    clearByClass('list-number');
+    clearByClass('left-graph-bar');
+    insertNumbersList(ordered);
+    drawNumberList();
+}
+
+function getList(){//GETS THE ARRAY FROM THE INPUTS TYPE NUMBERS
+    let numbers = [];
+    let entries = document.getElementsByClassName('list-number');
+    for(let i = 0; i <entries.length;i++){
+        numbers.push(entries[i].firstChild.value);
+    }
+    return numbers;
+}
+
+function readNumbersList() {//TEXT AREA INPUT STRING TO ARRAY
+    let inputNumbers = document.getElementById('number-to-add').value;
+    inputNumbers = inputNumbers.split(",");
+    //if(inputNumbers[0]==1)inputNumbers.pop();
+    let parsed = [];
+    for(let i in inputNumbers){ parsed.push(parseFloat(inputNumbers[i])); }
+    return parsed;
+}
+
+const graphHeight = 100;
+
+const graph = document.getElementById('left-graph');
+const newn = document.getElementById('new-numbers');
+
+//start optim
+let gEquave = parseFloat(document.getElementById('g-equave').value);
+document.getElementById('g-equave').onchange = ()=>{
+    gEquave = parseFloat(document.getElementById('g-equave').value);
+    if(totalNotes.length>0){
+        calcAll(getList());
+        adjustNumberList();
+        adjustClosed();
+        adjustFullSpectrum();
+        drawRulers();
+        drawSpaces();
+
+    }
+}
+let testAlpha = parseFloat(document.getElementById('alpha').value);
+document.getElementById('alpha').onchange = ()=>{
+    testAlpha = parseFloat(document.getElementById('alpha').value);
+    if(totalNotes.length>0){
+        calcAll(getList());
+        adjustNumberList();
+        adjustClosed();
+        adjustFullSpectrum();
+        drawRulers();
+        drawSpaces();
+    }
+}
+
+function clearAll(){
+    clearByClass('left-graph-bar');
+    clearByClass('new-numbers');
+    clearByClass('intervals-ui');
+    clearByClass('matrix-mark');
+    clearByClass('accu-mark');
+}
+
+let numberInList = [];
+let numbersSetList = [];
+
+function drawNumberList(){
+    clearAll();
+    //ayayay
+
+    numberInList = [];
+    numbersSetList = [];
+
+    for(let n = 0;n<totalNotes.length;n++){
+        const bar = document.createElement('div');
+        bar.className = "left-graph-bar color-original";
+        bar.style.left = ((parseInt(n))*10)+"px";
+        graph.appendChild(bar);
+        const data = document.createElement('div');
+        data.className = "left-graph-data color-original";
+
+        bar.appendChild(data);
+        numberInList.push(bar)
+
+        const newnumber = document.createElement('div');
+        newnumber.className = "new-numbers";
+        newn.appendChild(newnumber);
+        numbersSetList.push(newnumber);
+
+        const original = document.createElement('span');
+        original.className = "color-original";
+        newnumber.appendChild(original);
+
+        const withalpha = document.createElement('span');
+        withalpha.className = "color-alpha";
+        newnumber.appendChild(withalpha);
+
+        const basechange = document.createElement('span');
+        basechange.className = "color-based";
+        newnumber.appendChild(basechange);
+        
+        const inEquave = document.createElement('span');
+        inEquave.style.color = "#ccc";
+        newnumber.appendChild(inEquave);
+    }
+
+    const alphabar = document.createElement('div');
+    alphabar.id = "deltabar";
+    alphabar.className = "alpha-bar left-graph-bar color-alpha";
+    alphabar.style.position = "absolute";
+    graph.appendChild(alphabar);
+    
+}
+
+function adjustNumberList(){
+    const entries = getList();    
+    let min = Math.min(...entries), max = Math.max(...entries), alpha = testAlpha;
+    max = Math.max(max, alpha);
+    min = Math.min(min,alpha);
+    const h = graphHeight/(Math.abs(max-min));
+    for(let i=0;i<totalNotes.length;i++){
+         
+        numberInList[i].style.bottom = (totalNotes[i].original*h)-(min*h)+"px";
+        numberInList[i].children[0].innerText = totalNotes[i].original;
+
+        numbersSetList[i].children[0].innerHTML = totalNotes[i].original;
+        numbersSetList[i].children[1].innerHTML = totalNotes[i].delta;
+        numbersSetList[i].children[2].innerHTML = totalNotes[i].ranks[0][2];//yave
+        //numbersSetList[i].children[3].innerHTML = totalNotes[i].ranks[0];
+        numbersSetList[i].children[3].innerHTML = "/ "+gEquave+"<span style='font-size:8px;vertical-align:top;'>"+totalNotes[i].ranks[0][3]+" </span> = <span class='color-inequave'>"+totalNotes[i].ranks[0][0]+"</span>";
+    }
+    document.getElementById('deltabar').style.bottom = (testAlpha*h)-(min*h)+"px";;
+}
+
+const mat = document.getElementById('matrix');
+const accu = document.getElementById('accumulate');
+
+let spectrum = [];
+function drawFullSpectrum(){
+    spectrum = [];
+    clearByClass('intervals-spectrum');
+    const fullSpectrum = document.getElementById('full-spectrum');
+    let equaves = parseInt(document.getElementById('full-equaves').value);
+    let total = totalNotes.length*equaves;
+
+    const intervalsUI = document.createElement('div');
+    intervalsUI.className = "intervals-spectrum";
+    
+    fullSpectrum.appendChild(intervalsUI);
+   
+    for(let n=0;n<total;n++){
+        const mark = document.createElement('div');
+        mark.className = "spectrum-mark";
+        mark.style.position = "absolute";
+        //mark.id = "r"+row+"n"+n;
+        let markdata = document.createElement('div');
+        markdata.className = "mark-original";
+        mark.appendChild(markdata);
+
+        intervalsUI.appendChild(mark);
+        spectrum.push(mark);
+    }
+}
+
+function adjustFullSpectrum(){
+
+    const fullSpectrum = document.getElementById('full-spectrum');
+    const graphWidth = fullSpectrum.clientWidth;
+
+    let equaves = parseInt(document.getElementById('full-equaves').value);
+    let total = totalNotes.length*equaves;
+
+    let space = Math.pow(gEquave,equaves);  
+
+    let newnotes = [];
+
+    let si = 0;
+    for(let n=0;n<totalNotes.length;n++){//get the first index that is not 0
+        if(totalNotes[n].delta!=0){
+            si = n; break;
+        }
+    }
+
+    for(let s =0;s<equaves;s++){
+        for(let i=0;i<totalNotes.length;i++){
+            let temp = totalNotes[i].ranks[si][0];
+            newnotes.push(temp*Math.pow(gEquave,s));
+        }
+    }
+
+    let linlog = GetTrueOne('linlog');
+    for(let r =0;r<spectrum.length;r++){
+        if(newnotes[r]==0){
+            spectrum[r].style.display = 'none';
+        }
+        else{            
+            let n = newnotes[r];
+            let left;
+            if(linlog==0){
+                left = ((n-1)/(space-1))*graphWidth+"px";
+            }else{
+                left = ((Math.log2(n))/Math.log2(space))*graphWidth+"px";
+            }
+
+            spectrum[r].style.display = 'block';
+            spectrum[r].style.left = left;                
+        }
+    }
+}
+
+
+
+function drawRulerw(w,ne,d,g){//'ede-ruler', 1
+    const ruler = document.getElementById(w);
+    ruler.style.marginTop = "20px";
+
+    const divs = d||parseFloat(document.getElementById('ede-division').value)*ne;
+    const interval = Math.pow(parseFloat(document.getElementById('ede-equave').value),ne);
+    const equave = g||Math.pow(parseFloat(document.getElementById('g-equave').value),ne);
+
+    let linlog = GetTrueOne('linlog');
+    let step = Math.pow(interval,1/divs);//todo;
+    let dist = 1;
+
+    const graphWidth = ruler.clientWidth;//margin
+    const height = ruler.parentElement.clientHeight;
+
+    let totalmarks = Math.floor(divs*(equave/interval));
+
+    //for(let i = 0;i<totalmarks;i++){
+    let left = 0;
+    let i =0;
+    while(left<graphWidth){
+        const mark = document.createElement('div');
+        mark.className = "ruler-mark";
+        mark.style.position ="absolute";
+        mark.style.height = height+"px";
+        
+        if(linlog==0){
+            left = (dist-1)/(equave-1)*graphWidth;
+        }else{
+            left = Math.log2(dist)/Math.log2(equave)*graphWidth;
+            
+        }
+        mark.style.left = left +"px";
+        dist*=step;
+        
+        ruler.appendChild(mark);
+        
+        const number = document.createElement('span');
+        number.innerText = i;// number.style.position ="absolute";number.style.color = "orange";
+        //number.style.fontSize = "8px";
+       // number.style.top = "-12px";
+
+        mark.appendChild(number); i++;
+    }
+}
+
+function drawRulers(){
+    clearByClass('ruler-mark');
+    let equaves = parseInt(document.getElementById('full-equaves').value);
+    drawRulerw('ede-ruler',1);
+    drawRulerw('full-ruler',equaves);
+}
+drawRulers();
+
+function drawSpace(w,ne){
+    const ruler = document.getElementById(w);
+    const equave = Math.pow(parseFloat(document.getElementById('g-equave').value),ne);
+    let linlog = GetTrueOne('linlog');
+    let step = Math.pow(equave,1/ne);//todo;
+    let dist = 1;
+    const graphWidth = ruler.clientWidth;//margin
+    const height = ruler.parentElement.clientHeight+20;
+    let totalmarks = ne+1;
+    let left = 0;
+    for(let i = 0;i<totalmarks;i++){
+        const mark = document.createElement('div');
+        mark.className = "space-mark";
+        mark.style.position ="absolute";
+        mark.style.height = height+"px";
+        if(linlog==0){
+            left = (dist-1)/(equave-1)*graphWidth;
+        }else{
+            left = Math.log2(dist)/Math.log2(equave)*graphWidth;
+        }
+        mark.style.left = left +"px";
+        ruler.appendChild(mark);
+        const number = document.createElement('span');
+        number.innerText = dist;
+        mark.appendChild(number);
+        dist*=step;
+    }
+}
+
+function drawSpaces(){
+    clearByClass('space-mark');
+    let equaves = parseInt(document.getElementById('full-equaves').value);
+    drawSpace('ede-ruler',1);
+    drawSpace('full-ruler',equaves);
+}
+drawSpaces();
+
+
+const PHI = (1+Math.sqrt(5))/2;
+
+function calcMeans(){
+    let q = parseInt(document.getElementById('mean-quantity').value);
+    let val = parseFloat(document.getElementById('mean-equave').value);
+
+    let eq = gEquave;
+
+    //document.getElementById('g-equave').value = eq;
+
+    //let mui = document.getElementById('tmean');
+
+    let mean = ((val)/eq);
+    //let mean = (1+eq)/2;//phi
+    //let mean = 1/ ( (1+(1/eq))/2 );
+
+    
+
+    let notes = [];
+
+    for(let n = 0;n<q;n++){
+        notes.push(Math.pow(mean,n));
+    }
+
+    document.getElementById('number-to-add').value = notes;
+    clearAll();
+    clearByClass('list-number');clearByClass('left-graph-bar');clearByClass('new-numbers');
+    insertNumbersList(readNumbersList());init();getdaleg(val);
+}
+
+
+//notes generators///////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////
+/*
+let nnotes = [];
+function calcMeans(){
+    nnotes = [];
+    let q = parseInt(document.getElementById('quantity').value);
+    let neq = parseFloat(document.getElementById('nequave').value);
+    let mean = (1+neq)/2;
+    nnotes.push(1);
+    for(let i =0; i<q; i++){
+        nnotes.push(Math.pow(mean,i+1));
+    }
+    nnotes.push(neq);
+
+    console.log(nnotes)
 }
 
 function addRandonNumbers(){
@@ -164,6 +598,377 @@ function addRandonNumbers(){
     drawNumberList();
 }
 
+const testval = document.getElementById('testval');
+testval.onchange = ()=>{
+    getx(testval.value);
+}
+
+const testout = document.getElementById('testout');
+function getx(x){
+    //console.log(x)
+    let hijoderemilputa = 1+parseFloat(x);
+    testout.innerText = Math.pow(x,4)+" = "+hijoderemilputa;
+}
+
+////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////*/
+
+
+
+function Nu(){
+    this.original = 0;
+    this.delta = 0;
+    this.ranks = [];
+    this.name = "";
+}
+
+let totalNotes = [];
+function calcAll(na){//number array
+    if(gEquave==1){
+        alert("Can't be 1.");
+        return;
+    }
+    totalNotes = [];
+    firsts = [];
+    let del = parseFloat(document.getElementById('alpha').value);
+    for(let i =0;i<na.length;i++){
+        let note = new Nu();
+        note.original = Number(na[i]);
+        note.delta = na[i]-del;
+        for(let j=0;j<na.length;j++){
+            let base = na[j]-del;
+            if(note.delta==0||base==0){
+                note.ranks.push([0,"0/0",0,0]);
+            }else{
+                let rebased = Math.abs(note.delta/(na[j]-del));
+                let reduced = getclosed(rebased);
+                note.ranks.push([reduced[0], getfraction(reduced[0]).toString().replace(',','/'),rebased, reduced[1] ]);//
+
+
+               //////////////////////////////////////////////////
+                /*if(firsts[i]){
+                    if(firsts[i]==1) firsts[i]=2;
+                    if(reduced[0]<firsts[i]){
+                        firsts[i]=reduced[0];
+                    }
+                }else{
+                    firsts[i]=reduced[0];
+                    /*if(reduced[0]<firsts[i]&&reduced[0]>1){
+                        firsts[i]=reduced[0];
+                    }*/
+                //}*/
+                if(reduced[0]!=1) firsts.push(reduced[0]);
+                ///////////////////////////////////////////////
+
+            }
+        }
+        totalNotes.push(note);
+
+    }
+}
+
+function getclosed(n){
+    let eq = parseFloat(document.getElementById('g-equave').value);
+    let temp = n;
+    let exp = 0;
+    if(temp<1){
+        while(temp<1){
+            temp*=eq;//equave 
+            exp++;
+        }
+    }
+    else if(temp>eq){
+        while(temp>eq){
+            temp/=eq;//equave 
+            exp--;
+        }
+    }
+    return [temp,exp];
+}
+
+let epsilon = .0000000001;
+function getfraction(x) {
+    if (x == 0) return [0, 1];
+    const a = Math.abs(x);
+    let n = 0;
+    let d = 1;
+    let r;
+    while (true) {
+        r = n / d;
+        if (Math.abs((r - a) / a) < epsilon) {
+            break;
+        }
+        if (r < a) {
+            n++;
+        }
+        else {
+            d++;
+        }
+    }
+    return [x < 0 ? -n : n, d];
+}
+
+let rows = [];
+function drawRows(){
+    rows = [];
+    for(let r = 0; r<totalNotes.length;r++){
+        drawClosed(r);
+    }
+}
+
+function drawClosed(row){    
+    const intervalsUI = document.createElement('div');
+    intervalsUI.className = "intervals-ui";
+    rows.push(intervalsUI);
+    mat.appendChild(intervalsUI);
+
+    let notes = totalNotes;
+   
+    for(n in notes){
+        const mark = document.createElement('div');
+        mark.className = "matrix-mark";
+        mark.style.position = "absolute";
+
+        mark.id = "r"+row+"n"+n;
+
+        let markdata = document.createElement('div');
+        markdata.className = "mark-original";
+        if(visiblemarks[0]==false) markdata.style.display = "none";
+        mark.appendChild(markdata);
+
+            markdata = document.createElement('div');
+        markdata.className = "mark-delta";
+        if(visiblemarks[1]==false) markdata.style.display = "none";
+        mark.appendChild(markdata);
+
+            markdata = document.createElement('div');
+        markdata.className = "mark-decimal";
+        if(visiblemarks[2]==false) markdata.style.display = "none";
+        mark.appendChild(markdata);
+
+            markdata = document.createElement('div');
+        markdata.className = "mark-fraction";
+        if(visiblemarks[3]==false) markdata.style.display = "none";
+        mark.appendChild(markdata);
+
+        intervalsUI.appendChild(mark);
+
+        const accuMark = document.createElement('div');
+        accuMark.className = "accu-mark";
+        accuMark.style.position = "absolute";
+        accu.appendChild(accuMark);
+    }
+}
+
+function adjustClosed(){
+    const graphWidth = mat.clientWidth-2;
+    const eq = parseFloat(document.getElementById('g-equave').value);
+    let a = 0;
+    let linlog = GetTrueOne('linlog');
+    for(let r =0;r<rows.length;r++){
+        if(totalNotes[r].delta==0){
+            rows[r].style.backgroundColor = 'rgba(127,0,0,0.3)';
+            let rs = rows[r].children;
+            for(r in rs) rs[r].style.display ='none';
+        }
+        else{
+            rows[r].style.backgroundColor = 'rgba(0,0,0,0)';
+            for(let i =0;i<rows[r].children.length;i++){
+                let n = totalNotes[i].ranks[r][0];
+                if(n==0){
+                    rows[r].children[i].style.display = 'none';
+                    accu.children[a].style.display = 'none';
+                }else{
+                    let left;
+                    if(linlog==0){
+                        left = ((n-1)/(eq-1))*graphWidth+"px";
+                    }else{
+                        left = ((Math.log2(n))/Math.log2(eq))*graphWidth+"px";
+                    }
+                    
+                    accu.children[a].style.display = 'block';
+                    accu.children[a].style.left = left;
+
+                    rows[r].children[i].style.display = 'block';
+                    rows[r].children[i].style.left = left;
+                    
+                    rows[r].children[i].children[0].innerText = totalNotes[i].original;
+                    rows[r].children[i].children[1].innerText = totalNotes[i].delta.toFixed(3);
+                    rows[r].children[i].children[2].innerText = n.toFixed(3);
+                    rows[r].children[i].children[3].innerText = totalNotes[i].ranks[r][1];
+                }
+                a++;
+            }
+        }
+    }
+}
+
+function adjustHeight(){
+    let all = document.getElementsByName('data-display');
+    let m = 0;
+    for(let i =0;i<4;i++) if(all.item(i).checked) m++;
+    let ui = document.querySelectorAll('.intervals-ui');
+    for(u in ui) ui.item(u).style.height = m*9+"px";
+}
+
+function init(){
+    calcAll(getList());
+    drawNumberList();
+    adjustNumberList();
+    drawRows();
+
+    adjustHeight();
+    adjustClosed();//adjustHeight();
+    
+
+    drawFullSpectrum();
+    adjustFullSpectrum();
+
+    drawRulers();
+    drawSpaces();
+}
+
+
+function drawChromas(){
+
+}
+
+function adjustChromas(){
+
+}
+
+
+/*
+let firsts = []; 
+let smallest=[];
+function getFirsts(){
+    smallest=[];
+    firsts.sort( function(a, b){return (a-b) } ) ;
+  
+    let first = firsts[0]
+    let second = null;
+    for(let i = 1; i<firsts.length;i++){
+        if(firsts[i]!==first){
+            second =firsts[i];
+            break;
+        }
+    }
+    if(second==null){
+        smallest = [first, first];
+    }else{
+        smallest = [first, second];
+    }
+}*/
+
+const PLA = 1.3247179572447;
+let tol =PHI;
+
+
+function getdaleg(note) {
+    const PHI = (1 + Math.sqrt(5)) / 2; // Golden ratio
+    let eq = document.getElementById('g-equave').value;
+    let notes = [1, eq];
+    let commas = [];
+    let a = Math.pow(note, 1 / eq);
+    
+    let list = [];
+
+    for (let i = 1; i < 10000; i++) {
+        let t = Math.pow(note, i);
+        let nn = 1;
+        // Check for invalid values
+        if (!isFinite(t) || t === 0) {
+            console.log(i + " break");
+            break;
+        }
+
+        // Normalize t to the range [1, eq]
+        while (t < 1) {
+            t *= eq;
+            nn++;
+        }
+        while (t > eq) {
+            t /= eq;
+            nn++;
+        }
+
+        notes.push(t);
+
+        if (notes.length > 2) {
+            notes.sort((a, b) => a - b);
+
+            commas = [];
+            for (let j = 0; j < notes.length - 1; j++) {
+                commas[j] = notes[j + 1] / notes[j];
+            }
+
+            let smallest = Math.min(...commas);
+            let largest = Math.max(...commas);
+            let ratio = (largest - 1) / (smallest - 1);
+
+            if (ratio <= PHI) {
+                let d = i + 1;
+                //let n = Math.round(d * a);
+                //a = n / d;
+                list.push(`(${nn}/${d})`);
+            }
+        }
+    }
+    console.log(list);
+}
+
+
+
+
+
+
+let visiblemarks = [true,true,true,true];
+function setVisibleMarks(){
+    visiblemarks = [
+        document.getElementById('show-original').checked,
+        document.getElementById('show-delta').checked,
+        document.getElementById('show-decimal').checked,
+        document.getElementById('show-fraction').checked
+    ];
+}
+
+function toggleData(name,bo){
+    let all = document.querySelectorAll(name)//mark-original
+    for(let i=0;i<all.length;i++){
+        if(bo==false){
+            all.item(i).style.display = 'none';
+        }else{
+            all.item(i).style.display = 'block';
+        }
+    }
+    adjustHeight();
+    drawRulers();
+}
+
+
+
+
+
+/////////////////////ui//etc///////////
+
+function GetTrueOne(rname){
+    let options = document.getElementsByName(rname);
+    let t;
+    for (t=0; t < options.length ; t++){
+        if(options[t].checked==true){
+            return t;
+        }
+    }
+}
+
+function toggleGenerators(){
+    let v = document.getElementById('n-gen-gen');
+    if(v.style.display == 'none'){
+        v.style.display = 'block';
+    }
+    else{v.style.display ='none'};
+}
+
 function clearByClass(name){
     let entries = document.getElementsByClassName(name);
     for(let i = entries.length; i>0; i--){
@@ -171,363 +976,91 @@ function clearByClass(name){
     }
 }
 
-function sortList(order){
-    let currentNumbers = getList();
-    let ordered = [];
-    switch(order){
-        case 0:
-            ordered = currentNumbers.sort((a,b)=>a-b);
-            break;
-        case 1:
-            ordered = currentNumbers.sort((a,b)=>b-a);
-            break;
-    }
-    clearByClass('list-number');
-    clearByClass('left-graph-bar');
-    insertNumbersList(ordered);
-    drawNumberList();
-}
-
-function getList(){
-    let numbers = [];
-    let entries = document.getElementsByClassName('list-number');
-    for(let i = 0; i <entries.length;i++){
-        numbers.push(entries[i].firstChild.value);
-    }
-    return numbers;
-}
-
-function readNumbersList() {
-    let inputNumbers = document.getElementById('number-to-add').value;
-    inputNumbers = inputNumbers.split(",");
-    //if(inputNumbers[0]==1)inputNumbers.pop();
-    let parsed = [];
-    for(let i in inputNumbers){ parsed.push(parseFloat(inputNumbers[i])); }
-    return parsed;
-}
-
-const graphHeight = 100;
-
-const graph = document.getElementById('left-graph');
-const newn = document.getElementById('new-numbers');
-
-let gOriginal = [];
-let gInEquave = [];
-let sorted = [];
-
-//start optim
-let testgEquave = parseFloat(document.getElementById('g-equave').value);
-document.getElementById('g-equave').onchange = ()=>{
-    testgEquave = parseFloat(document.getElementById('g-equave').value);
-    drawNumberList();
-
-}
-let testAlpha = parseFloat(document.getElementById('alpha').value);
-document.getElementById('alpha').onchange = ()=>{
-    testAlpha = parseFloat(document.getElementById('alpha').value);
-    drawNumberList();
-}
-
-function drawNumberList(){
-    clearByClass('left-graph-bar');
-    clearByClass('new-numbers');
-    clearByClass('intervals-ui');
-    clearByClass('full-spectrum-mark');
-    clearByClass('matrix-mark');
-    clearByClass('ruler-mark');
-    //ayayay
-
-    gOriginal = [];
-    gInEquave = [];
-    
-
-    const gEquave = testgEquave;//optimized
-    const entries = getList();    
-    let min = Math.min(...entries), max = Math.max(...entries), alpha = testAlpha;
-    max = Math.max(max, alpha);
-    min = Math.min(min,alpha);
-
-    const absentries = [];
-        for(n in entries){
-            let ent = Math.abs(entries[n]-alpha);
-            if(ent!=0)absentries.push(ent);
-        }
-
-    //const sizeDif = entries.length-absentries.length;
-    //console.log(sizeDif);
-    
-    const h = graphHeight/(Math.abs(max-min));
-    for(n in entries){
-        const bar = document.createElement('div');
-        bar.className = "left-graph-bar color-original";
-        bar.style.bottom = (entries[n]*h)-(min*h)+"px";
-        bar.style.left = ((parseInt(n))*10)+"px";
-        graph.appendChild(bar);
-        const data = document.createElement('div');
-        data.className = "left-graph-data color-original";
-        data.innerText = entries[n];
-        bar.appendChild(data);
-
-
-
-        const newnumber = document.createElement('div');
-        newnumber.className = "new-numbers";
-        newn.appendChild(newnumber);
-
-        const original = document.createElement('span');
-        original.className = "color-original";
-        original.innerHTML = entries[n];
-        newnumber.appendChild(original);
-
-        const withalpha = document.createElement('span');
-        withalpha.className = "color-alpha";
-        let notzero = Math.abs(entries[n]-alpha);
-        withalpha.innerHTML = notzero;
-        newnumber.appendChild(withalpha);
-
-        const basechange = document.createElement('span');
-        basechange.className = "color-based";
-        
-        let changed;
-        const inEquave = document.createElement('span');inEquave.style.color = "#ccc";
-        let exp = 0;
-        if(notzero!=0){
-
-            changed = (Math.abs(entries[n]-alpha))/(absentries[0]);
-            basechange.innerHTML = changed;
-            newnumber.appendChild(basechange);
-
-            if(gEquave!=1){
-                if(changed>gEquave){
-                    while(changed>gEquave){
-                        changed/=gEquave;
-                        exp+=1;
-                    }
-                }
-                else if(changed<1){
-                    while(changed<1){
-                        changed*=gEquave;
-                        exp-=1;
-                    }
-                }
-            }
-            gOriginal.push(entries[n]);
-            gInEquave.push(changed);
-        }else{
-            changed = "OUT";
-        }
-        
-        
-        //////////////////////////////////HEHEHEHEHEHEH
-        
-        
-        inEquave.innerHTML = "/ "+gEquave+"<span style='font-size:8px;vertical-align:top;'>"+exp+" </span> = <span class='color-inequave'>"+changed+"</span>";
-
-        newnumber.appendChild(inEquave);
-        
-    }
-
-    sorted = [];
-    for(let i =0;i<gOriginal.length;i++){
-        sorted.push([gOriginal[i],gInEquave[i]]);
-    }
-    sorted = sorted.sort((a,b)=>a[1]-b[1]);
-
-    const alphabar = document.createElement('div');
-    alphabar.className = "alpha-bar left-graph-bar color-alpha";
-    alphabar.style.position = "absolute";
-    alphabar.style.bottom = (alpha*h)-(min*h)+"px";
-    graph.appendChild(alphabar);
-
-    for(let i = 0;i<entries.length;i++){
-        drawClosedEquave(i);
-    }
-
-    drawRuler();
-    drawFullSpectrum();
-    
-}
-
-function drawClosedEquave(base){
-    const mat = document.getElementById('matrix');
-    const accu = document.getElementById('accumulate');
-
-    const intervalsUI = document.createElement('div');
-    intervalsUI.className = "intervals-ui";
-    mat.appendChild(intervalsUI);
-
-    const fclosed = [];
-    for(let i = 0;i<gOriginal.length;i++){
-        fclosed.push(sorted[i][1]);
-    }
-    let newbase = fclosed[(base)%fclosed.length];
-    for(n in fclosed) fclosed[n]/=newbase;
-    //console.log(fclosed)
-    const closed = getClosedEquave(fclosed);
-   
-
-    const eq = parseFloat(document.getElementById('g-equave').value);
-
-    const graphWidth = mat.clientWidth-2;
-    for(n in closed){
-        const mark = document.createElement('div');
-        mark.className = "matrix-mark";
-        mark.style.position = "absolute";
-        const left = ((closed[n]-1)/(eq-1))*graphWidth+"px"
-        mark.style.left = left;
-
-        let markdata = document.createElement('div');
-        markdata.className = "matrix-mark-data";
-        markdata.innerHTML = '<span class="color-original">'+sorted[n][0]+'</span>';
-        mark.appendChild(markdata);
-
-        markdata = document.createElement('div');
-        markdata.className = "matrix-mark-data color-inequave";
-        markdata.style.top = "10px";
-        markdata.innerHTML = '<span>'+Math.floor(closed[n]*100)/100+'</span>';
-
-        mark.appendChild(markdata);
-
-        intervalsUI.appendChild(mark);
-
-        const accuMark = document.createElement('div');
-        accuMark.className = "matrix-mark";
-        accuMark.style.position = "absolute";
-        accuMark.style.left = left;
-
-        accu.appendChild(accuMark);
+function addEventsToNumberInputs(){
+    let all = document.querySelectorAll('.input-ext');
+    for(let a = 0;a<all.length;a++){
+        all.item(a).onmousedown = (e)=>{
+            //e.preventDefault();
+            setInputStep(e,all.item(a));
+        };
     }
 }
 
-function drawFullSpectrum(){
-    const eq = parseFloat(document.getElementById('g-equave').value);
-    const fullSpectrum = document.getElementById('full-spectrum');
-    const graphWidth = fullSpectrum.clientWidth;
-    //let octaves = 5;
-    //et center = 0;
-    //const from = parseFloat(document.getElementById('alpha').value);
-    const numbers = [];
-    //const ncopy = [...numbers];
-
-    for(n in sorted) {
-        numbers.push(sorted[n][1])
-    }
-    
-    for(n in numbers){
-        let c = numbers[n];
-
-        let d = c;
-        while(c<graphWidth-5){
-            const mark = document.createElement('div');
-            mark.className = "full-spectrum-mark";
-            if(n==0)mark.style.height = "35px";
-            mark.style.border = "none";
-            mark.style.position = "absolute";
-            mark.style.fontSize = "9px";
-            //mark.style.left = Math.log2(c)*80+"px";
-            mark.style.left = c+"px";
-            mark.innerText = "-"+sorted[n][0];
-            fullSpectrum.appendChild(mark);
-            c*=eq;
-        }
-    }
-
-    for(let i = 1;i<graphWidth;i*=2){
-        const mark = document.createElement('div');
-        mark.className = "full-spectrum-ruler";
-        mark.style.left = i+"px";
-        //mark.innerText = i;
-        if(i/100==Math.floor(i/100)){
-            mark.style.height = "20px";
-        }
-        else{
-            mark.style.height = "10px";
-        }
-        mark.style.top = "25px";
-        fullSpectrum.appendChild(mark)
-    }
-
-    //lin log
-}
-
-//numbers should get here already normalized,(>= 1)
-function getClosedEquave(numbers){
-    let eq = parseFloat(document.getElementById('g-equave').value);
-    let closed;
-    for(n in numbers){
-        //if(numbers[n]==0) numbers[n] = 1; //Number.MIN_VALUE
-        if(numbers[n]<1){
-            while(numbers[n]<1){
-                numbers[n]*=eq;//equave 
+function setInputStep(e,t){
+    if(e.button=="1"){
+        let ui = document.createElement('div');
+        ui.className = "uiselectstep";
+        t.appendChild(ui)
+        console.log(t)
+        for(let i = 0; i <5;i++){
+            let step = 1/Math.pow(10,i);
+            let s1 = document.createElement('div');
+            s1.innerText = step;
+            ui.appendChild(s1);
+            s1.onclick = ()=>{
+                t.firstChild.step = step;
+                ui.remove();
             }
         }
-        else if(numbers[n]>eq){
-            while(numbers[n]>eq){
-                numbers[n]/=eq;//equave 
-            }
-        }
-        
     }
-    closed = numbers;
-    return closed;
-    
 }
-
-function drawRuler(){
-    clearByClass('ruler-mark');
-    const ruler = document.getElementById('ede-ruler');
-    ruler.style.marginTop = "15px";
-
-    const divs = parseFloat(document.getElementById('ede-division').value);
-    const interval = parseFloat(document.getElementById('ede-equave').value);
-    const equave = parseFloat(document.getElementById('g-equave').value);
-
-    let dist = 1;
-    let step = Math.pow(interval,1/divs);//todo
-
-    const graphWidth = ruler.parentElement.parentElement.clientWidth-2;//margin
-    const height = ruler.parentElement.parentElement.parentElement.clientHeight-45;
-
-    let tolerance = .01;
-    let pos = 0;
-
-    while(dist<equave-tolerance){
-        
-        const mark = document.createElement('div');
-        mark.className = "ruler-mark";
-        mark.style.position ="absolute";
-        mark.style.height = height+"px";
-        mark.style.left = (dist-1)*graphWidth/(equave-1)+"px";
-
-        ruler.appendChild(mark);
-        dist*=step;
-
-        const number = document.createElement('span');
-        number.innerText = pos; number.style.position ="absolute";number.style.color = "orange";
-        number.style.fontSize = "8px";
-        number.style.top = "-12px";
-
-        mark.appendChild(number);
-
-
-        pos+=1;
-    }
-
-}
-drawRuler();
-
-
-function actionByID(hl){
-    //action is highlight and or plau
-
-}
-
-
 
 window.onload = function(){
-    insertNumbersList(defaultNumbers);
-    drawNumberList();
+    //insertNumbersList(defaultNumbers);
+    //drawNumberList();
+    addEventsToNumberInputs();
+    setVisibleMarks();
 }
+
+
+
+function testrand(a,s,m){
+    let j = 0;
+    for(let i=1;i<m;i++){
+        j += Math.pow(a,s/i);
+    }
+    return j;
+}
+
+let list = [];
+//let exc = [];
+function pp(q){
+    list = [3,5];
+    //exc = [];
+    for(let t = 7;t<7+q;t+=2){
+        if(t%5==0)continue;
+        for(let k = 0; k <= list.length; k++){
+            if(t%list[k]==0){
+                //console.log(t +" * "+ list[k])
+                break;
+            }
+            if(Math.ceil(Math.sqrt(t))<=list[k]){
+                list.push(t);
+                //console.log(t +"  PRIME  " + k + " steps")
+                break;
+            }
+        }
+
+    }
+
+    /*let g=0,h=0;
+    for(let i =0;i<list.length;i++){
+        let f = list[i];
+        while(f>2){ //the same as log base eq, but.. yeah
+                f = f/2;
+            }
+        if(f> Math.sqrt(2)) g++; else h++;
+        //console.log(f)
+        
+    }
+    console.log(g+" "+h)*/
+    
+}
+
+
+
+
+
 
 </script>
 

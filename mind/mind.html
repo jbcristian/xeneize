@@ -18,33 +18,11 @@
 
 <div id="main">
 
-    <div id="global">
-        <div id="logo"></div>
+    
 
-        <div class="header-right">Session: 
-            <div id="load-preset">Load Preset:</div>
-            <input type="file" id="interfaceFileSelect" oninput="getFile(this)">
-            <a id="save-preset"><div class="global-button">SAVE PRESET</div></a>
-        </div>
+    <div id="client" style="overflow-x: hidden;">
 
         
-    </div>
-
-    <div id="client">
-
-        <div id="interface-global"><!--header--->
-            <div id="title"> </div>
-            <div>
-                <select id="select-interface">
-                    <option>Conway's Game of Life</option>
-                    <option>SFINX Microtonal Guitar</option>
-                    <option>Spiral Harp</option>
-                    <!--option>R30</option-->
-                </select>
-                <div id="add-interface" class="global-button">ADD INTERFACE</div>
-            </div>
-            
-        </div>
 
         <div id="interface-window">
             <div id="iFPlaceholder">[ NO INTERFACE ]</div>
@@ -52,21 +30,79 @@
 
     </div>
 
-    <div id="daw">
+    <div id="logobt">ꟿ</div>
+    <div id="host" style="display:block;">
+        <div id="top-host">MIND</div>
+        <div id="byebye" >
 
-        <div id="daw-global">
-            <div id="add-track" class="button-A">ADD TRACK</div>
-            
-        </div>
-        <div id="daw-tracks">
+            <div id="global">
+    
+                <div class="header-right">Session: 
+                    <div id="load-preset">Load Preset:</div>
+                    <input type="file" id="interfaceFileSelect" oninput="getFile(this)">
+                    <a id="save-preset"><div class="global-button">SAVE PRESET</div></a>
+                </div>
+    
+                <div id="interface-global"><!--header--->
+                    <div id="title"> </div>
+                    <div>
+                        <select id="select-interface">
+                            <option>Conway's Game of Life</option>
+                            <option>SFINX Microtonal Guitar</option>
+                            <option>Spiral Harp</option>
+                            <!--option>R30</option-->
+                        </select>
+                        <div id="add-interface" class="global-button">ADD INTERFACE</div>
+                    </div>
+                    
+                </div>
+        
+                
+            </div>
+    
+            <div id="daw">
+    
+                <div id="daw-global">
+                    <div id="add-track" class="button-A">ADD TRACK</div>
+                    
+                </div>
+                <div id="daw-tracks">
+        
+                </div>
+        
+            </div>
 
         </div>
+
+        
 
     </div>
+
+    
 
 </div>
 
 <script>
+
+const rrr = document.getElementById('byebye');
+rrr.style.height = window.innerHeight-45+"px";
+document.getElementById('client').style.height = window.innerHeight-5+"px";
+window.onresize = ()=>{
+    rrr.style.height = window.innerHeight-45+"px";
+    document.getElementById('client').style.height = window.innerHeight-5+"px";
+}
+
+const logobt = document.getElementById('logobt');
+logobt.onclick = ()=>{
+    console.log("aa")
+    let b = document.getElementById('host');
+    if(b.style.display == 'block'){
+        b.style.display = 'none'
+    }
+    else{
+        b.style.display = 'block';
+    }
+}
 
 let interfaces;
 
@@ -107,7 +143,7 @@ function addInterface(){
             title = "Spiral Harp";
             interfaceToAdd = "spiral-harp-m";
             interfaceClassName = "spiralharp";
-            w = "540"; h = "920";
+            w = "1024"; h = "920";
             break;
         /*case 2:
             title = "R30";
@@ -134,9 +170,17 @@ function addInterface(){
        updateInterfaces();
        console.log("deleted: "+ fullInterface)
     });
-
     interfaceHeader.appendChild(deleteInterfaceButton);
 
+    let settingsInterfaceButton = document.createElement('DIV');
+    settingsInterfaceButton.className = "delete-interface";
+    settingsInterfaceButton.innerHTML = "≡";
+    settingsInterfaceButton.style.marginRight = "10px";
+    interfaceHeader.appendChild(settingsInterfaceButton);
+    settingsInterfaceButton.addEventListener('click',()=>{
+        toggleInterfaceSettings(settingsInterfaceButton);
+    });
+   
     fullInterface.appendChild(interfaceHeader);
 
     let interfaceiFrame = document.createElement("IFRAME");
@@ -145,11 +189,24 @@ function addInterface(){
     interfaceiFrame.src = interfaceToAdd+".html";
     interfaceiFrame.width = w;
     interfaceiFrame.height = h;
-    interfaceiFrame.style.overflow = "hidden";
+    //interfaceiFrame.style.overflow = "hidden";
     interfaces+= interfaceiFrame;
-    fullInterface.appendChild(interfaceiFrame);
+
+    fullInterface.appendChild(interfaceiFrame);    
+
     //document.getElementById('interface-window').innerHTML += '<iframe src="'+interfaceToAdd+'.html" width="640" height="640"></object>';
     updateInterfaces();
+}
+
+function toggleInterfaceSettings(interf){
+    let interfa = interf.parentElement.parentElement.lastElementChild.contentWindow.document.getElementById('interface-settings');
+    if(interfa.style.display == 'block'){
+        interfa.style.display = 'none';
+    }
+    else {
+        console.log("hey")
+        interfa.style.display = 'block';
+    }
 }
 
 function updateInterfaces(){

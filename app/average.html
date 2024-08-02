@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Median</title>
+    <style>
+        html {background-color: #333; color:#aaa; font-family: Consolas,monospace; font-size:11px; }
+        body{margin:0;overflow: hidden;}
+        div { margin:0px; padding:0px; }
+        .tuning-full{display:flex;}
+        .tuning-data{flex:1;white-space: nowrap;overflow: hidden;padding:0px 15px;}
+        .tuning-data:hover{white-space: normal;overflow:auto;}
+        .tuning-full{color:#ccc;}
+        .tuning-full:hover{color:#fff;}
+
+        #analysis{ background-color: #000;width: 100%;display:flex; height: 500px;}
+        #list{position:relative;height: 200px; width: 100%;overflow-y:scroll;}
+
+        .left{flex:1;overflow-y: scroll;padding-bottom:50px;}
+        .right{background-color: #001;flex:2;overflow-y: scroll; padding-bottom:50px;}
+        button{font-size:11px;font-family: Consolas,monospace;}
+
+        #intervals-direct{
+            font-size:9px;
+        }
+
+        .direct-mark{background-color: rgba(255,255,255,0.33);}
+
+        #ui-bar{position: fixed; top:200px;width: 100%; height: 2px; background-color: #111; overflow: hidden; margin-top:-2px; cursor:n-resize; }
+        #health{width:0%;background-color: #1e8; height: 100%;}/*haha*/
+        
+        #canvas-direct, #canvas-full{border:1px dashed #666; margin:0px;background-color: #000020;}
+        #canvas-marks{position: relative;}
+
+        #canvas-marks-full{position: relative;}
+        .full-graphic{margin:10px 30px;}
+
+        input[type="number"]{
+            background-color: #000;
+            color:#eee;
+            font-size:11px;
+            font-family: Consolas,monospace;
+            width: 40px;
+        }
+        .fixed-mark{ font-size:10px;position:absolute;}
+        .interval-mark{border-left:1px dashed #ccc; height: 10px; position:absolute;top:-12px;left:50%;}
+
+        #graph-opts{border-bottom: 1px dotted #666;width:100%;z-index: 10; overflow:hidden;text-wrap:nowrap;}
+
+        .interval-details{position:absolute;top:25px;left:15px;border:1px dashed #666;background-color: rgba(0,0,0,0.9); padding:5px; display: none;color:rgb(255, 255, 255);}
+
+        .threshold{border-top:1px dashed #00f; width: 830px; height: 3px;}
+        .data-bold{font-size: bold;color:#fff;}
+    </style>
+</head>
+<body>
+    <div id="list">
+        <div>
+            <input type="file" accept=".scl" multiple onchange="previewFile()">
+        </div>
+        <div class="content">
+    
+        </div>
+        <div id="ui-bar"><div id="health"></div></div>
+    </div>
+    
+    <div id="analysis">
+        <div class="left">
+            <button onclick="scanA()" style="float:right;">SCAN</button>
+            <div id="total-files">Total files: </div>
+            <div id="system-size" style="padding:8px;">
+                &Xscr;&equals;System size (number of notes): 
+                <div id="tuning-size-average">Average: </div>
+                <div id="tuning-size-range">Range:</div>
+                <div id="tuning-size-ranking">Mode Top 5: </div>
+            </div>
+            <div style="padding:8px;">
+                &Xscr;&equals;Intervals of equivalence (assuming all tunings are perodic):
+                <div id="equave-average">Average:</div>
+                <div id="equave-range">Range: </div>
+                <div id="top-equave">Mode Top 5: </div>
+            </div>
+            <br>
+            <div>
+                Truncation max digits: <input id="truncate-digits" type="number" value="8" step="1" min="3"> Precision Loss: <span id="precision-loss"></span><br>
+                To fraction, epsilon zeros: <input id="fraction-epsilon" type="number" value="5" step="1" min="1">
+                <br><br>
+            </div>
+            <div style="padding:8px;">
+                [Simple scan]
+                <div id="total-intervals">&Xscr;&equals;Total Intervals:</div>
+                <div id="total-unique-intervals">Total Unique Intervals:</div>
+                <div id="top-interval-simple">Mode Top 5: [Decimal Ratio, Total] </div>
+                <div id="bot-interval-simple"></div>
+            </div>
+            <div style="padding:8px;">
+                [Full scan]
+                <!--div>Calculate full interval matrix for all tunings (!) <button style="float:right;" onclick="getMatrixAll()">SCAN</button></div-->
+                <div id="total-fullscan">Total files (removed non-2:1):</div>
+                <div id="total-aggregate">&Xscr;&equals;Total Aggregate Intervals:</div>
+                <div id="total-unique-aggregate">Total Unique Aggregate Intervals: </div>
+                <div id="top-interval-full">Mode Top 5: [Decimal Ratio, Total] </div>
+                <div id="bot-interval-full"></div>
+            </div>
+            
+        </div>
+        <div class="right">
+            <div id="graph-opts">
+                Scale: &vArr; Lin<input type="radio" name="graph-scale" onchange="updateGraphs()"checked> Log<input type="radio" name="graph-scale" onchange="updateGraphs()" > &hArr;: Lin<input type="radio" name="graphx-scale" onchange="updateGraphs()"checked> Log<input type="radio" name="graphx-scale" onchange="updateGraphs()" > | Space Min: <input type="number" value="1" min="0" max="1" step=".05" id="simple-draw-min"> | Max <input type="number" value="2" min="2" max="100" step="0.5" id="simple-draw-max"> | <input type="checkbox" id="ignore-octave" onchange="updateGraphs()"> Ignore 2:1 | Bar width: <input type="number" value="2" min="1" max="5" id="bar-width" onchange="updateGraphs()"> | A: <input type="number" value="0.1" min="0.01" step="0.01" max="1" id="bar-alpha" onchange="updateGraphs()"> | Color <input type="checkbox" id="bar-color" onchange="updateGraphs()">
+            </div>
+            
+            <div class="full-graphic">
+                <div id="canvas-marks">
+                    <div id="simple-first" style="color:#666;">[Simple Scan] Total intervals: 0 | Total Unique: 0</div>
+                    <div class="interval-details"></div>
+                    <canvas id="canvas-direct" width="830" height="160"></canvas>
+                </div>
+                <div id="simple-opts" style="margin-top:40px;border-bottom:1px dashed #222; padding-bottom: 10px;">
+                    <div style="display:inline;">
+                        Mode Top <input id="simple-thres" type="number" value="0" step="1">
+                    </div>
+                    <div style="display:inline;font-style:italic;color:#666;">
+
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="full-graphic">
+                <div id="canvas-marks-full">
+                    <div id="full-first" style="color:#666;">[Full Scan] Total intervals: 0 | Total Unique: 0</div>
+                    <div class="interval-details"></div>
+                    <canvas id="canvas-full" width="830" height="160"></canvas>
+                    
+                </div>
+                <div id="full-opts" style="margin-top:40px;border-bottom:1px dashed #222; padding-bottom: 10px;">
+                    <div style="display:inline;">
+                        Mode Top <input id="full-thres" type="number" value="0" step="1">
+                    </div>
+                    <div style="display:inline;font-style:italic;color:#666;">
+
+                    </div>
+                </div>
+            </div>
+            
+            
+
+        </div>
+        
+    </div>
+    
+</body>
+<script type="text/javascript" src="intervals-names.js"></script> 
+<script>
+
+let prec = parseInt(document.getElementById('truncate-digits').value);
+document.getElementById('truncate-digits').onchange = ()=>{
+    prec =  parseInt(document.getElementById('truncate-digits').value);
+    writePrecisionLoss();
+    if(tunings.length>0){
+        scanB();
+    }
+}
+
+let epsilon = getEpsilon(parseInt(document.getElementById('fraction-epsilon').value));
+document.getElementById('fraction-epsilon').onchange = ()=>{
+    epsilon =  getEpsilon(parseInt(document.getElementById('fraction-epsilon').value));
+    //writePrecisionLoss();
+    if(tunings.length>0){
+        scanB();
+    }
+}
+
+function getEpsilon(z){return 1/(Math.pow(10,z-1));}
+
+function writePrecisionLoss(){
+    const sp = document.getElementById('precision-loss');
+    const digits = parseFloat(document.getElementById('truncate-digits').value);
+    sp.innerText = "~"+ (1200*Math.log2(1+(1/Math.pow(10,digits-1)))).toFixed(6) +" ¢";
+}
+writePrecisionLoss();
+
+
+let tunings = [];
+let systemSizes = [];
+
+let commonSize;
+let meanG;
+
+let len;
+function previewFile() {
+  const files = document.querySelector("input[type=file]").files;
+  if(files){
+    tunings = [];
+    systemSizes = [];
+
+    len = files.length;
+    for(let f = 0; f<len;f++){
+        const reader = new FileReader();
+        reader.addEventListener("load", ()=>{
+            parseSCL(reader.result,f,files[f].name);
+        },false);
+        reader.readAsText(files[f]);
+    }
+    document.getElementById('total-files').innerHTML = "Total: <span style='color:#fff;font-weight:bold;'>"+files.length+"</span>";
+  }
+  return;//?
+}
+
+function parseSCL(text,f,name){
+    //ui
+    const bar = document.getElementById('health');
+    bar.style.width = (100/len)*(f+1)+"%";
+
+    const content = document.querySelector(".content");
+    let splitted = text.split('\n');
+    
+    const full = document.createElement('div');
+    full.className = "tuning-full";
+    content.appendChild(full);
+
+    const nameui = document.createElement('div');
+    nameui.innerText = name;
+    nameui.className = "tuning-data";
+    nameui.style.maxWidth = "100px";
+    full.appendChild(nameui);
+
+    let c = 0;
+    let tuningText = "";
+    let tuning = [];
+
+    for(let s=0;s<splitted.length-1;s++){
+        //
+        if(splitted[s].startsWith("!"))continue;
+        if(c<2){
+            const data = document.createElement('div');
+            data.className = "tuning-data";
+            if(c==0) data.style.maxWidth = "250px";
+            if(c==1) {
+                data.style.maxWidth = "50px";
+                systemSizes.push( parseFloat(splitted[s]) );
+            }
+            data.innerText = splitted[s];
+            full.appendChild(data);
+            c++;
+        }else{
+            tuning.push(splitted[s].replace('\r',""));
+            tuningText+=splitted[s].replace('\r',", ")
+        }
+    }
+    tunings.push(tuning);
+
+    const tuningUI = document.createElement('div');
+    tuningUI.className = "tuning-data";
+    tuningUI.innerText = tuningText;
+    full.appendChild(tuningUI);
+
+    if( f%2 === 0 ) full.style.backgroundColor = "#222";
+    else full.style.backgroundColor = "#444";
+}
+
+function scanA(){
+    if(tunings==0) return;
+    numberOfNotes();
+    countSizes(); 
+    scanB();
+}
+
+function scanB(){
+    rebuildTunings();
+    getTopEquave();
+    groupIntervals();
+    drawIntervalsDirectCVS('canvas-marks','canvas-direct',individualIntervals);
+    getMatrixAll();
+}
+//average of tuning system size(number of notes)
+function numberOfNotes(){
+    let average = 0,median, min, max, vari, std;
+    for(let i=0;i<systemSizes.length;i++)average+=parseInt(systemSizes[i]);
+    average/=systemSizes.length;
+
+    let sizeorder = systemSizes.sort((a,b)=>a-b);
+    median = sizeorder[Math.floor(sizeorder.length/2)];
+    
+    vari = 0;
+    for(let i=0;i<systemSizes.length;i++) vari+= Math.pow(parseInt(systemSizes[i])-average,2);
+    vari= vari/(systemSizes.length-1);//tunings are a sample
+    std=Math.sqrt(vari);
+
+    document.getElementById('tuning-size-average').innerHTML =  
+        "Average: [Mean: <span class='data-bold'>"+Math.round(average)+"("+average.toFixed(3)+"...)</span>] [Median: <span class='data-bold'>"+median+"</span>]<br>[Var: <span class='data-bold'>"+vari.toFixed(3)+"...</span>] [Std: <span class='data-bold'>"+std.toFixed(3)+"...</span>] [CV: <span class='data-bold'>"+(std/average).toFixed(3)+"...</span>]";
+
+    min = Math.min(...systemSizes);
+    max = Math.max(...systemSizes);
+
+    document.getElementById('tuning-size-range').innerHTML = "Range: [Min: <span class='data-bold'>"+min+"</span>] [Max: <span class='data-bold'>"+max+"</span>]";
+    meanG=Math.round(average);
+
+    simplethres=median;fullthres=median;
+    document.getElementById('simple-thres').value = median;
+    document.getElementById('full-thres').value = median;
+    //commonSize = Math.round(average);
+}
+
+//groups and counts tuning systems by its size
+//let isv;
+function countSizes(){
+    let individualsSizes = new Map();
+    for(let i = 0;i<systemSizes.length;i++){
+        let c = systemSizes[i].toString();
+        if(individualsSizes.has(c)){
+            individualsSizes.set(c, individualsSizes.get(c)+1);
+        }else{
+            individualsSizes.set(c,1);
+        }
+    }
+    let individualsSorted = new Map([...individualsSizes.entries()].sort( (a,b) => b[1] - a[1]));
+    let isv = individualsSorted.entries();
+
+    commonSize = isv.next().value; //top mode needs to be global
+
+    const rankUI = document.getElementById('tuning-size-ranking');
+    rankUI.innerHTML = "Mode Top 5: [Number of Notes, Total] <br><span class='data-bold'>" 
+     + " ["+commonSize+"] "
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] </span> ";
+}
+
+
+let tuningsRebuild = [];
+function rebuildTunings(){
+    tuningsRebuild = [];
+    //[ratios, cents, decimal ratios]
+    for(let i=0;i<tunings.length;i++){
+        let tun = [];
+        for(let j=0;j<tunings[i].length;j++){
+            let c = tunings[i][j];
+            //precision needs to start adjusting here mmmmm or just cents, log loss
+            if(c.includes(".")) {//is cents
+                let ratio = calcRatioFromCents(parseFloat(c));
+                let cents = parseFloat(c);
+                let dratio = calcDecimalFromCents(parseFloat(c));
+                tun.push([ratio,cents,dratio]);
+            }else{ //includes / or nothing, so its a ratio
+                let ratio = c;
+                let dratio = calcDecimalRatioFromRatio(c);
+                let cents = calcCentsFromRatio(c);
+                tun.push([ratio,cents,dratio]);
+            }
+        }
+        tuningsRebuild.push(tun);
+    }    
+}
+
+//the difference between the count of most popular interval, that is 2/1, from the count of most popular equave, also 2/1,
+//comes from tunings that has the octave, but it's not its equave
+function getTopEquave(){
+    let individuals = new Map();
+    let eqsum = 0;
+    let eqarr = [];
+    for(let i = 0;i<tuningsRebuild.length;i++){
+        let c = tuningsRebuild[i][tuningsRebuild[i].length-1][2];
+        eqsum += c;
+        eqarr.push(c);
+        /*let clen = c.toString().length; if(c[0]==0) clen+=1;
+        if(clen>=prec) {
+            //c = truncateDecimals(c, prec);
+            c= parseFloat(c.toPrecision(prec));
+        }*/
+        if(individuals.has(c)){
+            individuals.set(c, individuals.get(c)+1);
+        }else{
+            individuals.set(c,1);
+        }
+    }
+    let individualsSorted = new Map([...individuals.entries()].sort( (a,b) => b[1] - a[1]));
+    let isv = individualsSorted.entries();
+
+    let mean = eqsum/tuningsRebuild.length;
+
+    eqarr = eqarr.sort((a,b)=>a-b);
+    let median = eqarr[Math.round(eqarr.length/2)];
+
+    let vari = 0;
+    for(let i=0;i<eqarr.length;i++){
+        vari += Math.pow(eqarr[i]-mean,2);
+    }
+    vari/= eqarr.length-1;//sample?
+    let std = Math.sqrt(vari);
+
+    document.getElementById('equave-average').innerHTML = "Average: [Mean: <span class='data-bold'>"+mean.toFixed(3)+"...</span>] [Median: <span class='data-bold'>"+median+"</span>]<br>[Var: <span class='data-bold'>"+vari.toFixed(3)+"...</span>] [Std: <span class='data-bold'>"+std.toFixed(3)+"...</span>] [CV: <span class='data-bold'>"+(std/mean).toFixed(3)+"...</span>]"
+
+    document.getElementById('equave-range').innerHTML = "Range: [Min: <span class='data-bold'>"+eqarr[0].toFixed(3)+"...</span>] [Max: <span class='data-bold'>"+eqarr[eqarr.length-1].toFixed(3)+"...</span>]"
+
+    const rankUI = document.getElementById('top-equave');
+    rankUI.innerHTML = "Mode top 5:<br><span style='color:#fff;font-weight:bold;'>" 
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] </span> ";
+}
+
+let allIntervals = [];
+let individualIntervals = [];
+let individualIntervalsBot = [];
+function groupIntervals(){
+    let individuals = new Map();
+    allIntervals = [];
+    individualIntervals = [];
+    individualIntervalsBot = [];
+    for(let i=0;i<tuningsRebuild.length;i++){
+        for(let j=0;j<tuningsRebuild[i].length;j++){
+            let c = tuningsRebuild[i][j][2];//truncate here
+            let clen = c.toString().length;
+            if(c[0]==0) clen+=1;
+            if(clen>=prec) {
+                //c = truncateDecimals(c, prec);
+                c= parseFloat(c.toPrecision(prec));
+            }
+            if(individuals.has(c)){
+                individuals.set(c, individuals.get(c)+1);
+            }else{
+                individuals.set(c,1);
+            }
+            allIntervals.push(c); //only decimal ratios
+        }
+    }
+
+    individualIntervals = new Map([...individuals.entries()].sort( (a,b) => b[1] - a[1]));
+
+    let isv = individualIntervals.entries();
+
+    const rankUI = document.getElementById('top-interval-simple');
+    rankUI.innerHTML = "Mode Top 5: [Decimal Ratio, Total] <br><span style='color:#fff;font-weight:bold;'>" 
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] </span> ";
+
+    //individualIntervalsBot = new Map([...individuals.entries()].sort( (a,b) => a[1] - b[1]));
+    //let isvbot = individualIntervalsBot.entries();
+
+    let count = 0;
+    for([key,val]of individualIntervals) if(val==1) count++;
+    
+    const rankbotUI = document.getElementById('bot-interval-simple');
+    rankbotUI.innerHTML = "The are <span style='color:#fff;'>"+count+"</span> intervals appearing only once.";
+    /*" here are 5.<br><span style='color:#fff;font-weight:bold;'>"
+     + " ["+isvbot.next().value+"] "
+     + " ["+isvbot.next().value+"] "
+     + " ["+isvbot.next().value+"] "
+     + " ["+isvbot.next().value+"] "
+     + " ["+isvbot.next().value+"] </span> ";*/
+
+
+    document.getElementById('total-intervals').innerHTML = "𝒳=Total intervals: <span style='color:#fff;font-weight:bold;'>"+allIntervals.length+"</span>";
+    document.getElementById('total-unique-intervals').innerHTML = "Total unique intervals: <span style='color:#fff;font-weight:bold;'>"+individualIntervals.size+"</span>";
+
+    document.getElementById('simple-first').innerHTML = "[Simple Scan] Total intervals: <span style='color:#fff;font-weight:bold;'>"+allIntervals.length+"</span> | Total unique: <span style='color:#fff;font-weight:bold;'>"+individualIntervals.size+"</span>";
+}
+
+let drawmin = document.getElementById('simple-draw-min').value;
+document.getElementById('simple-draw-min').onchange = ()=>{
+    drawmin = document.getElementById('simple-draw-min').value;
+    //scanB();
+    updateGraphs();
+}
+let drawmax = document.getElementById('simple-draw-max').value;
+document.getElementById('simple-draw-max').onchange = ()=>{
+    drawmax = document.getElementById('simple-draw-max').value;
+    //scanB();
+    updateGraphs();
+}
+
+let simplethres = 0;
+document.getElementById('simple-thres').onchange = ()=>{
+    simplethres = document.getElementById('simple-thres').value;
+    updateGraphs();
+}
+let fullthres = 0;
+document.getElementById('full-thres').onchange = ()=>{
+    fullthres = document.getElementById('full-thres').value;
+    updateGraphs();
+}
+
+/*
+function drawIntervalsDirect(){
+    const drawLimit = 3;
+    const directui = document.getElementById('graph-intervals-direct');
+    directui.style.width = "500px";
+    directui.style.height = "300px";
+    directui.style.border = "1px solid #ccc"
+    directui.style.position = "relative";
+    let sizex = directui.clientWidth;
+    let sizey = directui.clientHeight;
+    console.log(sizex,sizey);
+    rebuildTunings();
+    groupIntervals();
+    
+    //cut the octave, dont use
+    let maxh = Math.max(...individualIntervals.values());
+
+    let maxw = Math.max(...individualIntervals.keys());//find the largest interval to draw, 
+    if(maxw>drawLimit) maxw = drawLimit;
+
+    let scalex = sizex/maxw;
+    let scaley = sizey/maxh;
+
+    for([key,val]of individualIntervals){
+        if(key<=drawLimit){
+            const mark = document.createElement('div');
+            mark.className = "direct-mark";
+            mark.style.position = "absolute"; mark.style.bottom = "0px";
+            mark.style.width = "2px";
+            mark.style.left = ((parseFloat(key))*scalex)+"px";
+            mark.style.height = (parseFloat(val)*scaley)+"px";
+            directui.appendChild(mark);
+        }else{
+            //console.log("Interval "+key+" was ignored.");
+        }
+    }
+}*/
+
+function drawIntervalsDirectCVS(parent,canvas,indint){
+    let thres = canvas=="canvas-full"?fullthres:simplethres;
+    let linlog = GetTrueOne('graph-scale');
+    let linlogx = GetTrueOne('graphx-scale');
+    const cvm = document.getElementById(parent);//'canvas-marks'
+    const cvs = document.getElementById(canvas);//'canvas-direct'
+    const ctx = cvs.getContext('2d');
+    let sizex = cvs.width;
+    let sizey = cvs.height;
+
+    let alpha = parseFloat(document.getElementById('bar-alpha').value);
+    let bw = parseFloat(document.getElementById('bar-width').value);
+
+    ctx.clearRect(0,0,sizex,sizey);    
+    ctx.fillStyle = "rgba(180,255,230,"+alpha+")";
+
+    //cut the octave, dont use,todo
+    let maxh = 0;
+    if(document.getElementById('ignore-octave').checked){
+        maxh = nextBiggest([...indint.values()]);
+        if(maxh==-Infinity) maxh = getMax([...indint.values()]);
+    }
+    //else maxh = Math.max(...indint.values());
+    else maxh = getMax([...indint.values()]);
+    if(linlog==1) maxh = Math.log(maxh+1);
+
+    //let maxw = Math.max(...indint.keys());//find the largest interval to draw, 
+    let maxw = getMax([...indint.keys()]);
+    if(maxw>drawmax) maxw = drawmax;
+    //maxw = drawmax;
+    let dmin = drawmin;
+    let dmax = drawmax;
+    if(linlogx==1) {
+        maxw = Math.log2(maxw);
+        dmin = Math.log2(drawmin);
+        //dmax = Math.log(dmax);
+    }
+
+    let scalex = sizex/(maxw-dmin);
+    //let scalex = sizex/(dmax-dmin);
+    let scaley = sizey/maxh;
+
+    let fixedmarks = [0.25,0.5,1,2,4,8]; //octaves
+    clearByClass('fixed-mark',parent);
+    for(let f =0;f<fixedmarks.length;f++){
+        if(fixedmarks[f]<=drawmax&&fixedmarks[f]>=drawmin){
+            const fixedmark = document.createElement('div');
+            fixedmark.className = "fixed-mark";
+            fixedmark.style.width ="1px"; fixedmark.style.height = "15px";
+            fixedmark.style.bottom = "-15px";
+            fixedmark.innerText = " "+fixedmarks[f];
+            let left = (fixedmarks[f]-dmin);
+            if(linlogx==1) left = Math.log2(left);
+            fixedmark.style.left = (left*scalex)+"px";
+            cvm.appendChild(fixedmark);
+        }
+    }
+
+    let ymarks = [1]; 
+    let maxn = getMax([...indint.values()]);
+    if(document.getElementById('ignore-octave').checked){maxn = nextBiggest([...indint.values()]);}
+    let dist = 10**((maxn.toString().length)-1);
+    for(let m=0;m<maxn-dist;){
+        m+=dist;
+        ymarks.push(m);
+    }
+    ymarks.push(maxn);
+    for(let m=0;m<ymarks.length;m++){
+        const mark = document.createElement('div');
+        mark.className = "fixed-mark";
+        mark.style.width = "15px"; mark.style.height = "1px";
+        mark.style.left = "-15px";
+        let bot = ymarks[m];
+        if(linlog==1) bot = Math.log(bot+1);
+        mark.style.bottom = bot*scaley+"px";
+        mark.innerText = ymarks[m];
+        cvm.appendChild(mark);
+    }
+
+    //top marks
+    let is = indint.keys();
+    let decimallist = [];
+    //console.log(is)
+    //for(let m = 0;m<parseInt(commonSize[0]);m++){
+    for(let m = 0;m<thres;m++){
+        const mark = document.createElement('div');
+        mark.className = "fixed-mark";
+        mark.style.bottom = "-25px";
+        let x = is.next().value;
+        let text = "";
+
+        /*let o1 = tuningsRebuild.findIndex(arr => arr.some(t => t[2].toPrecision(prec) == x));
+        let o2 = tuningsRebuild[o1].findIndex(t => t[2].toPrecision(prec) == x);
+        if(tuningsRebuild[o1][o2][0].length>10){
+            text = tuningsRebuild[o1][o2][1].toFixed(2);
+        }else{
+            //
+            text = tuningsRebuild[o1][o2][0];
+            //use original fraction
+        }*/
+        text = toFractionIterative(x).toString().replace(',','/');
+        //console.log(o1);
+        mark.innerText = text;
+        let w = mark.innerText.length*2;
+        mark.style.position = "absolute";
+
+        if(m==parseInt(thres-1)){
+            clearByClass('threshold',parent);
+            const treshui = document.createElement('div');
+            treshui.className = "threshold"; treshui.style.position = "absolute";
+            let k = indint.get(x)
+            if(linlog==1) k=Math.log(k+1);
+            treshui.style.bottom = (k*scaley)+"px";
+            cvm.appendChild(treshui);
+        }
+
+        decimallist.push(x.toFixed(4));
+        
+        x-=dmin;
+        if(linlogx==1) x = Math.log2(x);
+        mark.style.left = -w+x*scalex+"px";
+        const imark = document.createElement('div'); imark.className = "interval-mark";
+        mark.appendChild(imark);
+        mark.onmouseenter = ()=> showDetails(text,cvm);
+        mark.onmouseleave = ()=> hideDetails();
+        cvm.appendChild(mark);
+    }
+
+    decimallist = decimallist.sort((a,b)=>a-b);
+    cvm.parentElement.lastElementChild.lastElementChild.innerText =decimallist;
+
+
+    for([key,val]of indint){
+        if(key<=dmax&&key>=dmin){
+            let left = ((parseFloat(key)-dmin));
+            if(linlogx==1) left = Math.log2(left);
+
+            let y = parseFloat(val);
+            if(linlog==1) y = Math.log(y+1);
+
+            ctx.fillRect(
+                left*scalex,
+                sizey,
+                bw,
+                -(y*scaley)
+            );
+        }else{
+            //console.log("Interval "+key+" was ignored.");
+        }
+    }
+    if(document.getElementById('bar-color').checked){
+        const imageData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+        const data = imageData.data;
+        let hsl = []; 
+        for (let i = 0; i < data.length; i += 4) {
+            let h = data[i+3];
+            //if(!h) h=0;
+                hsl = hslToRgb( 
+                ((255-h)),
+                1,.05*Math.log2(h+h));
+                data[i] = hsl[0]; // red
+                data[i + 1] = hsl[1]; // green
+                data[i + 2] = hsl[2]; // blue
+                data[i+3] = 255;
+        }
+        ctx.putImageData(imageData, 0, 0);
+    }
+}
+
+
+
+let fulltunings = []; //like rebuild but only decimals
+
+let fullAllIntervals = [];
+let fullIndividual = [];
+let fullIndividualBot = [];
+function getFullMatrix(tuning){
+    let full = [];
+    full.push(tuning);
+    let index, base;
+    const eq = tuning[tuning.length-1];
+
+    for(let i=0;i<tuning.length-1;i++){
+        index=i;
+        base = tuning[index];
+        let switched = [];
+        for(let k = 0; k<tuning.length;k++){
+            let interval = tuning[k]/base;
+            if(interval<=1){
+                while(interval<=1){
+                    interval*=eq;//equave 
+                }
+            }
+            else if(interval>eq){
+                while(interval>eq){
+                    interval/=eq;//equave 
+                }
+            }
+            switched.push( interval );
+        }
+        full.push(switched);
+    }
+    fulltunings.push(full);
+}
+
+function getMatrixAll(){
+    if(tunings==0) return;
+    fulltunings = [];
+    for(let t = 0;t < tuningsRebuild.length;t++){
+        let tuning = [];
+        //if(tuningsRebuild[t][0][2]<=1) continue;
+        //if(tuningsRebuild[t][tuningsRebuild[t].length-1][2]>2) continue;
+        if(tuningsRebuild[t][tuningsRebuild[t].length-1][2]!=2) {tuning=[];console.log("ehe") }
+        else{
+            for(let i=0;i<tuningsRebuild[t].length;i++){
+                let temp = tuningsRebuild[t][i][2];
+                if(temp<=1||temp>2){ //remove non-2:1 recheck
+                    tuning = []; continue;
+                }
+                tuning.push(tuningsRebuild[t][i][2]);
+            }
+        }
+        
+        if(tuning.length>0) getFullMatrix(tuning);
+    }
+    writeFullScanInfo();
+}
+
+function writeFullScanInfo(){//group
+    let individuals = new Map();
+    fullAllIntervals = [];
+    fullIndividual = [];
+    fullIndividualBot = [];
+    for(let i=0;i<fulltunings.length;i++){
+        for(let j=0;j<fulltunings[i].length;j++){
+            for(let u = 0;u<fulltunings[i][j].length;u++){
+                let c = fulltunings[i][j][u];//truncate here
+                let clen = c.toString().length;
+                if(c[0]==0) clen+=1;
+                if(clen>=prec) {
+                    c= parseFloat(c.toPrecision(prec));
+                }
+                if(individuals.has(c)){
+                    individuals.set(c, individuals.get(c)+1);
+                }else{
+                    individuals.set(c,1);
+                }
+                fullAllIntervals.push(c); //only decimal ratios
+            }
+        }
+    }
+
+    fullIndividual = new Map([...individuals.entries()].sort( (a,b) => b[1] - a[1]));
+    let isv = fullIndividual.entries();
+
+    const rankUI = document.getElementById('top-interval-full');
+    rankUI.innerHTML = "Mode Top 5: [Decimal Ratio, Total] <br><span style='color:#fff;font-weight:bold;'>" 
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] "
+     + " ["+isv.next().value+"] </span> ";
+
+     let count = 0;
+    for([key,val]of fullIndividual) if(val==1) count++;
+    
+    const rankbotUI = document.getElementById('bot-interval-full');
+    rankbotUI.innerHTML = "The are <span style='color:#fff;'>"+count+"</span> intervals appearing only once.";
+
+    document.getElementById('total-aggregate').innerHTML = "𝒳=Total Aggregate Intervals: <span style='color:#fff;font-weight:bold;'>"+fullAllIntervals.length+"</span>";
+    document.getElementById('total-unique-aggregate').innerHTML = "Total unique aggregate: <span style='color:#fff;font-weight:bold;'>"+fullIndividual.size+"</span>";
+    document.getElementById('total-fullscan').innerHTML = "Total files (removed non-2:1): <span style='font-weight:bold;color:#fff'> "+fulltunings.length+"</span>";
+
+    drawIntervalsDirectCVS('canvas-marks-full','canvas-full',fullIndividual);
+
+    document.getElementById('full-first').innerHTML = "[Full Scan] Total intervals: <span style='color:#fff;font-weight:bold;'>"+fullAllIntervals.length+"</span> | Total unique: <span style='color:#fff;font-weight:bold;'>"+fullIndividual.size+"</span>";
+}
+
+function updateGraphs(){
+    if(individualIntervals.size>0){
+        drawIntervalsDirectCVS('canvas-marks','canvas-direct',individualIntervals);
+        
+    }
+    if(fullIndividual.size>0){
+        drawIntervalsDirectCVS('canvas-marks-full','canvas-full',fullIndividual);
+    }
+}
+
+//a ratio enters here
+function showDetails(interval,canvas){
+    let ratio = interval;
+    let cents = calcCentsFromRatio(ratio);
+    let name = names.get(interval);//names is loaded in other js
+    if(name==undefined) name = "Unnamed interval.";
+
+    let w = canvas.getElementsByClassName('interval-details');
+    w[0].style.display = "block";
+    w[0].innerHTML = ratio+"<br>"+cents+" ¢<br><span style='font-style:italic;'>"+name+"</span>";
+}
+
+function hideDetails(){
+    let w = document.getElementsByClassName('interval-details');
+    for(el of w){
+        el.style.display = "none";
+    }
+}
+
+
+
+
+
+function truncateDecimals (num, digits) {
+    var numS = num.toString(),
+        decPos = numS.indexOf('.'),
+        substrLength = decPos == -1 ? numS.length : 1 + decPos + digits,
+        trimmedResult = numS.substr(0, substrLength),
+        finalResult = isNaN(trimmedResult) ? 0 : trimmedResult;
+
+    return parseFloat(finalResult);
+}
+
+function nextBiggest(arr) {
+  let max = -Infinity, result = -Infinity;
+
+  for (const value of arr) {
+    const nr = Number(value)
+
+    if (nr > max) {
+      [result, max] = [max, nr] // save previous max
+    } else if (nr < max && nr > result) {
+      result = nr; // new second biggest
+    }
+  }
+
+  return result;
+}
+
+function calcDecimalFromCents(v){
+    return Math.pow(2,v/1200);
+}
+
+function calcRatioFromCents(v){
+    //algorithm from stackoverflow
+    let gcd = function(a, b) {
+    if (b < 0.0000001) return a;                // Since there is a limited precision we need to limit the value.
+
+    return gcd(b, Math.floor(a % b));           // Discard any fractions due to limitations in precision.
+    };
+
+    let fraction = Math.pow(2,v/1200);
+    let leng = fraction.toString().length - 2;
+
+    let denominator = Math.pow(10, leng);
+    let numerator = fraction * denominator;
+
+    let divisor = gcd(numerator, denominator);    
+
+    numerator /= divisor;
+    denominator /= divisor;
+
+    let ratio = Math.floor(numerator) + '/' + Math.floor(denominator);
+    return ratio;
+}
+
+/*
+function calcRatioFromDecimal(v){
+    //algorithm from stackoverflow
+    let gcd = function(a, b) {
+    if (b < 0.0000001) return a;                // Since there is a limited precision we need to limit the value.
+
+    return gcd(b, Math.floor(a % b));           // Discard any fractions due to limitations in precision.
+    };
+    
+    let fraction = v;
+    let leng = fraction.toString().length - 2;
+
+    let denominator = Math.pow(10, leng);
+    let numerator = fraction * denominator;
+
+    let divisor = gcd(numerator, denominator);    
+
+    numerator /= divisor;
+    denominator /= divisor;
+
+    let ratio = Math.floor(numerator) + '/' + Math.floor(denominator);
+    return ratio;
+}*/
+
+function calcCentsFromRatio(v){
+    //may not have any "/"
+    let r = calcDecimalRatioFromRatio(v);
+    let cent = 1200*Math.log2(r);
+    return cent;
+}
+
+function calcDecimalRatioFromRatio(v){
+    let s = v.toString()
+    if(s.includes('/')){
+        let numbers = s.split('/');
+        let r =parseInt(numbers[0])/parseInt(numbers[1]);
+        return r;
+    }
+    else {
+        return parseInt(s);
+    } 
+}
+
+function toFractionIterative(x) {
+    if (x == 0) return [0, 1];
+    const a = Math.abs(x);
+    let n = 0;
+    let d = 1;
+    let r;
+    while (true) {
+        r = n / d;
+        if (Math.abs((r - a) / a) < epsilon) {
+            break;
+        }
+        if (r < a) {
+            n++;
+        }
+        else {
+            d++;
+        }
+    }
+    return [x < 0 ? -n : n, d];
+}
+
+function GetTrueOne(rname){
+    let options = document.getElementsByName(rname);
+    let t;
+    for (t=0; t < options.length ; t++){
+        if(options[t].checked==true){
+            return t;
+        }
+    }
+}
+
+function clearByClass(name,test){
+    let entries = document.getElementById(test).getElementsByClassName(name);
+    for(let i = entries.length; i>0; i--){
+        entries[i-1].remove();
+    }
+}
+
+function getMax(arr) {
+    let len = arr.length;
+    let max = -Infinity;
+
+    while (len--) {
+        max = arr[len] > max ? arr[len] : max;
+    }
+    return max;
+}
+
+function hslToRgb(hue, sat, light) {
+  var t1, t2, r, g, b;
+  hue = hue / 60;
+  if ( light <= 0.5 ) {
+    t2 = light * (sat + 1);
+  } else {
+    t2 = light + sat - (light * sat);
+  }
+  t1 = light * 2 - t2;
+  r = hueToRgb(t1, t2, hue + 2) * 255;
+  g = hueToRgb(t1, t2, hue) * 255;
+  b = hueToRgb(t1, t2, hue - 2) * 255;
+  //return {r : r, g : g, b : b};
+  return [r,g,b];
+}
+function hueToRgb(t1, t2, hue) {
+  if (hue < 0) hue += 6;
+  if (hue >= 6) hue -= 6;
+  if (hue < 1) return (t2 - t1) * hue + t1;
+  else if(hue < 3) return t2;
+  else if(hue < 4) return (t2 - t1) * (4 - hue) + t1;
+  else return t1;
+}
+
+
+function getByValue(map, searchValue) {
+  for (let [key, value] of map.entries()) {
+    if (value === searchValue)
+      return key;
+  }
+}
+
+function closestBF(arr){
+    let sarr = arr.sort((a,b)=> b -a);
+    let dist = Infinity, pair = [], temp = 0;
+    for(let i=0;i<sarr.length;i++){
+        temp = sarr[i]-sarr[i+1];
+        if(temp<=dist) {
+            dist = temp;
+            pair = [sarr[i],sarr[i+1]]
+        }
+    }
+    return [dist,pair]
+}
+
+function countFromTo(arr,from,to){
+    let count = 0;
+    for(let i=0;i<arr.length;i++){
+        if(arr[i]>from&&arr[i]<to) count++;
+    }
+    return count;
+}
+
+
+
+
+
+
+
+
+
+
+//document.getElementById('ui-bar').onmousedown = dragMouseDown;
+
+dragElement(document.getElementById('ui-bar'));
+function dragElement(elmnt) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    elmnt.onmousedown = dragMouseDown;
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+    }
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        pos2 = pos4 - e.clientY;
+        document.getElementById('list').style.height = (200-pos2) + "px";
+        document.getElementById('analysis').style.height = (500+pos2) + "px";
+        elmnt.style.top = (200-pos2) + "px";
+    }
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+    }
+}
+
+</script>
+</html>
