@@ -9,8 +9,8 @@
             input[type="number"]{width: 40px; background-color: #666;}
             .main{display:flex;}
            
-            .left{flex:1; max-width: 420px; border-right: 1px solid #444;}
-            .right{flex:2;padding:0px 50px;overflow:hidden;}
+            .left{flex:1; max-width: 350px; border-right: 1px solid #444;}
+            .right{flex:2;padding:0px 25px;overflow:hidden;}
             #left-graph{position: relative; height: 100px;width:auto; background-color: #113;}
             .left-graph-bar{ position:absolute; width: 8px;margin:0px;padding:0px;border-top: 1px solid #0fc; height: 1px; }
             .alpha-bar{position:absolute; width:100%; margin:0px;padding:0px;border-top:1px dashed #f0f;}
@@ -100,10 +100,10 @@
                 <div id="ngenerators">
                     <div id="n-gen-gen" style="display: none;">
                         <div style="padding:10px;background-color: #222;margin:10px;">
-                            Progression mapping:<br>
-                            Notes: <input type="number" id="mean-quantity" value="1" onchange="calcMeans();">
+                            Chain:<br>
+                            Notes: <input type="number" id="mean-quantity" value="1" onchange="calcChain();">
                             <br>
-                            Ratio: <div class="input-ext"><input type="number" id="mean-equave" value="2" step="0.001" onchange="calcMeans();"></div>
+                            Generator: <div class="input-ext"><input type="number" id="mean-equave" value="2" step="0.001" onchange="calcChain();"></div>
                             <div id="tmean">Auto adapt ruler: <input type="checkbox" id="auto-ruler" checked > Max divisions: <input type="number" id="auto-max-d" value="100" step="1" min="1" max="1000"></div>
                         </div>
 
@@ -118,7 +118,7 @@
                 </div>
                 
                 <div>
-                    <button id="clear-list" onclick="clearByClass('list-number');clearByClass('left-graph-bar');clearByClass('new-numbers')">CLEAR</button>
+                    <button id="clear-list" onclick="clearAll();clearByClass('list-number');clearByClass('left-graph-bar');clearByClass('new-numbers')">CLEAR</button>
                     <button id="sort-asc" onclick="sortList(0)">SORT ASCENDING</button>
                     <button id="sort-desc" onclick="sortList(1)">SORT DESCENDING</button>
                 </div>
@@ -150,7 +150,7 @@
                     <input name="data-display" type="checkbox" checked id="show-original" onchange="toggleData('.mark-original',this.checked)"> Original
                     <input name="data-display" type="checkbox" checked id="show-delta" onchange="toggleData('.mark-delta',this.checked)"> Delta
                     <input name="data-display" type="checkbox" checked id="show-decimal"onchange="toggleData('.mark-decimal',this.checked)"> Decimal
-                    <input name="data-display" type="checkbox" checked id="show-fraction" onchange="toggleData('.mark-fraction',this.checked)"> Fraction <input type="number" value="6" step="1" min="1" max="15">
+                    <input name="data-display" type="checkbox" checked id="show-fraction" onchange="toggleData('.mark-fraction',this.checked)"> ~Ratio &epsi; : 10^-<input id="epsilon" type="number" value="6" step="1" min="1" max="15">
                 </div>
             </div>
             <div id="ede-ruler">
@@ -176,10 +176,8 @@
         
         
     </div>
-    <!--div id="stored"></div>
+    <!--div id="stored"></div-->
 
-    <input type="number" id="testval" value="1" step="0.001" >
-    <div id="testout"></div-->
 </body>
 <script>
 
@@ -225,7 +223,7 @@ function sortList(order){
     clearByClass('list-number');
     clearByClass('left-graph-bar');
     insertNumbersList(ordered);
-    drawNumberList();
+    drawNumberList();init();
 }
 
 function getList(){//GETS THE ARRAY FROM THE INPUTS TYPE NUMBERS
@@ -284,6 +282,7 @@ function clearAll(){
     clearByClass('intervals-ui');
     clearByClass('matrix-mark');
     clearByClass('accu-mark');
+    clearByClass('intervals-spectrum');
 }
 
 let numberInList = [];
@@ -434,7 +433,6 @@ function adjustFullSpectrum(){
 }
 
 
-
 function drawRulerw(w,ne,d,g){//'ede-ruler', 1
     const ruler = document.getElementById(w);
     ruler.style.marginTop = "20px";
@@ -527,54 +525,29 @@ function drawSpaces(){
 drawSpaces();
 
 
-const PHI = (1+Math.sqrt(5))/2;
-
-function calcMeans(){
+function calcChain(){
     let q = parseInt(document.getElementById('mean-quantity').value);
     let val = parseFloat(document.getElementById('mean-equave').value);
 
     let eq = gEquave;
 
-    //document.getElementById('g-equave').value = eq;
-
-    //let mui = document.getElementById('tmean');
-
-    let mean = ((val)/eq);
-    //let mean = (1+eq)/2;//phi
-    //let mean = 1/ ( (1+(1/eq))/2 );
-
-    
-
     let notes = [];
 
     for(let n = 0;n<q;n++){
-        notes.push(Math.pow(mean,n));
+        notes.push(Math.pow(val,n));
     }
 
     document.getElementById('number-to-add').value = notes;
     clearAll();
     clearByClass('list-number');clearByClass('left-graph-bar');clearByClass('new-numbers');
-    insertNumbersList(readNumbersList());init();getdaleg(val);
+    insertNumbersList(readNumbersList());init();
+    
+    //grla(val,parseFloat(document.getElementById('g-equave').value),1000);
 }
 
 
 //notes generators///////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////
-/*
-let nnotes = [];
-function calcMeans(){
-    nnotes = [];
-    let q = parseInt(document.getElementById('quantity').value);
-    let neq = parseFloat(document.getElementById('nequave').value);
-    let mean = (1+neq)/2;
-    nnotes.push(1);
-    for(let i =0; i<q; i++){
-        nnotes.push(Math.pow(mean,i+1));
-    }
-    nnotes.push(neq);
-
-    console.log(nnotes)
-}
 
 function addRandonNumbers(){
     const numbers = [];
@@ -595,19 +568,14 @@ function addRandonNumbers(){
     }
 
     clearByClass('left-graph-bar');
-    drawNumberList();
-}
-
-const testval = document.getElementById('testval');
-testval.onchange = ()=>{
-    getx(testval.value);
+    drawNumberList();init();
 }
 
 const testout = document.getElementById('testout');
 function getx(x){
     //console.log(x)
-    let hijoderemilputa = 1+parseFloat(x);
-    testout.innerText = Math.pow(x,4)+" = "+hijoderemilputa;
+    let h = 1+parseFloat(x);
+    testout.innerText = Math.pow(x,4)+" = "+h;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -643,7 +611,6 @@ function calcAll(na){//number array
                 let rebased = Math.abs(note.delta/(na[j]-del));
                 let reduced = getclosed(rebased);
                 note.ranks.push([reduced[0], getfraction(reduced[0]).toString().replace(',','/'),rebased, reduced[1] ]);//
-
 
                //////////////////////////////////////////////////
                 /*if(firsts[i]){
@@ -686,7 +653,7 @@ function getclosed(n){
     return [temp,exp];
 }
 
-let epsilon = .0000000001;
+let epsilon = Math.pow(10,-parseInt(document.getElementById('epsilon').value||-6));
 function getfraction(x) {
     if (x == 0) return [0, 1];
     const a = Math.abs(x);
@@ -820,7 +787,6 @@ function init(){
     adjustHeight();
     adjustClosed();//adjustHeight();
     
-
     drawFullSpectrum();
     adjustFullSpectrum();
 
@@ -860,58 +826,52 @@ function getFirsts(){
     }
 }*/
 
-const PLA = 1.3247179572447;
-let tol =PHI;
 
 
-function getdaleg(note) {
-    const PHI = (1 + Math.sqrt(5)) / 2; // Golden ratio
-    let eq = document.getElementById('g-equave').value;
-    let notes = [1, eq];
+//Golden ratio logarithm algorithm
+const PHI = (1 + Math.sqrt(5)) / 2;
+function grla(note,base,maxd) {
+    let eq = base;
+    let t = note;
+
+    let notes = [];
     let commas = [];
-    let a = Math.pow(note, 1 / eq);
-    
     let list = [];
 
-    for (let i = 1; i < 10000; i++) {
-        let t = Math.pow(note, i);
-        let nn = 1;
-        // Check for invalid values
-        if (!isFinite(t) || t === 0) {
-            console.log(i + " break");
-            break;
-        }
+    let n = 1; //numerator
+    let d = 1; //denominator
+    for (d ; d < maxd; d++) {
+        //if (!isFinite(t) || t === 0) {break;}
 
-        // Normalize t to the range [1, eq]
         while (t < 1) {
             t *= eq;
-            nn++;
+            n++;
         }
         while (t > eq) {
             t /= eq;
-            nn++;
+            n++;
         }
+        if(d==1)n+=n-1
 
         notes.push(t);
+        t*=note;
 
-        if (notes.length > 2) {
-            notes.sort((a, b) => a - b);
+        let interval = [1,eq]
+        interval.push(...notes)
+        interval.sort((a, b) => a - b);
+        
+        commas = [];
+        for (let j = 0; j < interval.length - 1; j++) {
+            let h = interval[j + 1] / interval[j];
+            if(!commas.includes(h)) commas.push(h);
+        }
+        
+        let smallest = Math.min(...commas);
+        let largest = Math.max(...commas);
+        let ratio = (largest - 1) / (smallest - 1);
 
-            commas = [];
-            for (let j = 0; j < notes.length - 1; j++) {
-                commas[j] = notes[j + 1] / notes[j];
-            }
-
-            let smallest = Math.min(...commas);
-            let largest = Math.max(...commas);
-            let ratio = (largest - 1) / (smallest - 1);
-
-            if (ratio <= PHI) {
-                let d = i + 1;
-                //let n = Math.round(d * a);
-                //a = n / d;
-                list.push(`(${nn}/${d})`);
-            }
+        if (ratio <= PHI) {
+            list.push(`(${n}/${d+1})`);
         }
     }
     console.log(list);
@@ -920,9 +880,7 @@ function getdaleg(note) {
 
 
 
-
-
-let visiblemarks = [true,true,true,true];
+let visiblemarks = [true,false,true,true];
 function setVisibleMarks(){
     visiblemarks = [
         document.getElementById('show-original').checked,
