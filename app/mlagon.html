@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>mla</title>
+</head>
+<style>
+    html{background-color: #111; color:#ccc; }
+
+</style>
+<body>
+    <div id="mla-example" style="font-family:Consolas; font-size:14px;">
+        <div style="font-size:11px;">
+            Base: <input type="number" id="logbase" value="2" step=".1" onchange="drawResults();drawPolys()" style="width:50px;background-color:#666;"> | Argument: <input type="number" value="3" step=".1" id="logarg" onchange="drawResults();drawPolys()" style="width:50px;background-color:#666;"> 
+        </div>
+        <div id="results" style="font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;padding:15px;">
+        </div>
+        <div style="display:flex;font-family: Consolas;">
+            <div id="ordertable"></div>
+            <div>
+                <canvas id="polygonCanvas" width="256" height="256"></canvas>
+            </div>
+        </div>
+        
+        
+    </div>
+
+    
+</body>
+
+<script>
+
+let maxpoly = 30;
+let poly = [];
+const PHI = (1 + Math.sqrt(5)) / 2;
+function mla(note,base,maxd) {
+    let link = note; 
+    let list = [];
+    poly = [];
+
+    let H = 1;
+    let lower = 1;
+    let upper = base;
+
+    let n = 1;
+    let d = 1;
+    
+    for (; d < maxd;) {
+        //if (!isFinite(t) || t === 0) {break;}
+        while (link < 1) {
+            link *= base;
+            n++;
+        }
+        while (link > base) {
+            link /= base;
+            n++;
+        }
+        if(link==base||link==1){
+            list.push(n);
+            return list;
+        }
+        if(d==1){
+            H = base/link
+            n+=n-1
+        }
+
+        d+=1;
+
+
+        if (link > lower && link < upper){
+         
+            let commas = [link/lower, upper/link];
+            let ratio = ( Math.max(...commas) - 1) / (Math.min(...commas) - 1);
+
+            if (ratio <= 2) {
+                if(d<maxpoly){
+                    poly = [n,d]
+                }
+                list.push(` ${n}/${d} `);
+            }
+
+            if (link < H) lower = link;
+            else upper = link;
+        }
+        link*=note;
+    }
+    return list;
+}
+
+function drawResults(){
+    let base = parseFloat(document.getElementById('logbase').value);
+    let arg = parseFloat(document.getElementById('logarg').value);
+    let list = mla(arg,base,1000);
+
+    document.getElementById('results').innerHTML = "log<span style='display:inline-block;'>"+base+"</span>("+arg+") ≈ "+ list + ", ...";
+}
+drawResults();
+
+let neworder = []
+
+const radius = 100; 
+const canvas = document.getElementById('polygonCanvas');
+const ctx = canvas.getContext('2d');
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;
+
+let dialLink = [];
+function calcPoly(){
+         dialLink = [];
+    let base = parseFloat(document.getElementById('logbase').value);
+    let arg = parseFloat(document.getElementById('logarg').value);
+    let link = arg;
+    let n = 0;
+    let d = 0;
+    for(; d< poly[1];){
+        while (link < 1) {
+            link *= base;
+            n++;
+        }
+        while (link > base) {
+            link /= base;
+            n++;
+        }
+        //dialLink.push([link.toFixed(4),n,d])
+        //if(d==1){
+        //    n+=n-1
+        //}
+
+        d+=1;
+        dialLink.push([link.toFixed(4),n,d])
+        link*=arg;
+    }
+    dialLink.sort((a,b)=>a[0]-b[0]);
+    const tableui = document.getElementById('ordertable');
+    let tabui = document.createElement('div')
+     neworder = []
+    for(let i = 0;i<dialLink.length;i++){
+        const row = document.createElement('div');
+        row.style.display ="flex";
+        row.innerHTML = "<div style='display-inline;margin-right:20px'>~ " + dialLink[i][0] + "</div> <span> "+arg+"</span><span style='margin-top:-2px;font-size:11px;width:20px;'> " + dialLink[i][1] + "</span> <span>"+base+"</span><span style='margin-top:-2px;font-size:11px;width:20px;'> " + dialLink[i][2] + "</span>";
+        if(i<poly[0]%poly[1])neworder.push(dialLink[i][2])
+        tabui.appendChild(row);
+    }
+    tableui.innerHTML = tabui.innerHTML;
+}
+
+
+
+
+function drawPolygon(n, radius, centerX, centerY) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "grey"
+    ctx.beginPath();
+    for (let i = 0; i < n; i++) {
+        const angle = (i * 2 * Math.PI) / n - Math.PI / 2;
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+        if (i === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    }
+    ctx.closePath();
+    ctx.stroke();
+}
+
+function drawReorderedPolygon(n, order, radius, centerX, centerY, color) {
+    //ctx.clearRect(0, 0, canvas.width, canvas.height); //
+
+    const points = [];
+    const ui1 = [];
+    const ui2 = [];
+    for (let i = n-1; i >= 0; i--) {
+        const angle = (i * 2 * Math.PI) / n - Math.PI / 2;
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+
+        const x1 = centerX + radius*1.1 * Math.cos(angle);
+        const y1 = centerY + radius*1.1 * Math.sin(angle);
+
+        const x2 = centerX + radius*.85 * Math.cos(angle);
+        const y2 = centerY + radius*.85 * Math.sin(angle);
+        points.push({ x, y });
+        ui1.push({ x1, y1 });
+        ui2.push({ x2, y2 });
+    }
+    ctx.fillStyle = "red";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "11px Consolas";
+    ctx.strokeStyle = color
+    ctx.beginPath();
+    ctx.moveTo(points[order[0] - 1].x, points[order[0] - 1].y);
+    
+    for (let i = 1; i < order.length; i++) {
+        ctx.lineTo(points[order[i] - 1].x, points[order[i] - 1].y);
+    }
+    ctx.stroke();
+
+    for (let i = 0; i < order.length; i++) {
+        ctx.fillStyle = "red";
+        ctx.fillText(order[i],ui1[order[i] - 1].x1, ui1[order[i] - 1].y1);
+        ctx.fillStyle = "lime";
+        ctx.fillText(dialLink[i][1]%dialLink[i][2],ui2[order[i] - 1].x2, ui2[order[i] - 1].y2);
+    }
+    
+    //ctx.closePath();
+    
+}
+
+function drawPolys(){
+    calcPoly();
+    drawPolygon(poly[1], radius, centerX, centerY);
+    drawReorderedPolygon(poly[1], neworder, radius, centerX, centerY,"blue");
+}
+drawPolys()
+
+function approximatePi(sides) {
+    const radius = 1;
+    const angle = Math.PI / sides;
+    const sideLength = 2 * radius * Math.sin(angle);
+    const perimeter = sides * sideLength;
+    const piApproximation = perimeter / 2;
+    return piApproximation;
+}
+
+
+</script>
+</html>
