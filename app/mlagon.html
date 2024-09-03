@@ -137,7 +137,7 @@ function calcPoly(){
     for(let i = 0;i<dialLink.length;i++){
         const row = document.createElement('div');
         row.style.display ="flex";
-        row.innerHTML = "<div style='display-inline;margin-right:20px'>~ " + dialLink[i][0] + "</div> <span> "+arg+"</span><span style='margin-top:-2px;font-size:11px;width:20px;'> " + dialLink[i][1] + "</span> <span>"+base+"</span><span style='margin-top:-2px;font-size:11px;width:20px;'> " + dialLink[i][2] + "</span>";
+        row.innerHTML = "<div style='display-inline;margin-right:20px'>~ " + dialLink[i][0] + "</div> <span> "+arg+"</span><span style='margin-top:-2px;font-size:11px;width:20px;'> " + dialLink[i][2] + "</span> / <span>"+base+"</span><span style='margin-top:-2px;font-size:11px;width:20px;'> " + dialLink[i][1] + "</span>";
         if(i<poly[0]%poly[1])neworder.push(dialLink[i][2])
         tabui.appendChild(row);
     }
@@ -196,7 +196,16 @@ function drawReorderedPolygon(n, order, radius, centerX, centerY, color) {
     for (let i = 1; i < order.length; i++) {
         ctx.lineTo(points[order[i] - 1].x, points[order[i] - 1].y);
     }
+   
+    ctx.setLineDash([]);
     ctx.stroke();
+    //ctx.closePath();
+    ctx.setLineDash([5, 8]);
+    ctx.beginPath();
+    ctx.moveTo(points[order[order.length-1] - 1].x, points[order[order.length-1] - 1].y);
+    ctx.lineTo(points[order[0] - 1].x, points[order[0] - 1].y);
+    ctx.stroke();
+    ctx.setLineDash([]);
 
     for (let i = 0; i < order.length; i++) {
         ctx.fillStyle = "red";
@@ -205,7 +214,7 @@ function drawReorderedPolygon(n, order, radius, centerX, centerY, color) {
         ctx.fillText(dialLink[i][1]%dialLink[i][2],ui2[order[i] - 1].x2, ui2[order[i] - 1].y2);
     }
     
-    //ctx.closePath();
+    
     
 }
 
