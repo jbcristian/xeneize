@@ -87,5 +87,26 @@ function drawResults(){
 drawResults();
 
 
+
+function getFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const varParam = urlParams.get('var');
+    if (varParam) {
+        return varParam.split(',').map(parseFloat);
+    }
+    return [];
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const vars = getFromURL();
+    if (vars.length > 0) {
+        document.getElementById('logbase').value = vars[0];
+        document.getElementById('logarg').value = vars[1];
+        drawResults();
+    }
+});
+
+
 </script>
 </html>
