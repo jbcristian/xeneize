@@ -90,9 +90,11 @@ function mla(note,base,maxd) {
 function drawResults(){
     let base = parseFloat(document.getElementById('logbase').value);
     let arg = parseFloat(document.getElementById('logarg').value);
+    if(arg==1||arg==0||base==1||base==0)return;
     let list = mla(arg,base,1000);
-
-    document.getElementById('results').innerHTML = "log<span style='display:inline-block;'>"+base+"</span>("+arg+") ≈ "+ list + ", ...";
+    let equals = list.length>1?" ≈ ":" = "
+    let fin = list.length>1?", ...":"."
+    document.getElementById('results').innerHTML = "log"+base+"("+arg+") "+equals+" "+list +" "+ fin ;
 }
 drawResults();
 
@@ -109,6 +111,7 @@ function calcPoly(){
          dialLink = [];
     let base = parseFloat(document.getElementById('logbase').value);
     let arg = parseFloat(document.getElementById('logarg').value);
+    if(arg==1||arg==0||base==1||base==0)return false;
     let link = arg;
     let n = 0;
     let d = 0;
@@ -219,9 +222,13 @@ function drawReorderedPolygon(n, order, radius, centerX, centerY, color) {
 }
 
 function drawPolys(){
-    calcPoly();
+    let base = parseFloat(document.getElementById('logbase').value);
+    let arg = parseFloat(document.getElementById('logarg').value);
+    if(arg==1||arg==0||base==1||base==0)return false;
+    calcPoly()
     drawPolygon(poly[1], radius, centerX, centerY);
     drawReorderedPolygon(poly[1], neworder, radius, centerX, centerY,"blue");
+    
 }
 drawPolys()
 

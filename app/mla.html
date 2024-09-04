@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>mla</title>
+</head>
+<style>
+    html{background-color: #111; color:#ccc; 
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; font-size:14px;}
+    input[type="number"]{width: 40px; background-color: #666; font-size:12px;}
+</style>
+<body>
+    <div id="mla-example">
+        <div style="font-size:12px;">
+            Base: <input type="number" id="logbase" value="2" step=".1" onchange="drawResults()"> | Argument: <input type="number" value="3" step=".1" id="logarg" onchange="drawResults()"> 
+        </div>
+        <div id="results" style="padding: 15px;">
+        </div>
+    </div>
+    
+</body>
+
+<script>
+
+const PHI = (1 + Math.sqrt(5)) / 2;
+function mla(note,base,maxd) {
+    let link = note; 
+    let list = [];
+
+    let H = 1;
+    let lower = 1;
+    let upper = base;
+
+    let n = 1;
+    let d = 1;
+    
+    for (; d < maxd;) {
+        if (!isFinite(link) || link === 0) {break;}
+        while (link < 1) {
+            link *= base;
+            n++;
+        }
+        while (link > base) {
+            link /= base;
+            n++;
+        }
+        if(link==base||link==1){
+            list.push(n);
+            return list;
+        }
+        if(d==1){
+            H = base/link
+            n+=n-1
+        }
+
+        d+=1;
+
+        if (link > lower && link < upper){
+         
+            let commas = [link/lower, upper/link];
+            let ratio = ( Math.max(...commas) - 1) / (Math.min(...commas) - 1);
+
+            if (ratio <= 2) {
+                list.push(` ${n}/${d} `);
+            }
+
+            if (link < H) lower = link;
+            else upper = link;
+        }
+        link*=note;
+    }
+    return list;
+}
+
+function drawResults(){
+    let base = parseFloat(document.getElementById('logbase').value);
+    let arg = parseFloat(document.getElementById('logarg').value);
+    let list = mla(arg,base,100000);
+    let equals = list.length>1?" ≈ ":" = "
+    let fin = list.length>1?", ...":"."
+    document.getElementById('results').innerHTML = "log"+base+"("+arg+") "+equals+" "+list +" "+ fin ;
+}
+
+drawResults();
+
+
+</script>
+</html>
