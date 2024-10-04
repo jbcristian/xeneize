@@ -27,8 +27,16 @@
 
 const PHI = (1 + Math.sqrt(5)) / 2;
 function mla(note,base,maxd) {
-    let link = note; 
+    if (base <= 1 || base === 1) {
+        return "Base must be greater than 1.";
+    }
+    if (note <= 0) {
+        return "Argument must be greater than 0.";
+    }
     let list = [];
+
+    let link = note; 
+    
 
     let H = 1;
     let lower = 1;
@@ -79,9 +87,12 @@ function drawResults(){
     let base = parseFloat(document.getElementById('logbase').value);
     let arg = parseFloat(document.getElementById('logarg').value);
     let list = mla(arg,base,100000);
-    let equals = list.length>1?" ≈ ":" = "
-    let fin = list.length>1?", ...":"."
-    document.getElementById('results').innerHTML = "log"+base+"("+arg+") "+equals+" "+list +" "+ fin ;
+    if(list!=0){
+        let equals = list.length>1?" ≈ ":" = "
+        let fin = list.length>1?", ...":"."
+        document.getElementById('results').innerHTML = "log"+base+"("+arg+") "+equals+" "+list +" "+ fin ;
+    }
+    
 }
 
 drawResults();
