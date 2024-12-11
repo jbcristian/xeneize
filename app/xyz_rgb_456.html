@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>CIEXYZ 1931 RGB</title>
+    <style>
+        html { background:#111; color:#ccc; font-family: Consolas; font-size:12px;}
+        
+        #controls{font-size:11px;color:#666;}
+        #controls input{vertical-align: bottom;}
+        #spectrum {position:relative; width: 600px; height:50px; border:1px solid #666;}
+        #rangeMarks {position:relative;width:600px; height: 25px; border:1px dashed #333;}
+
+        .colorband { position:absolute; top:0px; width:1px; height:50px;}
+        .rulermark { position:absolute; border-left:1px solid white; background:#333;width:1px;height: 10px;font-size:9px;font-family: Consolas; color:white;
+        bottom:0px;}
+        .colorhud {position:absolute; top:50px; background-color: rgb(16, 4, 51); border:1px solid gray; visibility: hidden; font-size:9px; width: auto; padding:1px; color:#eee;}
+        .colorband:hover .colorhud{visibility: visible; z-index: 10;}
+        .colorband:hover {background-color: white;}
+        #major-white {border:1px solid #555; width: 600px; height: 280px;}
+    </style>
+</head>
+<body>
+<div id="controls" onclick="drawSpectrum()">
+    <div style="text-align: right;">CIE XYZ 1931 Spectrum</div>
+    <span><input type="radio" name="freqwave" checked></span>Frequency350-900THz] | <input type="radio" name="freqwave"><span>Wavelength [350-800nm]</span> | Scale:  
+    <span>Lin<input type="radio" name="linlog" checked></span> <span>Log<input type="radio" name="linlog"></span>
+</div>
+<div id="rangeMarks"></div>
+<div id="spectrum"></div>
+<div id="major-white"><canvas id="rgbCanvas" width="600" height="280"></canvas></div>
+
+<script>
+const SPECTRUM = document.getElementById('spectrum');
+const RULER = document.getElementById('rangeMarks');
+
+
+function xFit_1931( wave ) {
+    let t1 = (wave-442.0)*((wave<442.0)?0.0624:0.0374);
+    let t2 = (wave-599.8)*((wave<599.8)?0.0264:0.0323);
+    let t3 = (wave-501.1)*((wave<501.1)?0.0490:0.0382);
+    return 0.362*Math.exp(-0.5*t1*t1) + 1.056*Math.exp(-0.5*t2*t2) - 0.065*Math.exp(-0.5*t3*t3);
+}
+
+function yFit_1931( wave ) {
+    let t1 = (wave-568.8)*((wave<568.8)?0.0213:0.0247);
+    let t2 = (wave-530.9)*((wave<530.9)?0.0613:0.0322);
+    return 0.821*Math.exp(-0.5*t1*t1) + 0.286*Math.exp(-0.5*t2*t2);
+}
+
+function zFit_1931( wave ) {
+    let t1 = (wave-437.0)*((wave<437.0)?0.0845:0.0278);
+    let t2 = (wave-459.)*((wave<459.0)?0.0385:0.0725);
+    return 1.217*Math.exp(-0.5*t1*t1) + 0.681*Math.exp(-0.5*t2*t2);
+}
+
+function xFit_1964 (wave){
+    return 0.398 * Math.exp(-1250*( Math.log( (wave+570.1)/1014 ))**2) +
+           1.132 * Math.exp(-234*( Math.log( (1338-wave)/743.5 ))**2);
+}
+
+function yFit_1964 (wave){
+    return 1.011 * Math.exp(-0.5*( (wave-556.1)/46.14 )**2);
+}
+
+function zFit_1964 (wave){
+    return 2.060 * Math.exp(-32*( Math.log( (wave-265.8)/180.4 ))**2);
+}
+
+function waveToXYZ(nm){
+    return [xFit_1931(nm), yFit_1931(nm), zFit_1931(nm)];
+    //return [xFit_1964(nm), yFit_1964(nm), zFit_1964(nm)];
+}
+
+function xyzToRGB(xyz){
+    let r, g, b;
+
+    r = 3.2406255 * xyz[0] + (-1.537208 * xyz[1]) + (-0.4986286 * xyz[2]);
+    g = -0.968937 * xyz[0] + 1.8757561 * xyz[1] + 0.0415175 * xyz[2];
+    b = 0.0557101 * xyz[0] + (-0.2040211 * xyz[1] + 1.0569959 * xyz[2]);
+
+    return [r,g,b];
+}
+
+function rgbGamma(rgb){
+    let grgb = []
+    for(let i = 0;i<3;i++){
+        let c = rgb[i]
+
+        if(c < 0) c = 0;
+        else if(c <= 0.0031308) c*= 12.92;
+        else if(c < 1) c= 1.055 * c**(1/2.6) - 0.055;
+        else c = 1
+
+        c=Math.round(c*255)
+
+        grgb.push(c);
+        
+    }
+    return grgb
+}
+
+function renderSpectrumManualRGB(){
+    for (var i = 0 ; i < 500 ; i++){
+        let wave = waveToXYZM(300+i);
+        let rgb = rgbGamma(xyzToRGB(wave));
+        let mark = document.createElement('div');
+        mark.style.backgroundColor = 'rgb('+rgb[0]+' '+rgb[1]+' '+rgb[2]+')'
+        mark.style.position = "absolute";
+        mark.style.left = i+"px";
+        mark.style.top = "0px";
+        mark.style.width = "1px";
+        mark.style.height = "100px";
+        SPECTRUM.appendChild(mark)
+    }
+}
+
+function visible(w){
+    while(w<=370) w*=2
+    while(w>=740) w/=2
+    return w;
+}
+
+function drawNormal() {
+    const mean = 25; // Center of the curve
+    const stdDev = 10; // Spread of the curve
+    const maxHeight = 50; // Maximum height of the curve
+
+    for (var i = 0; i < 50; i++) {
+        let mark = document.createElement('div');
+        mark.style.backgroundColor = 'rgb(255, 255, 255)';
+        mark.style.position = "absolute";
+        mark.style.left = i + "px";
+        mark.style.bottom = "0px";
+        mark.style.width = "1px";
+
+        // Calculate height using the normal distribution formula
+        let exponent = -Math.pow(i - mean, 2) / (2 * Math.pow(stdDev, 2));
+        let height = (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
+
+        // Scale the height to the maximum height
+        let scaledHeight = height * maxHeight * stdDev * Math.sqrt(2 * Math.PI);
+        mark.style.height = scaledHeight + "px";
+
+        SPECTRUM.appendChild(mark);
+    }
+}
+
+function freqToWavelength(frequency) { //input Thz, output nm
+    const speedOfLight = 299792.458;
+    return speedOfLight / frequency;
+}
+
+function waveToFreq(wave) { //input nm, output Thz
+    const speedOfLight = 299792.458;
+    return speedOfLight / wave;
+}
+
+
+let startRange = 0;
+let endRange = 1;
+let typeRange = 1;
+
+let stepMap = 1;
+
+let type = 0;
+let scale = 0;
+
+let pixelRange = 600; //same as canvas
+
+function drawSpectrum(){
+    clearByClass('colorband');
+    clearByClass('rulermark')
+    type = GetTrueOne('freqwave');
+    scale = GetTrueOne('linlog');
+
+    if(type==0){
+        startRange = 350;
+        endRange = 900;
+    } else {
+        startRange = 350;
+        endRange = 800;
+    }
+
+    typeRange = endRange -startRange;
+    stepMap = typeRange/pixelRange;
+
+    calculateRuler();
+
+    renderSpectrum();
+
+    drawWhite();
+}
+
+function calculateRuler() { 
+    let marks50 = []; 
+    for (let i = 0; i <= typeRange; i++) { 
+        let test = (startRange + i) / 50 % 50; 
+        if (test == Math.floor(test)) { 
+            marks50.push(startRange + i);
+        }
+    } 
+    for (let j = 0; j < marks50.length; j++) { 
+        let left = 0;
+        if (scale == 0) { // linear scale 
+            left = (marks50[j] - startRange) / stepMap;
+        } else { 
+            // logarithmic scale 
+            left = (Math.log10(marks50[j]) - Math.log10(startRange)) / (Math.log10(endRange) - Math.log10(startRange)) * pixelRange;
+        } 
+        let meterScale = document.createElement('div');
+        meterScale.className = 'rulermark';
+        meterScale.innerHTML = marks50[j];
+        meterScale.style.left = left + "px";
+        RULER.appendChild(meterScale);
+    }
+}
+
+function renderSpectrum(){
+    for (let i = 1 ; i < pixelRange ; i++){
+        let value = 0; let nm = 0;
+        if(scale==0){
+            value = startRange+(i*stepMap)
+        } else {
+            value = startRange * Math.pow((endRange / startRange), (i / pixelRange));
+        }
+        let freq;
+        if(type==0){
+            freq = value;
+            nm = freqToWavelength(value);
+        }
+        else{
+            freq = waveToFreq(value);
+            nm = value;
+        }
+
+        let wave = waveToXYZ( nm); //color
+        let mark = document.createElement('div');
+        mark.className = 'colorband'
+        mark.style.backgroundColor = 'color(xyz-d65 '+wave[0]+' '+wave[1]+' '+wave[2]+')'
+        mark.style.left = i+"px";
+        SPECTRUM.appendChild(mark)
+
+        let colorhud = document.createElement('div');
+        colorhud.className = 'colorhud';
+        mark.appendChild(colorhud);
+        colorhud.innerHTML = "THz:"+freq.toFixed(3)+"<br>nm: "+nm.toFixed(3)+" ";
+    }
+}
+
+
+function drawWhite(){
+    const canvas = document.getElementById('rgbCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function drawCircle(color, x, y, radius) {
+        ctx.globalCompositeOperation = 'screen';
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2, false);
+        ctx.fillStyle = color;
+        ctx.fill();
+    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    let rgb = [];
+    let colors = ['red','green','blue'];
+    if(type==0){
+        rgb = [435,543,652];
+    }
+    else{
+        rgb = [689,552,458];
+    }
+
+    for (let j = 0; j < rgb.length; j++) { 
+        let left = 0;
+        if (scale == 0) { // linear scale 
+            left = (rgb[j] - startRange) / stepMap;
+        } else {
+            // logarithmic scale 
+            left = (Math.log10(rgb[j]) - Math.log10(startRange)) / (Math.log10(endRange) - Math.log10(startRange)) * pixelRange;
+        } 
+        let meterScale = document.createElement('div');
+        meterScale.className = 'rulermark';
+        meterScale.style.borderColor = colors[j];
+        meterScale.style.borderWidth = '3px';
+        meterScale.innerHTML = rgb[j];
+        meterScale.style.left = left + "px";
+        meterScale.style.bottom = "-65px";
+        RULER.appendChild(meterScale);
+
+        if(j==1){
+            let center = document.createElement('div');
+            center.className ="rulermark"
+            RULER.appendChild(center);
+            center.style.position ="absolute";
+            center.style.left = (left-75) + "px";
+            center.style.bottom = "-80px";
+            center.style.width = "150px";
+            center.style.border = "none";
+            center.style.backgroundColor ="transparent"
+            center.style.textAlign = "center"
+            if(type==0){
+                center.innerHTML = "4 : 5 : 6";
+            }
+            else{
+                center.innerHTML = "6 : 5 : 4";
+            }
+        }
+    }
+
+    drawCircle('red', 260, 120, 70);
+    drawCircle('blue', 340, 120, 70);
+    drawCircle('rgb(0,255,0)', 300, 185, 70);
+}
+
+
+/*Green: Dominant wavelength of about 549 nm
+Red: Dominant wavelength of about 612 nm
+Blue: Dominant wavelength of about 464 nm*/
+
+function GetTrueOne(rname){
+    let options = document.getElementsByName(rname);
+    let t;
+    for (t=0; t < options.length ; t++){
+        if(options[t].checked==true){
+            return t;
+        }
+    }
+}
+
+function clearByClass(name){
+    let entries = document.getElementsByClassName(name);
+    for(let i = entries.length; i>0; i--){
+        entries[i-1].remove();
+    }
+}
+
+window.onload = function() {
+    drawSpectrum();
+}
+
+</script>
+</body>
+</html>
