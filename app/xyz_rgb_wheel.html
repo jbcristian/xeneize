@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>CIEXYZ 1931 RGB</title>
+    <style>
+        html { background:#111; color:#ccc; font-family: Consolas; font-size:12px;}
+        
+    </style>
+</head>
+<body>
+<div id="wheel"><canvas id="clockCanvas" width="500" height="500" style="background:black;"></canvas></div>
+<script>
+
+function freqToWavelength(frequency) { //input Thz, output nm
+    const speedOfLight = 299792.458;
+    return speedOfLight / frequency;
+}
+
+function waveToFreq(wave) { //input nm, output Thz
+    const speedOfLight = 299792.458;
+    return speedOfLight / wave;
+}
+
+let startRange = 375;
+let endRange = 750;
+let typeRange = endRange -startRange;
+
+function GetTrueOne(rname){
+    let options = document.getElementsByName(rname);
+    let t;
+    for (t=0; t < options.length ; t++){
+        if(options[t].checked==true){
+            return t;
+        }
+    }
+}
+
+function clearByClass(name){
+    let entries = document.getElementsByClassName(name);
+    for(let i = entries.length; i>0; i--){
+        entries[i-1].remove();
+    }
+}
+
+const canvas = document.getElementById('clockCanvas');
+const ctx = canvas.getContext('2d');
+ctx.globalCompositeOperation = 'difference';
+
+const backgroundImage = new Image();
+backgroundImage.src = 'magenta_bridge.png';
+
+backgroundImage.onload = function() {
+    ctx.drawImage(backgroundImage, 50, 50, 400, 400);
+};
+
+function drawDialLog(){
+    
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 210;
+
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius-15, 0, 2 * Math.PI);
+    ctx.strokeStyle = "white";
+    ctx.fillStyle = "white"
+    ctx.stroke();
+
+    let marks25 = []; 
+    for (let i = 0; i <= typeRange; i++) { 
+        let test = (startRange + i) / 25 % 25; 
+        if (test == Math.floor(test)) { 
+            marks25.push(startRange + i);
+        }
+    }
+
+    let marks5 = []; 
+    for (let i = 0; i <= typeRange; i++) { 
+        let test = (startRange + i) / 5 % 5; 
+        if (test == Math.floor(test)) { 
+            marks5.push(startRange + i);
+        }
+    }
+
+    let step = typeRange/(Math.PI *2);
+
+    for (let i = 0; i < marks25.length-1; i++) {
+        //const angle = (marks25[i] - startRange) / step; //linear test
+        let angle = (Math.log10(marks25[i]) - Math.log10(startRange)) / (Math.log10(endRange) - Math.log10(startRange)) * Math.PI *2;
+        angle = (Math.PI * 2)-angle
+        angle -=.5 * Math.PI;
+
+        const x1 = centerX + Math.cos(angle) * (radius);
+        const y1 = centerY + Math.sin(angle) * (radius);
+        const x2 = centerX + Math.cos(angle) * (radius - 30);
+        const y2 = centerY + Math.sin(angle) * (radius - 30);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        // numbers
+        const numX = centerX + Math.cos(angle) * (radius + 15);
+        const numY = centerY + Math.sin(angle) * (radius + 15);
+        ctx.font = '11px Consolas';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        if(i==0){
+            ctx.fillText("375|750",numX, numY)
+        }else{
+            ctx.fillText(marks25[i], numX, numY);
+        }
+    }
+
+    for (let i = 0; i < marks5.length-1; i++) {
+        let angle = (Math.log10(marks5[i]) - Math.log10(startRange)) / (Math.log10(endRange) - Math.log10(startRange)) * Math.PI *2;
+        angle = (Math.PI * 2)-angle
+        angle -= .5* Math.PI;
+        const x1 = centerX + Math.cos(angle) * (radius - 10);
+        const y1 = centerY + Math.sin(angle) * (radius - 10);
+        const x2 = centerX + Math.cos(angle) * (radius - 15);
+        const y2 = centerY + Math.sin(angle) * (radius - 15);
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    }
+}
+
+
+window.onload = function() {
+    drawDialLog();
+}
+
+
+</script>
+</body>
+</html>
