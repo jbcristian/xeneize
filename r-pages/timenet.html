@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Timenet</title>
+<style>
+  body {
+    font-family: sans-serif;
+  }
+  #timeline-container {
+    width: 100%;
+    position: relative;
+    padding-top: 50px; /* Space for the ruler */
+  }
+  #ruler-container {
+    width: 100%;
+    height: 50px;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  #events-container {
+      position: relative;
+      height: 100%;
+  }
+  .full-row{
+    width:100%;
+    margin:0; padding:0;
+    position:relative;
+    font-size:10px;
+    padding-top:18px;
+    padding-bottom:4px;
+    margin-bottom:2px;
+    background-image:linear-gradient(0deg, #ccc, transparent);
+    border-top:1px dashed blue;
+    border-bottom:1px dashed blue;
+
+  }
+  .timeline-event {
+    position: absolute;
+    border-top: 3px solid #007bff;
+    padding: 2px 4px;
+    box-sizing: border-box;
+    font-size:10px;
+    white-space: nowrap;
+    top:0px;
+  }
+  .mainEvent{
+    position:absolute;
+  }
+  .dateRange{
+    position:absolute;
+    height:20px;
+  }
+  .eventDescription{
+    position:absolute;
+  }
+</style>
+</head>
+<body>
+
+<h2 style="font-size:12px;">Ancient Systems Timeline: Mathematics, Astronomy, Music, Cosmology. (2500 BC - 500 AD)</h2>
+
+<div id="timeline-container">
+  <canvas id="ruler-container"></canvas>
+  <div id="events-container"></div>
+</div>
+
+<script>
+  const timelineData = [
+    {
+      "index" : "1",
+      "date-range": "-2100,-2000",
+      "date-range-f": "2100-2000 BC",
+      "main-event": "Egyptian Decans / Star Clock",
+      "description-extras": "Early astronomical observations, Egyptians utilized groups of stars known as Decans, dividing the 360-degree ecliptic into 36 parts of 10 degrees each."
+    },
+    {
+      "index" : "1",
+      "date-range": "-2000,-1400",
+      "date-range-f": "2000-1400 BC",
+      "main-event": "24-hour Day",
+      "description-extras": "Shadow clocks (c. 1500 BCE) divided the sunlit day into 10 working parts plus two 'twilight hours,' totaling 12 daytime divisions. The night was segmented into 12 hours, initially tracked by the movement of the Decans."
+    },
+    {
+      "index" : "1",
+      "date-range": "-1400,-1000",
+      "date-range-f": "1400-1000 BC",
+      "main-event": "Temple Calendars and the 365-Day Year",
+      "description-extras": "Egyptians refined their civil calendar to a 365-day system based on heliacal risings of Sirius (Sopdet), which signaled the annual Nile flood."
+    },
+    {
+      "index" : "1",
+      "date-range": "-100,0",
+      "date-range-f": "c. 50 BC",
+      "main-event": "Dendera Zodiac",
+      "description-extras": "Egyptian System, a circular bas-relief carved into the ceiling of a chapel in the Temple of Hathor which depicts both the 12 zodiac signs and the 36 decans."
+    },
+    {
+      "index" : "2",
+      "date-range": "-2200,-1900",
+      "date-range-f": "c. 2000 BC",
+      "main-event": "Early Babylonian Star Catalogs",
+      "description-extras": "Identifying major markers like Taurus (The Steer of Heaven) and Leo (The Lion) at the cardinal points."
+    },
+    {
+      "index" : "2",
+      "date-range": "-2200,-1900",
+      "date-range-f": "c. 2000 BC",
+      "main-event": "Early Babylonian Cosmology",
+      "description-extras": "Veneration of the seven celestial bodies visible to the naked eye. This recognition cemented the numerical importance of seven in Mesopotamian culture."
+    },
+    {
+      "index" : "2",
+      "date-range": "-1780,-600",
+      "date-range-f": "1780–600 BC",
+      "main-event": "Mesopotamian Tuning System",
+      "description-extras": "The cuneiform tablet CBS1766 contains tuning instructions for a lyre, showcasing the 7-within-12 gearing, the 'circle of fifths,' and a numerical sequence aligned with the 'Chaldean Order.'"
+    },
+    {
+      "index" : "2",
+      "date-range": "-1500,-1300",
+      "date-range-f": "c. 1400 BC",
+      "main-event": "The Hurrian Hymn to Nikkal",
+      "description-extras": "Mesopotamian cuneiform tablets demonstrate a sophisticated understanding of diatonic / heptatonic (7-note) tuning systems, which were explicitly linked to the 7 heavenly bodies."
+    },
+    {
+      "index" : "2",
+      "date-range": "-500,-400",
+      "date-range-f": "c. 500 BC",
+      "main-event": "Babylonian Uniform 12-sign Zodiac",
+      "description-extras": "Babylonian astronomers began dividing the 360-degree ecliptic band into twelve perfectly equal 30-degree sectors. Mathematical systems A and B devised by astronomers such as Nabu-rimanni and Kidinnu"
+    },
+    {
+      "index" : "3",
+      "date-range": "-700,-600",
+      "date-range-f": "c. 700-600 BC",
+      "main-event": "Early Greek Musical Modes",
+      "description-extras": "Pre-Pythagorean Greek music featured diatonic modal systems (Dorian, Phrygian, Lydian, etc.) before mathematical formalization."
+    },
+    {
+      "index" : "3",
+      "date-range": "-600,-500",
+      "date-range-f": "c. 569 BC",
+      "main-event": "Pythagorean Music Theory",
+      "description-extras": "Systematic music practice, explicitly linking the established numerical ratios of music to the structure of the cosmos."
+    },
+    {
+      "index" : "3",
+      "date-range": "-334, -100",
+      "date-range-f": "334-100 BC",
+      "main-event": "Hellenistic Zodiac",
+      "description-extras": "Babylonian/Greek integrated in Egypt. Alexander the Great’s campaign that brought Mesopotamia into the sphere of Greek influence commenced in 334 BC."
+    },
+    {
+      "index" : "3",
+      "date-range": "100,200",
+      "date-range-f": "100-200 AD",
+      "main-event": "Ptolemy's Almagest",
+      "description-extras": "A comprehensive treatise on astronomy"
+    },
+    {
+      "index" : "3",
+      "date-range": "100,200",
+      "date-range-f": "100-200 AD",
+      "main-event": "Seven-day Week Standard",
+      "description-extras": "Ptolemy's Chaldean order. The universal diffusion and standardization of the seven-day week were achieved in the early Roman Imperial period. Replaced the native Roman eight-day market cycle (internundinum)."
+    },
+    {
+      "index" : "4",
+      "date-range": "-1600,-1400",
+      "date-range-f": "1600-1406 BC",
+      "main-event": "Chinese Independent 12-fold system",
+      "description-extras": "Rooted in indigenous Asian metaphysics, is based on the 12 Earthly Branches. It tracks the approximate 12-year orbital cycle of Jupiter, known as the 'year star.' This alignment coincidentally made it easier to integrate their 12-tone music and the Hellenistic calendar."
+    },
+    {
+      "index" : "4",
+      "date-range": "-700,-200",
+      "date-range-f": "700-200 BC",
+      "main-event": "Sanfen Sunyi",
+      "description-extras": "Chinese music theory, use of octave 1:2 and fifth 2:3 as pitch generators, identifying the 'comma', and the near 7-within-12 gearing, fully documented by the 239 BCE."
+    },
+    {
+      "index" : "5",
+      "date-range": "-400,150",
+      "date-range-f": "400 BC-150 AD",
+      "main-event": "12-sign Zodiac in India",
+      "description-extras": "The transmission of Hellenistic astronomy began as early as the 4th century BCE, accelerating in the early centuries of the Common Era. Sanskrit translations of Greek texts, such as the Yavanajātaka (c. 149/150 CE) directly introduced the 12 zodiacal signs and established the fixed order of planets corresponding to the seven-day week."
+    }
+  ];
+
+  
+  const startYear = -2500;
+  const endYear = 500;
+  const totalYears = endYear - startYear;
+  const rulerIncrement = 500;
+  const eventRowHeight = 50; 
+
+  const timelineContainer = document.getElementById('timeline-container');
+  const rulerCanvas = document.getElementById('ruler-container');
+  const eventsContainer = document.getElementById('events-container');
+  const ctx = rulerCanvas.getContext('2d');
+
+  
+  function drawRuler() {
+    const canvasWidth = rulerCanvas.offsetWidth;
+    rulerCanvas.width = canvasWidth;
+    const canvasHeight = "50";
+    rulerCanvas.height = canvasHeight;
+
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(canvasWidth, 0);
+    ctx.strokeStyle = '#ccc';
+    ctx.stroke();
+
+    const numIncrements = totalYears / rulerIncrement;
+    for (let i = 0; i <= numIncrements; i++) {
+      const year = startYear + (i * rulerIncrement);
+      const xPos = ((year - startYear) / totalYears) * canvasWidth;
+
+      ctx.beginPath();
+      ctx.moveTo(xPos, 0);
+      ctx.lineTo(xPos, 20);
+      ctx.stroke();
+
+      ctx.textAlign = 'center';
+      const label = year < 0 ? `${-year} BC` : `${year} AD`;
+      ctx.fillText(label, xPos, 30);
+    }
+  }
+
+  
+  function createTimelineEvents() {
+    eventsContainer.innerHTML = ''; // clear
+    timelineData.forEach((eventData, index) => {
+      const fullRow = document.createElement('div');
+      fullRow.className = 'full-row';
+      eventsContainer.appendChild(fullRow)
+
+
+      const [start, end] = eventData['date-range'].split(',').map(Number);
+
+      const startPercentage = ((start - startYear) / totalYears) * 100;
+      const widthPercentage = ((end - start) / totalYears) * 100;
+
+      const eventElement = document.createElement('div');
+      eventElement.className = 'timeline-event';
+      eventElement.style.left = `${startPercentage}%`;
+      eventElement.style.width = `${widthPercentage}%`;
+
+      let color = "";
+      switch(eventData['index']){
+        case "1": color = "#c00";
+          break;
+        case "2": color = "#ea0";
+          break;
+        case "3": color = "#0cc";
+          break;
+        case "4": color = "#00c";
+          break;
+        case "5": color = "#c0c";
+          break;
+        default: color = "blue";
+          break;
+      }
+
+      eventElement.style.borderColor = color;
+
+      const dateRange = document.createElement('strong');
+      dateRange.className = "dateRange"
+      dateRange.textContent = `${eventData['date-range-f']} `;
+      
+      const mainEvent = document.createElement('strong');
+      //mainEvent.className = "mainEvent"
+      mainEvent.textContent = `${eventData['main-event']}: `;
+
+
+      const description = document.createElement('span');
+      description.textContent = `${eventData['description-extras']}: `;
+      //description.className ="eventDescription";
+
+      eventElement.appendChild(dateRange);
+      fullRow.appendChild(mainEvent);
+      fullRow.appendChild(description);
+
+      fullRow.appendChild(eventElement);
+    });
+
+  }
+
+  drawRuler();
+  createTimelineEvents();
+
+  window.addEventListener('resize', () => {
+      drawRuler();
+      createTimelineEvents();
+  });
+
+function adjustDateRangeMargins() {
+  const elements = document.querySelectorAll('.dateRange');
+
+  elements.forEach(el => {
+    const parent = el.parentElement;
+    if (!parent) return;
+
+    const parentWidth = parent.getBoundingClientRect().width;
+    const elementWidth = el.getBoundingClientRect().width;
+
+    const marginLeft = -(elementWidth / 2) + ((parentWidth-6) / 2); 
+
+    el.style.marginLeft = `${marginLeft}px`;
+  });
+}
+
+window.addEventListener('resize', adjustDateRangeMargins);
+adjustDateRangeMargins();
+
+
+</script>
+
+</body>
+</html>
