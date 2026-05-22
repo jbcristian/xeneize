@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[ æqvo ]</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; margin: 20px; background: #616462; color: #333; }
+        .app { width:1024px; font-size:11px; background-color: #eee;}
+        .groups { display:flex; background-color: #000000;}
+        .controls { padding: 5px; margin-bottom: 0px; display: flex; gap: 20px; flex-wrap: wrap; align-items: baseline; flex:2; }
+        
+        .input-group { display: flex; flex-direction: column; }
+        .checkbox-group { display: flex; align-items: center; gap: 15px; padding-bottom: 0px; }
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 0.9em; cursor: pointer; }
+        
+        label { font-weight: bold; margin-bottom: 5px; font-size: 0.85em; text-transform: uppercase; color: #aaa; }
+        input[type="number"] { padding: 0px; width: 40px; border-radius: none; font-weight: bold; font-family: monospace; color:black; background-color: #798e77; padding-left:3px;text-shadow: 0 0 black; }
+        
+        .info-panel { display: flex; gap: 0px; flex:3; }
+        .panel-card { border-left:1px dashed #666; color: #ecf0f1; padding: 7px;  font-family: monospace; }
+        .panel-card h4 { margin: 0 0 10px 0; color: #757d79; text-transform: uppercase; font-size: 0.8em; }
+
+        table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+        th {  border: 1px solid #575757; padding: 2px; font-size: 0.8em; }
+        td { border: 1px solid #3e3e3e; padding: 4px; text-align: center; }
+
+        .addFreqButton {position:absolute;width:10px;height:10px;font-weight: bold; cursor: pointer ;right:0px; color:#9f9f9f;line-height: 10px; border:1px solid black; opacity: 0; }
+
+        .addFreqButton:hover{border:1px solid grey;}
+        
+        .header-index { font-size: 1.2em; color: #858585; }
+        .header-order { color: #6c6c6c; }
+        .generator { background: #313131 !important; } 
+
+        .cell-data { display: flex; flex-direction: column; gap: 4px; font-family: monospace; position:relative; }
+        .cents { color: #6c6c6c; font-weight: bold; font-size: 0.85em; }
+        .freq { color: #969696; font-weight: 600; font-size: .9em; }
+        .mo { color: #9c9c9c; font-style: italic; font-size: 0.85em; }
+        .empty-cell { color: #ccc; font-size: 0.75em; }
+
+        .black {background-color: black;}
+
+        canvas { background: #000; border: 1px solid #333; border-radius: none; width: 100%; height: 60px; }
+        
+
+        .keys { display: flex; gap: 8px; justify-content: center; margin-top: 20px; margin-bottom:20px; }
+        .key { border: 1px solid #000;
+                padding: 4px;
+                width: 10px;
+                text-align: center;
+                font-size: 10px;
+                font-weight: 900;
+                background: #eeeeee;
+                color: #666;
+                height: 10px;
+                transition: 0.05s;
+                font-family: monospace; }
+        .key.active { background: black; color: white; transform: scale(0.95); box-shadow: 0 0 15px rgba(123, 123, 123, 0.4); }
+
+        .component-card { background: #eeeeee;
+            border-left: 4px solid black;
+            padding: 5px;
+            display: flex;
+            grid-template-columns: 1.5fr 1fr 1fr 0.5fr;
+            gap: 15px;
+            align-items: center;
+            border: 1px solid black;
+            margin: 2px;
+            color: #000; }
+
+        .component-card label{color:#000;}
+        #tuning-system label{color:#000; display:flex;align-items: center; margin-bottom:0px;}
+
+        button { font-size:10px; background-color: #eee; border:1px solid black; cursor: pointer;}
+        button:hover{background-color: grey;}
+        .lbutton { font-size:10px; background-color: #eee; border:1px solid black; cursor: pointer;}
+        .lbutton:hover{background-color: grey;}
+
+
+        .midi-monitor {  border: 1px solid #444; }
+        .midi-status { font-size: 0.7rem; color: #000; margin-bottom: 5px; text-transform: uppercase; }
+        .midi-keys-scroll { overflow-x: clip; display: flex; gap: 1px; padding-bottom: 5px; background: #111; }
+        .m-key { min-width: 10.65px; height: 20px; background:#eee; border-radius: 0; transition: 0.1s; position: relative; }
+        .m-key.active { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        .m-key::after { content: attr(data-note); position: absolute; bottom: 2px; left: 1px; font-size: 5px; color: #666; }
+
+        .extra-synth{padding:5px; color:#999; border:1px solid #333;}
+
+        label input[type="file"] {
+    position: absolute;
+    top: -10000px;
+    opacity: 0;
+  }
+  .label, .lbutton {
+    width: auto;
+    border:1px solid #818181;
+
+    color:#747474;
+    font-family: 'Consolas', monospace;
+    font-size: 9px;
+    display: inline-block;
+    padding:1px 5px;
+  }
+
+  .lbutton2 {
+    width: auto;
+    border:1px solid #aaa;
+    background-color: #000;
+    color:#aaa;
+    font-family: 'Consolas', monospace;
+    font-size: 9px;
+    display: inline-block;
+    padding:1px 5px;
+  }
+
+  .label:hover {
+    color:#ccc;
+    background-color: #333;
+  }
+  .label:active {
+    background: #9fa1a0;
+  }
+  .label:invalid+span {
+    color: #000000;
+  }
+  .label:valid+span {
+    color: #ffffff;
+  }
+
+  .topbar label{margin:0px;}
+
+  #preset-list{
+    font-size:11px; font-family: monospace; background-color: #798e77; font-weight: bold; text-shadow: 0 0 black;
+  }
+
+
+  .arg {display: inline-block;}
+  table {color:#ccc;}
+
+  #argsContainer {padding: 0px 5px;
+    display: inline-block;
+    border: 1px dashed grey;
+    margin: 0px;}
+
+    #general-opts input[type="range"]{
+        max-width: 59px;
+    }
+
+    .component-card input[type="range"]{
+        max-width: 69px;
+    }
+
+    .extra-synth input[type="range"]{
+        max-width: 40px;
+    }
+
+    .sscanfit td {padding:1px;}
+
+    #freq-display { font-family: monospace;}
+
+
+    </style>
+
+    <style>
+    
+        input[type="range"] {
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+            width: auto;
+            max-width: 100px;
+        }
+
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            background: #ddd;
+            height: 6px;
+            border:1px solid #888;
+        }
+
+
+        input[type="range"]::-moz-range-track {
+            background: #ddd;
+            height: 6px;
+            border:1px solid #888;
+        }
+
+  
+        input[type="range"]::-webkit-slider-thumb {
+        appearance: none;
+        margin-top: -5px; /* Centers thumb on track */
+        background-color: rgb(101, 114, 101);
+        height: 15px;
+        width: 5px;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+        border: none;
+        background-color: rgb(101, 114, 101);
+        height: 15px;
+        width: 5px;
+        }
+
+  
+        input[type="checkbox"],
+        input[type="radio"] {
+            appearance: none;
+            background-color: #798e77;
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 13px;
+            height: 13px;
+            border: 1px solid black;
+            display: inline-grid;
+            place-content: center;
+            cursor: pointer;
+        }
+
+        input[type="radio"] {
+            border-radius: 50%;
+        }
+
+   
+        input[type="checkbox"]::before,
+        input[type="radio"]::before {
+            content: "";
+            width: 0.8em;
+            height: 0.8em;
+            transform: scale(0);
+           
+            box-shadow: inset 1em 1em black;
+        }
+
+        input[type="checkbox"]::before {
+        
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+
+        input[type="radio"]::before {
+            border-radius: 50%;
+        }
+
+        input:checked::before {
+        transform: scale(1);
+        }
+
+    </style>
+
+
+</head>
+<body>
+<div class="app">
+
+    <div class="topbar" style="display:flex;align-items: center; height: 20px; justify-content:space-between;">
+        <div class="presets" style=" display:inline-block; padding:2px;">
+            Presets: 
+            <div style="display:inline-block;">
+                <select id="preset-list" onchange="applyPreset();">
+                </select>
+            </div>
+            <div style="display:inline-block;">
+               <button style="position: relative;" onclick="openSavePreset(this);">Save New</button>
+            </div>
+            <div style="display:inline-block;vertical-align: text-bottom;">
+                <label class="lbutton">
+                    <input type="file" oninput="getFile(this)"/>
+                    IMP
+                </label>
+                <a id="export-presets">
+                    <button class="lbutton" >EXP</button>
+                </a>
+                
+            </div>
+        </div>
+        <div>
+            <span>æqvo</span>
+            <button id="startBtn">Initialize Audio Engine</button>
+        </div>
+        <div class="calcs" style="margin-right:5px;">
+            Table/calculators:
+            <label>
+                Group Generators  <input type="checkbox" checked id="showGenerators" onchange="toggleDisplay('tableGenerators')">
+                Simultaneous approx <input type="checkbox" id="showSimult" onchange="toggleDisplay('tableFits')">
+            </label>
+        </div>
+        
+    </div>
+    
+    <div id="tableGenerators" style="display: block;">
+
+        <div class="groups" style="margin-bottom: -5px;">
+
+            <div class="controls">
+                <div class="input-group">
+                    <label>Divisions</label>
+                    <input type="number" id="inputD" value="10" min="1" max="100" step="1">
+                </div>
+
+                <div class="input-group">
+                    <label>Equave</label>
+                    <input type="number" id="inputF" value="2" step="0.001" min="0" max="10" style="width:60px;">
+                </div>
+
+                <div class="input-group">
+                    <label>Rows</label>
+                    <input type="number" id="inputR" value="3" min="2" max="10" step="1">
+                </div>
+
+                <div class="input-group">
+                    <label>Display Options</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" id="showCents"> Cents</label>
+                        <label class="checkbox-item"><input type="checkbox" id="showMO"> Millioctaves</label>
+                    </div>
+                </div>
+                
+            </div>
+    
+            <div class="info-panel">
+                <div class="panel-card">
+                    <h4>Step Metrics</h4>
+                    <div id="stepInfo"></div>
+                </div>
+                <div class="panel-card">
+                    <h4>Group Generators</h4>
+                    <div id="coprimeList"></div>
+                </div>
+            </div>
+    
+        </div>
+    
+        <div style="overflow-x: auto; background:#000;padding:5px;">
+            <table id="resultTable">
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div id="tableFits" style="display:none; background-color: black; padding:5px; border-top:2px solid grey;">
+        <div class="card">
+            
+            <div class="input-fit" style="display:inline-block;">
+                <label>Equave:</label> <input type="number" id="baseInput" value="2" step="any">
+                <label>Convergents:</label> <input type="number" id="depthInput" value="6" min="1">
+                <label>Max Q (Scanning):</label> <input type="number" id="maxQ" value="100">
+                <button onclick="calculate()">Run Analysis</button>
+            </div>
+            <div id="argsContainer">
+                <div class="arg">
+                    <label>Arg:</label> <input type="number" class="arg-input" value="3" step="any">
+                    <button class="remove" onclick="removeInput(this)">×</button>
+                </div>
+                <div class="arg">
+                    <label>Arg:</label> <input type="number" class="arg-input" value="5" step="any">
+                    <button class="remove" onclick="removeInput(this)">×</button>
+                </div>
+            </div>
+            <button onclick="addInput()">+ Add Argument</button>
+        </div>
+        
+        <div class="card">
+            <label style="font-size:.8em;color:#666;font-family: monospace;">Convergent Comparison</label>
+            <div id="tableArea"></div>
+        </div>
+        
+        <div class="card">
+            <label style="font-size:.8em;color:#666;font-family: monospace;">Scanning Method: Top 10 Simultaneous Fits</label>
+            <div id="scanResults" class="best-list"></div>
+        </div>
+    </div>
+
+    <div id="synth-main" style="border-top:2px solid black;">
+
+        <div style="display:flex;">
+            <div class="components" style="flex:3; border-bottom:1px solid black">
+                <!--div id="warning" class="warning"></div-->
+
+                <div id="tuning-system" style="margin:10px;" class="optse">
+                    
+                    <div style="display:flex; align-items: center; border:1px dashed grey;gap:20px;">
+                        <span>Tuning System</span>
+                        <label id="ltuning-ed">
+                            <input type="radio" name="ttype" checked onchange="setTuning();"> Equal Divisions: <input type="number" min="1" max="1000" step="1" id="tuning-divisions" value="10" onchange="setTuning();">
+                             Equave: <input type="number" style="width:60px;" min="1" max="500" step=".001" id="tuning-equave" value="2" onchange="setTuning();"> LINKED<input type="checkbox" checked id="linked-equaves">
+
+                        </label>
+                        <div></div>
+                        <label id="ltuning-cent" style="opacity: .5;">
+                            <input type="radio" name="ttype" onchange="setTuning();"> Cents: <input type="number" min="1" max="2000" step="0.05" value="100" id="tuning-cents" onchange="setTuning();">
+                        </label>                         
+                    </div>
+                </div>
+               
+                <div id="general-opts" style="margin:10px;">
+                    <div style="display:flex; align-items: center; border:1px dashed grey;gap:0px;">
+                        <div class="control-group">
+                            <label>Attack</label>
+                            <input style="width:80px" type="range" id="attack" min="0.01" max=".5" step="0.001" value="0.05">
+                        </div>
+                        <div class="control-group">
+                            <label>Decay</label>
+                            <input style="width:80px" type="range" id="decay" min="0.0" max=".5" step="0.01" value="0.1">
+                        </div>
+                        <div class="control-group">
+                            <label>Sustain</label>
+                            <input type="range" id="sustainG" min="0.01" max="1" step="0.01" value=".5"> 
+                        </div>
+                        <div class="control-group">
+                            <label>Release</label>
+                            <input style="width:80px" type="range" id="release" min="0.01" max="4" step="0.01" value="0.4" >
+                        </div>
+                        <div class="control-group">
+                            <label>Relative</label>
+                            <input type="range" id="relative-rel" min="0" max=".5" value="0" step="0.01">
+                        </div>
+                        <div class="control-group">
+                            <label>F<sub>0</sub>  Gain</label>
+                            <input type="range" id="fGain" min="0" max="1" step="0.1" value="1">
+                        </div>
+                        <div class="control-group" style="width:129px;">
+                            <label><input type="checkbox" id="randomPhase" checked> Random Phase</label>
+                        </div>
+                        
+                    </div>
+                </div>
+            
+                <div style="display:flex; justify-content: space-between; align-items: center;">
+                    <span>Frequency Components</span>
+                    <button class="btn btn-add" onclick="addComponent()">+ ADD</button>
+                </div>
+
+                <div id="components-container" onchange="drawDissonance();">
+                    
+                
+                </div>
+            </div>
+
+            <div class="black" style="flex:2;color:#666;">
+                <div class="global-settings" style="border:1px dashed grey; padding:5px;">
+
+                    <div>
+                        <div class="extra-synth">
+                            <div>
+                                <label>Master Volume</label>
+                                <input type="range" id="masterVol" min="0" max=".25" step="0.01" value="0.15" style="max-width:80px;">
+                                <label>Base Hz [MIDI 69 - Keyb A]</label>
+                            <input type="number" id="baseFreq" value="261.4" onchange="baseHz=this.value">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div>
+                        <div class="extra-synth">
+                            <label>
+                            Reverb:<input type="checkbox" id="reverbOn" onchange="reverbOn=this.checked;"> </label>
+                            <label class="lbutton2">LOAD IR<input type="file" id="IRFile"></label>
+
+                            <label>Dry</label>
+                            <input type="range" id="rev-gain" min="0" max="1" step="0.1" value=".2" onchange="updateReverb();">
+                                    | 
+                            <label>RING
+                                <input type="checkbox" id="ringOn" class="p-sub"></label>
+            
+                                <label>Hz</label>
+                                <input type="number" id="ringFreq" class="t-freq" min="1" max="1000" value="5" step=".1">
+                           
+                                <label>+</label>
+                                <input type="range" id="ringGain" class="t-gain" min="0" max="500" step="1" value="3">
+                        </div>
+                    </div>
+                </div>
+                
+
+                <div style="display:flex; margin-left:6px; margin-top: 5px; flex-wrap: wrap;">
+                    <div style="display: inline-block;">
+                        <canvas id="dissonanceCanvas" width="285" height="80" style="width:285px; height:80px; display:block;"></canvas>
+                        <canvas id="densityCanvas"  width="285" height="20" style="width:285px; height:20px; display: block;"></canvas>
+
+                    </div>
+                    <div style="display:inline-block; margin-left:5px;">
+                        Dissonance Curve:<br/>
+                        <label>E.D. Ruler: <input type="checkbox" id="tuning-ruler" checked  onchange="drawDissonance();"></label><br/>
+                        <label>Cents Ruler <input type="checkbox" id="12edo-ruler" onchange="drawDissonance();"></label><br/>
+                        <label>Range:<br/>Equave +<input type="number" value="0.1" step="0.01" min="0.01" max="10" id="dissRange" onchange="drawDissonance();"></label>
+                    </div>
+                </div>
+
+                <div class="graphs" style="margin:10px;margin-top:2px;">
+                    Analyser:
+                    <div  style="display:flex;">
+                        <div style="flex:1;">
+                            <canvas id="oscilloscope"></canvas>
+                            <label style="display:flex;align-items:center;">Time: <input type="checkbox" id="drawTime" onchange="drawTime=this.checked;draw();"></label>
+                        </div>
+                        <div style="flex:1;">
+                            <canvas id="oscilloscope2"></canvas>
+                            <label style="display:flex;align-items:center;">Frequency: <input type="checkbox" id="drawFreq" checked onchange="drawFreq=this.checked;draw2();"></label>
+                        </div> 
+
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <div class="synth-bot">
+            <div style="position: relative;">
+                <div class="extra-opts" style="position:absolute; left:10px; top:5px;" >
+                    <input type="checkbox" id="colorCode" checked onchange="colors();"> Chroma <input style="width:50px;" type="range" id="chroma-base" onchange="colors();" value="0" min="0" max="1" step=".01">
+                </div>
+                <div>
+                    <div class="keys" id="keyboard">
+                        <div class="key" data-key="q">Q</div><div class="key" data-key="w">W</div><div class="key" data-key="e">E</div>
+                        <div class="key" data-key="r">R</div><div class="key" data-key="t">T</div><div class="key" data-key="y">Y</div>
+                        <div class="key" data-key="u">U</div><br/>
+                        <div class="key" data-key="a">A</div><div class="key" data-key="s">S</div><div class="key" data-key="d">D</div>
+                        <div class="key" data-key="f">F</div><div class="key" data-key="g">G</div><div class="key" data-key="h">H</div>
+                        <div class="key" data-key="j">J</div><br/>
+                        <div class="key" data-key="z">Z</div><div class="key" data-key="x">X</div><div class="key" data-key="c">C</div>
+                        <div class="key" data-key="v">V</div><div class="key" data-key="b">B</div><div class="key" data-key="n">N</div>
+                        <div class="key" data-key="m">M</div>
+                    </div>
+                </div>
+                <div class="extra-opts" style="position:absolute; right:10px; top:5px;" >
+                    <span id="freq-display">f<sub>0</sub> ----- Hz</span>
+                </div>
+            </div>
+
+            <div class="midi-monitor">
+                <div id="midiStatus" class="midi-status" style="display:inline-block;">MIDI: Scanning...</div> <div style="padding:0px 5px; float:right;"><button onclick="getMIDI();" style="font-size:8px;">SCAN MIDI</button></div>
+                <div class="midi-keys-scroll" id="midiKeys"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!--preset-->
+<script>
+
+let userpresets = [];
+
+
+window.addEventListener("load", () => {
+    //loadPresets();
+    loadSettings();
+    const savePresetButton = document.getElementById('export-presets');
+    savePresetButton.addEventListener('click', function(){
+        let jsn = JSON.stringify(userpresets);
+        let blob = new Blob([jsn]);
+        let url = URL.createObjectURL(blob);
+        savePresetButton.href = url;
+        savePresetButton.download = "aeqvo";//.JSON
+    });
+} )
+
+//validate the preset type!!!todo
+function getFile(elm){//import
+    new Response(elm.files[0]).json().then(json =>{
+        userpresets = json;
+        localStorage.setItem("EXAEQUO-PRESET",JSON.stringify(userpresets));
+        fillPresetList();
+    }, err => {
+        //not json
+        console.log("That's not a preset.")
+    });
+}
+
+
+async function loadSettings() {
+  try {
+    const storedSettings = await localStorage.getItem("AEQVO-PRESET");
+    if (storedSettings) {
+        userpresets = JSON.parse(localStorage.getItem("AEQVO-PRESET"));
+        fillPresetList();
+    } else {
+        localStorage.setItem("AEQVO-PRESET",defaultPresets);
+        userpresets = JSON.parse(localStorage.getItem("AEQVO-PRESET"));
+        fillPresetList();
+    }
+  } catch (error) {
+    console.error('Error loading settings:', error);
+  }
+}
+
+let defaultPresets = '[{"name":"13ED3 Odd Harmonics","tuningMode":0,"tuningEquave":3,"tuningDivisions":13,"tuningCents":0,"linked":true,"masterVolume":0.06,"baseFreq":261,"ringOn":"on","ringFreq":"5","ringGain":"10","attack":0.12,"decay":0.2,"sustain":0.73,"release":0.85,"relrel":0.22,"fGain":1,"randomPhase":false,"components":[{"equave":true,"count":2,"mult":3,"decay":3.3,"gain":1,"sub":false},{"equave":false,"count":1,"mult":5,"decay":0,"gain":0.9,"sub":false},{"equave":false,"count":1,"mult":7,"decay":0,"gain":0.4,"sub":false},{"equave":false,"count":1,"mult":11,"decay":0,"gain":0,"sub":false}]},{"name":"7ED2 E-Guitar","tuningMode":0,"tuningEquave":2,"tuningDivisions":7,"tuningCents":0,"linked":true,"masterVolume":0.02,"baseFreq":261,"ringOn":false,"ringFreq":"5","ringGain":"10","attack":0.003,"decay":0.04,"sustain":0.54,"release":0.95,"relrel":0.26,"fGain":1,"randomPhase":false,"components":[{"equave":true,"count":4,"mult":2,"decay":2.1,"gain":1,"sub":false},{"equave":false,"count":1,"mult":2.971988578273897,"decay":0.5,"gain":0.8,"sub":false},{"equave":false,"count":1,"mult":4.8760546168179015,"decay":0.5,"gain":0.5,"sub":false},{"equave":false,"count":1,"mult":5.943977156547793,"decay":0.5,"gain":0.3,"sub":false}]},{"name":"6EDPhi Metal","tuningMode":0,"tuningEquave":1.618033,"tuningDivisions":6,"tuningCents":0,"linked":true,"masterVolume":0.07,"baseFreq":261,"ringOn":false,"ringFreq":"5","ringGain":"10","attack":0.002,"decay":0.02,"sustain":0.75,"release":1.04,"relrel":0.04,"fGain":1,"randomPhase":false,"components":[{"equave":true,"count":4,"mult":1.618033,"decay":1.4,"gain":1,"sub":false},{"equave":false,"count":1,"mult":1.75314809449874,"decay":0.5,"gain":0.5,"sub":false},{"equave":false,"count":1,"mult":2.83665147078608,"decay":4,"gain":0.2,"sub":false}]},{"name":"10EDroot5 Bells","tuningMode":0,"tuningEquave":2.23606,"tuningDivisions":10,"tuningCents":0,"linked":true,"masterVolume":0.07,"baseFreq":261,"ringOn":false,"ringFreq":"5","ringGain":"10","attack":0.002,"decay":0.02,"sustain":0.45,"release":1.62,"relrel":0.19,"fGain":1,"randomPhase":false,"components":[{"equave":true,"count":3,"mult":2.23606,"decay":1.8,"gain":1,"sub":false},{"equave":false,"count":1,"mult":3.343683631181188,"decay":0.5,"gain":0.7,"sub":false},{"equave":false,"count":1,"mult":5.418951334353081,"decay":0.5,"gain":0.2,"sub":false},{"equave":false,"count":1,"mult":7.47667722033901,"decay":0.5,"gain":0.1,"sub":false}]},{"name":"11ED3 Keys","tuningMode":0,"tuningEquave":3,"tuningDivisions":11,"tuningCents":0,"linked":true,"masterVolume":0.06,"baseFreq":261,"ringOn":false,"ringFreq":"5","ringGain":"10","attack":0,"decay":0.06,"sustain":0.87,"release":0.27,"relrel":0.09,"fGain":1,"randomPhase":false,"components":[{"equave":true,"count":4,"mult":3,"decay":2.4,"gain":1,"sub":false},{"equave":false,"count":1,"mult":4.473216238611969,"decay":0.5,"gain":0.3,"sub":false}]},{"name":"9ED2.5 Glass","tuningMode":0,"tuningEquave":2.5,"tuningDivisions":9,"tuningCents":0,"linked":true,"masterVolume":0.06,"baseFreq":261,"ringOn":false,"ringFreq":"5","ringGain":"10","attack":0,"decay":0.06,"sustain":0.81,"release":0.37,"relrel":0.5,"fGain":1,"randomPhase":false,"components":[{"equave":true,"count":4,"mult":2.5,"decay":4,"gain":1,"sub":false},{"equave":false,"count":3,"mult":5.098576081850301,"decay":3.9,"gain":0.5,"sub":false}]},{"name":"10ED2 Guitar","tuningMode":0,"tuningEquave":2,"tuningDivisions":10,"tuningCents":100,"linked":true,"masterVolume":0.06,"baseFreq":261.4,"ringOn":false,"ringFreq":"5","ringGain":"3","attack":0.01,"decay":0.04,"sustain":0.66,"release":0.81,"relrel":0.31,"fGain":1,"randomPhase":false,"components":[{"equave":true,"count":3,"mult":2,"decay":2.32,"gain":1,"sub":false},{"equave":false,"count":1,"mult":3.0314331330207964,"decay":0.5,"gain":0.8,"sub":false},{"equave":false,"count":1,"mult":4.924577653379664,"decay":0.5,"gain":0.22,"sub":false},{"equave":false,"count":1,"mult":6.062866266041593,"decay":0.5,"gain":0.39,"sub":false},{"equave":false,"count":1,"mult":6.964404506368992,"decay":0.5,"gain":0.6,"sub":false},{"equave":false,"count":1,"mult":9.18958683997628,"decay":0.5,"gain":0.22,"sub":false}]},{"name":"10ED2 Guitar2","tuningMode":0,"tuningEquave":2,"tuningDivisions":10,"tuningCents":100,"linked":true,"masterVolume":0.06,"baseFreq":261.4,"ringOn":false,"ringFreq":"5","ringGain":"3","attack":0.01,"decay":0.03,"sustain":0.62,"release":1.66,"relrel":0.23,"fGain":1,"randomPhase":false,"components":[{"equave":true,"count":3,"mult":2,"decay":1.29,"gain":1,"sub":false},{"equave":false,"count":1,"mult":3.0314331330207964,"decay":0.5,"gain":1,"sub":false},{"equave":false,"count":1,"mult":4.924577653379664,"decay":0.5,"gain":0.8,"sub":false},{"equave":false,"count":1,"mult":6.062866266041593,"decay":0.5,"gain":0.47,"sub":false},{"equave":false,"count":1,"mult":6.964404506368992,"decay":0.5,"gain":0.56,"sub":false},{"equave":false,"count":1,"mult":9.18958683997628,"decay":0.5,"gain":0.1,"sub":false},{"equave":false,"count":1,"mult":10.556063286183154,"decay":0.5,"gain":0.09,"sub":false},{"equave":false,"count":1,"mult":11.31370849898476,"decay":0.5,"gain":0.07,"sub":false}]},{"name":"7ED-E(2.71)","tuningMode":0,"tuningEquave":2.7182818,"tuningDivisions":7,"tuningCents":100,"linked":true,"masterVolume":0.06,"baseFreq":261.4,"ringOn":false,"ringFreq":"5","ringGain":"3","attack":0.015,"decay":0.03,"sustain":0.64,"release":1.35,"relrel":0.23,"fGain":1,"randomPhase":false,"components":[{"equave":true,"count":3,"mult":2.7182818,"decay":1.55,"gain":1,"sub":false},{"equave":false,"count":1,"mult":4.813519661939129,"decay":0.5,"gain":0.51,"sub":false},{"equave":false,"count":1,"mult":6.405409307634638,"decay":0.5,"gain":0.43,"sub":false},{"equave":false,"count":1,"mult":9.832706843170316,"decay":0.5,"gain":0.17,"sub":false}]},{"name":"5EDroot2","tuningMode":0,"tuningEquave":1.4142,"tuningDivisions":5,"tuningCents":100,"linked":true,"masterVolume":0.1,"baseFreq":261.4,"ringOn":false,"ringFreq":"5","ringGain":"3","attack":0.01,"decay":0.04,"sustain":0.66,"release":0.12,"relrel":0.31,"fGain":1,"randomPhase":false,"components":[{"equave":true,"count":4,"mult":1.4142,"decay":1.1,"gain":1,"sub":false}]},{"name":"11ED-Pi","tuningMode":0,"tuningEquave":3.141592,"tuningDivisions":11,"tuningCents":100,"linked":true,"masterVolume":0.1,"baseFreq":261.4,"ringOn":false,"ringFreq":"5","ringGain":"3","attack":0.01,"decay":0.04,"sustain":0.66,"release":0.74,"relrel":0.31,"fGain":1,"randomPhase":true,"components":[{"equave":true,"count":4,"mult":3.141592,"decay":3.23,"gain":1,"sub":false},{"equave":false,"count":1,"mult":5.285997533303814,"decay":0.5,"gain":1,"sub":false},{"equave":false,"count":1,"mult":2.2991297339001586,"decay":0.5,"gain":0.18,"sub":false},{"equave":false,"count":1,"mult":3.8684826362371987,"decay":0.5,"gain":0.12,"sub":false},{"equave":false,"count":1,"mult":7.2229275789828655,"decay":0.5,"gain":0.62,"sub":false}]},{"name":"7ED(3/2) keys","tuningMode":0,"tuningEquave":1.5,"tuningDivisions":7,"tuningCents":100,"linked":true,"masterVolume":0.1,"baseFreq":261.4,"ringOn":false,"ringFreq":"5","ringGain":"3","attack":0.01,"decay":0.04,"sustain":0.66,"release":0.74,"relrel":0.31,"fGain":1,"randomPhase":false,"components":[{"equave":true,"count":4,"mult":1.5,"decay":0.58,"gain":1,"sub":false},{"equave":false,"count":1,"mult":2.5263545894854893,"decay":0.5,"gain":0.59,"sub":false}]},{"name":"5EDzeta(3)","tuningMode":0,"tuningEquave":1.2020569,"tuningDivisions":5,"tuningCents":100,"linked":true,"masterVolume":0.04,"baseFreq":261.4,"ringOn":false,"ringFreq":"5","ringGain":"3","attack":0.01,"decay":0.04,"sustain":0.66,"release":0.05,"relrel":0.07,"fGain":1,"randomPhase":false,"components":[{"equave":true,"count":6,"mult":1.2020569,"decay":0,"gain":1,"sub":false}]},{"name":"9EDzeta(2)","tuningMode":0,"tuningEquave":1.6449,"tuningDivisions":9,"tuningCents":100,"linked":true,"masterVolume":0.04,"baseFreq":261.4,"ringOn":false,"ringFreq":"5","ringGain":"3","attack":0.01,"decay":0.15,"sustain":0.78,"release":0.51,"relrel":0.07,"fGain":1,"randomPhase":false,"components":[{"equave":true,"count":4,"mult":1.6449,"decay":2,"gain":1,"sub":false},{"equave":false,"count":1,"mult":2.0521140833065608,"decay":0.5,"gain":0.59,"sub":false},{"equave":false,"count":1,"mult":3.567438554261061,"decay":0.5,"gain":0.07,"sub":false},{"equave":false,"count":1,"mult":4.971065687653555,"decay":0.5,"gain":0.06,"sub":false}]},{"name":"10EDPhi**2","tuningMode":0,"tuningEquave":2.618033,"tuningDivisions":10,"tuningCents":100,"linked":true,"masterVolume":0.04,"baseFreq":261.4,"ringOn":false,"ringFreq":"5","ringGain":"3","attack":0.01,"decay":0.02,"sustain":0.72,"release":0.51,"relrel":0.11,"fGain":1,"randomPhase":false,"components":[{"equave":true,"count":4,"mult":2.618033,"decay":2,"gain":1,"sub":false},{"equave":false,"count":1,"mult":1.9614741163103977,"decay":0.5,"gain":1,"sub":false},{"equave":false,"count":1,"mult":5.13520396514646,"decay":0.5,"gain":0.81,"sub":false}]}]';
+
+function fillPresetList(){
+    let sels = document.getElementById('preset-list');
+   
+    for(let a = sels.length; a>0;a--){
+        sels[a-1].remove();
+    }
+
+    for(let i =0;i<userpresets.length;i++){
+        let opt = document.createElement('option');
+        opt.value = i;
+        opt.innerText = userpresets[i].name;
+        sels.appendChild(opt);
+    }
+
+    sels.selectedIndex = -1;
+
+}
+
+
+function savePreset(n){
+
+    let components = [];
+    const componentsP = document.querySelectorAll('.component-card');
+
+    componentsP.forEach(comp => {
+        const count = parseInt(comp.querySelector('.p-count').value);
+        if(count>0){
+            const mult = parseFloat(comp.querySelector('.p-mult').value);
+            const decay = parseFloat(comp.querySelector('.p-decay').value);
+            const ggain = parseFloat(comp.querySelector('.p-gain').value);
+            const sub = comp.querySelector('.p-sub').checked;
+            let component = {
+                "equave": comp.id==="equaveComponent"?true:false,
+                "count": count,
+                "mult":mult,
+                "decay": decay,
+                "gain": ggain,
+                "sub": sub
+            };
+            components.push(component);
+        }
+    });
+
+    let npreset = {
+        "name":n,
+        "tuningMode": GetTrueOne('ttype'),
+        "tuningEquave": parseFloat(document.getElementById('tuning-equave').value),
+        "tuningDivisions": parseInt(document.getElementById('tuning-divisions').value),
+        "tuningCents": parseFloat(document.getElementById('tuning-cents').value),
+        "linked": document.getElementById('linked-equaves').checked,
+        "masterVolume": parseFloat(document.getElementById('masterVol').value),
+        "baseFreq": parseFloat(document.getElementById('baseFreq').value),
+        "ringOn": document.getElementById('ringOn').checked,
+        "ringFreq": document.getElementById('ringFreq').value,
+        "ringGain": document.getElementById('ringGain').value,
+        "attack": parseFloat(document.getElementById('attack').value),
+        "decay": parseFloat(document.getElementById('decay').value),
+        "sustain": parseFloat(document.getElementById('sustainG').value),
+        "release": parseFloat(document.getElementById('release').value),
+        "relrel": parseFloat(document.getElementById('relative-rel').value),
+        "fGain": parseFloat(document.getElementById('fGain').value),
+        "randomPhase": document.getElementById('randomPhase').checked,
+        "components": components
+    }
+
+    let exs = false;
+    for(let i = 0;i<userpresets.length;i++){
+        if(userpresets[i].name == n) {
+            userpresets[i] = npreset;
+            exs=true;
+        }
+    }
+    if(!exs) userpresets.push(npreset);
+    localStorage.setItem("AEQVO-PRESET",JSON.stringify(userpresets));
+    fillPresetList();
+}
+
+//?
+function applyPreset(){
+    let p = document.getElementById('preset-list').selectedIndex||0;
+
+    let tt = document.getElementsByName('ttype');
+    switch(userpresets[p].tuningMode){
+        case 0: tt[0].checked = true; tt[1].checked=false; break;
+        case 1: tt[0].checked = false; tt[1].checked=true; break;
+        default: break;
+    }
+    document.getElementById('tuning-divisions').value = userpresets[p].tuningDivisions;
+    document.getElementById('tuning-equave').value = userpresets[p].tuningEquave;
+    document.getElementById('tuning-cents').value = userpresets[p].tuningCents;
+    document.getElementById('linked-equaves').checked = userpresets[p].linked;
+
+    document.getElementById('attack').value = userpresets[p].attack;
+    attack = userpresets[p].attack;
+    document.getElementById('decay').value = userpresets[p].decay;
+    decay = userpresets[p].decay;
+    document.getElementById('sustainG').value = userpresets[p].sustain;
+    sustain = userpresets[p].sustain;
+    document.getElementById('release').value = userpresets[p].release;
+    release = userpresets[p].release;
+    document.getElementById('relative-rel').value = userpresets[p].relrel;
+    relrel = userpresets[p].relrel;
+    document.getElementById('fGain').value = userpresets[p].fGain;
+    fGain = userpresets[p].fGain;
+    document.getElementById('randomPhase').checked = userpresets[p].randomPhase;
+    randomPhase = userpresets[p].randomPhase;
+
+    document.getElementById('masterVol').value = userpresets[p].masterVolume;
+    masterVolume = userpresets[p].masterVolume;
+    document.getElementById('baseFreq').value = userpresets[p].baseFreq;
+    baseHz = userpresets[p].baseFreq;
+
+    document.getElementById('ringOn').checked = userpresets[p].ringOn;
+    ringOn = userpresets[p].ringOn;
+    document.getElementById('ringFreq').value = userpresets[p].ringFreq;
+    ringFreq= userpresets[p].ringFreq;
+    document.getElementById('ringGain').value = userpresets[p].ringGain;
+    ringGain = userpresets[p].ringGain;
+
+    document.getElementById('inputD').value = userpresets[p].tuningDivisions;
+    document.getElementById('inputF').value = userpresets[p].tuningEquave;
+    updateTable();
+
+    let total = document.querySelectorAll('.component-card');
+
+    for(let i =0;i<total.length;i++){
+        if(total[i].id==="equaveComponent") continue;
+        total[i].remove();
+    }
+
+    for(let i =0;i<userpresets[p].components.length;i++){
+        let comp = userpresets[p].components[i];
+        if(comp.equave ==true){
+            let co = document.getElementById('equaveComponent')
+            co.querySelector('.p-count').value = comp.count;
+            co.querySelector('.p-mult').value = comp.mult;
+            co.querySelector('.p-decay').value = comp.decay;
+            co.querySelector('.p-gain').value = comp.gain;
+            co.querySelector('.p-sub').checked = comp.sub;
+        }else{
+            addComponent(comp.mult,comp.sub, comp.count, comp.decay, comp.gain, comp.equave );
+        }
+    }
+    setTuning();
+    //document.getElementById('preset-list').selectedIndex = -1;
+}
+
+function openSavePreset(b){
+    if(b.children.length==0){
+        notplay=false;
+        let main = document.createElement('div');
+        main.style.zIndex = "10";
+        main.style.border = "5px solid #666";
+        main.style.backgroundColor ="#ccc";
+        main.style.position = "absolute";
+        main.style.padding = "10px";
+        main.style.top = "15px"; main.style.left ="-50px";
+        main.innerText = "Preset Name:"
+        b.appendChild(main);
+
+        let inp = document.createElement('input');
+        inp.type = "text";
+        inp.id = "tmpPresetName";
+        main.appendChild(inp);
+
+        let sub = document.createElement('button');
+        sub.innerText = "SAVE";
+        sub.onclick = (ev)=>{
+            if(inp.value.length>0){
+                savePreset(inp.value);
+                main.remove();
+                ev.stopPropagation();
+            } else { alert("Non-empty names only."); }
+        }
+        main.appendChild(sub);
+
+        document.getElementById('synth-main').onclick = ()=>{
+            notplay=true;
+            main.remove();
+        }
+    }
+}
+
+</script>
+
+
+
+
+
+<!--tuning-->
+<script>
+
+//links
+let globalStep = {"f":1,"c:":0,"m":0}; //freq, cents, mocts
+
+function setTuning(){
+    let ttype = GetTrueOne('ttype');
+    if(ttype==0){
+        let tE = parseFloat(document.getElementById('tuning-equave').value);
+        let tD = parseInt(document.getElementById('tuning-divisions').value);
+
+        let freq = Math.pow(tE,1/tD);
+
+        globalStep.f = freq;
+        globalStep.c = centsFromFreq(freq);
+        globalStep.m = moctsFromFreq(freq);
+    } else if(ttype==1){
+        let tuningCents = parseFloat(document.getElementById('tuning-cents').value);
+
+        let freq = freqFromCents(tuningCents)
+
+        globalStep.f = freq;
+        globalStep.c = tuningCents;
+        globalStep.m = moctsFromFreq(freq);
+    }
+
+
+    function freqFromCents(cents){
+        return 2**(cents/1200);
+    }
+    function centsFromFreq(freq){
+        return Math.log2(freq)*1200;
+    }
+    function moctsFromFreq(freq){
+        return Math.log2(freq)*1000;
+    }
+
+    colors();
+    
+    drawDissonance();
+}
+
+function continuedFraction(x, maxTerms = 10) {
+    const terms = [];
+    let value = x;
+
+    for (let i = 0; i < maxTerms; i++) {
+        const a = Math.floor(value);
+        terms.push(a);
+        const frac = value - a;
+        if (frac === 0) break; // exact rational
+        value = 1 / frac;
+    }
+
+
+    const convergents = [];
+    let p0 = 1, q0 = 0; // previous previous
+    let p1 = terms[0], q1 = 1; // previous
+
+    convergents.push(`${p1}/${q1}`);
+
+    for (let i = 1; i < terms.length; i++) {
+        const a = terms[i];
+        const p = a * p1 + p0;
+        const q = a * q1 + q0;
+        convergents.push(`${p}/${q}`);
+        p0 = p1; q0 = q1;
+        p1 = p;  q1 = q;
+    }
+
+    return { terms, convergents };
+}
+
+</script>
+
+
+<!--midi/pc keys-->
+<script>
+   
+    const midiKeysContainer = document.getElementById('midiKeys');
+    for (let i = 0; i < 88; i++) {
+        const keyEl = document.createElement('div');
+        keyEl.className = 'm-key';
+        keyEl.id = `m-note-${i+20}`;
+        keyEl.setAttribute('data-note', i+20);
+        midiKeysContainer.appendChild(keyEl);
+    }
+
+    function getMIDI(){
+        if (navigator.requestMIDIAccess) {
+            navigator.requestMIDIAccess().then(onMIDISuccess, () => {
+                document.getElementById('midiStatus').innerText = "MIDI: Access Denied";
+            });
+        }
+    }
+    getMIDI();
+
+    function onMIDISuccess(midiAccess) {
+        const status = document.getElementById('midiStatus');
+        const inputs = midiAccess.inputs.values();
+        let deviceCount = 0;
+        for (let input of inputs) {
+            input.onmidimessage = handleMIDIMessage;
+            deviceCount++;
+        }
+        status.innerText = deviceCount > 0 ? `MIDI: ${deviceCount} device(s) ready` : "MIDI: No devices found";
+    }
+ //are u noteoff?
+    function handleMIDIMessage(msg) {
+        const [command, note, velocity] = msg.data;
+
+        if(note<20||note>107) return;
+        
+        if (command === 144 && velocity > 0) {
+            const freqn = baseHz * (globalStep.f**(note-69));
+            playVoice(`midi-${note}`, freqn, velocity / 127);
+            document.getElementById(`m-note-${note}`).classList.add('active');
+            freqDisplay.innerHTML = "f<sub>0</sub> "+freqn.toFixed(1)+ " Hz"
+        } else if (command === 128 || (command === 144 && velocity === 0)) {
+            stopVoice(`midi-${note}`);
+            document.getElementById(`m-note-${note}`).classList.remove('active');
+            freqDisplay.innerHTML = "f<sub>0</sub> ----- Hz"
+        }
+    }
+
+let notplay=true;
+const freqDisplay = document.getElementById('freq-display');
+// pc keys
+window.addEventListener('keydown', e => {
+    if(notplay){
+    const k = e.key.toLowerCase();
+    if (kbMap.hasOwnProperty(k)) {
+        const freqn = baseHz * (globalStep.f**(kbMap[k]-7));
+        playVoice(`q-${k}`, freqn);
+        document.querySelector(`[data-key="${k}"]`).classList.add('active');
+        freqDisplay.innerHTML = "f<sub>0</sub> "+freqn.toFixed(1)+ " Hz"
+    }
+    }
+});
+
+window.addEventListener('keyup', e => {
+    if(notplay){
+    const k = e.key.toLowerCase();
+    if (kbMap.hasOwnProperty(k)) {
+        stopVoice(`q-${k}`);
+        document.querySelector(`[data-key="${k}"]`).classList.remove('active');
+        freqDisplay.innerHTML = "f<sub>0</sub> ----- Hz"
+    }
+    }
+});
+
+</script>
+
+
+<!--generator table-->
+<script>
+    
+    const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+
+    const elements = {
+        inputD: document.getElementById('inputD'),
+        inputR: document.getElementById('inputR'),
+        inputF: document.getElementById('inputF'),
+        showCents: document.getElementById('showCents'),
+        showMO: document.getElementById('showMO'),
+        stepInfo: document.getElementById('stepInfo'),
+        coprimeList: document.getElementById('coprimeList'),
+        tableHead: document.getElementById('tableHead'),
+        tableBody: document.getElementById('tableBody')
+    };
+
+    function updateTable() {
+        const D = parseInt(elements.inputD.value) || 1;
+        const R = parseInt(elements.inputR.value) || 2;
+        const F = parseFloat(elements.inputF.value) || 2;
+        const showCents = elements.showCents.checked;
+        const showMO = elements.showMO.checked;
+
+
+        let coprimes = [];
+        for (let i = 1; i < D; i++) {
+            if (gcd(i, D) === 1) coprimes.push(i);
+        }
+        elements.coprimeList.innerText = `[ ${coprimes.join(', ')} ]`;
+
+        const totalCents = Math.log2(F) * 1200;
+        const stepCents = totalCents / D;
+        const fRatio = Math.pow(F, 1/D);
+        const stepMO = (Math.log2(F) * 1000) / D;
+        elements.stepInfo.innerHTML = `Step: ${stepCents.toFixed(2)}c | Ratio: ${fRatio.toFixed(6)} | MO: ${stepMO.toFixed(2)}`;
+
+
+        let headHTML = "<tr>";
+        for (let c = 0; c <= D; c++) {
+            const currentGCD = gcd(c, D);
+
+            const order = (c === 0 || c === D) ? 1 : D / currentGCD;
+            const isGenerator = (order === D);
+            
+            headHTML += `<th class="${isGenerator ? 'generator' : ''}">
+                <span class="header-index">k=${c}</span>
+                <span class="header-order">Order: ${order}</span>
+            </th>`;
+        }
+        headHTML += "</tr>";
+        elements.tableHead.innerHTML = headHTML;
+
+        let bodyHTML = "";
+        for (let r = 1; r <= R; r++) {
+            bodyHTML += "<tr>";
+            for (let c = 0; c <= D; c++) {
+                const k = (r - 1) * D + c;
+
+                if (c === 0 || c === D) {
+                    bodyHTML += `<td class="empty-cell">—</td>`;
+                } else {
+                    const currentCents = k * stepCents;
+                    const currentFreq = Math.pow(2, currentCents / 1200);
+                    const currentMO = k * stepMO;
+
+                    bodyHTML += `<td>
+                        <div class="cell-data" onmouseenter="toggleaddbtn(this);" onmouseleave="toggleaddbtn(this);">
+                            ${showCents ? `<div class="cents">${currentCents.toFixed(1)}¢</div>` : ''}
+                            <div class="freq">${currentFreq.toFixed(4)}f</div>
+                            ${showMO ? `<div class="mo">${currentMO.toFixed(1)}₥</div>` : ''}
+                            <div class="addFreqButton" onclick="addComponent(${currentFreq})">+</div>
+                        </div>
+                    </td>`;
+                }
+            }
+            bodyHTML += "</tr>";
+        }
+        elements.tableBody.innerHTML = bodyHTML;
+    }
+
+    //  listeners
+    [elements.inputD, elements.inputR, elements.inputF, elements.showCents, elements.showMO].forEach(el => {
+        el.addEventListener('input', updateTable);
+    });
+
+    updateTable();
+
+    function toggleaddbtn(w){
+        let btn = w.querySelector('.addFreqButton');
+        if(btn.style.opacity == 1){
+            btn.style.opacity = 0;
+        } else {btn.style.opacity = 1 }
+    }
+
+</script>
+
+
+<!--fit scan-->
+<script>
+    function addInput() {
+        const div = document.createElement('div');
+        div.className = 'arg';
+        div.innerHTML = `<label>Arg:</label> <input type="number" class="arg-input" value="1.5" step="any"> <button class="remove" onclick="removeInput(this)">×</button>`;
+        document.getElementById('argsContainer').appendChild(div);
+    }
+
+    function removeInput(btn) {
+        if(document.querySelectorAll('.arg-input').length > 1) btn.parentElement.remove();
+    }
+
+    // standard 1D cfc
+    function get1D(target, depth) {
+        let cf = [], x = target;
+        for (let i = 0; i < depth; i++) {
+            let a = Math.floor(x); cf.push(a);
+            let rem = x - a;
+            if (Math.abs(rem) < 1e-12) break;
+            x = 1 / rem;
+        }
+        let convs = [], h2 = 0, h1 = 1, k2 = 1, k1 = 0;
+        cf.forEach(a => {
+            let h = a * h1 + h2; let k = a * k1 + k2;
+            convs.push({p: h, q: k});
+            h2 = h1; h1 = h; k2 = k1; k1 = k;
+        });
+        return convs;
+    }
+
+
+    function calculate() {
+        const base = parseFloat(document.getElementById('baseInput').value);
+        const depth = parseInt(document.getElementById('depthInput').value);
+        const maxQ = parseInt(document.getElementById('maxQ').value);
+        const inputs = Array.from(document.querySelectorAll('.arg-input')).map(i => parseFloat(i.value));
+        const targets = inputs.map(v => Math.log(v) / Math.log(base));
+
+        // 1
+        let html = `<table class="sscanfit"><tbody>`;
+
+        const allConvs = targets.map((t, idx) => {
+            const c = get1D(t, depth);
+            html += `<tr><td>log<sub>${base}</sub>(${inputs[idx]}) ≈ ${t.toFixed(6)}</td>`;
+            for(let i=0; i<depth; i++) {
+                let val = c[i] ? `${c[i].p}/${c[i].q}` : '-';
+
+                let approx = c[i].p / c[i].q;
+                let diff = (t - approx).toExponential(2);
+
+                html += `<td>${val} <br><small>(${diff})</small></td>`;
+            }
+            html += `</tr>`;
+            return c;
+        });
+
+
+        html += `</tbody></table>`;
+        document.getElementById('tableArea').innerHTML = html;
+
+        // scanning method
+        const winners = [];
+        for (let q = 1; q <= maxQ; q++) {
+            let totalSqErr = 0;
+            inputs.forEach(val => {
+                let target = Math.log(val) / Math.log(base);
+                let drift = Math.abs(Math.round(q * target) - (q * target));
+                totalSqErr += Math.pow(drift, 2);
+            });
+            let rms = Math.sqrt(totalSqErr / inputs.length);
+            winners.push({q, rms});
+        }
+   
+        winners.sort((a,b) => a.rms - b.rms);
+        let bhtml = `<table class="sscanfit"><tbody><tr><td>Q<br>Total RMS Error</td>`;
+      
+        winners.slice(0, 10).sort((a,b) => a.q - b.q).forEach(w => {
+            bhtml += `<td>${w.q} <br><small> ${w.rms.toFixed(5)}</small></td>`;
+        });
+        bhtml += `</tr></tbody></table>`;
+        document.getElementById('scanResults').innerHTML = bhtml;
+    }
+    calculate();
+
+</script>
+
+
+<!--main audio-->
+<script>
+let audioCtx, masterGain, analyser;
+let componentCount = 0;
+const activeVoices = new Map();
+
+const kbMap = { 'q':0, 'w':1, 'e':2, 'r':3, 't':4, 'y':5, 'u':6,
+                'a':7, 's':8, 'd':9, 'f':10, 'g':11, 'h':12, 'j':13,
+                'z':14, 'x':15, 'c':16, 'v':17, 'b':18, 'n':19, 'm':20                
+            };
+
+const eqLinked = document.getElementById('linked-equaves');
+
+let baseHz = parseFloat(document.getElementById('baseFreq').value);
+
+let drawTime = document.getElementById('drawTime').checked;
+let drawFreq = document.getElementById('drawFreq').checked;
+
+
+window.onload = () => { addComponent(2,false,2,0,1);
+
+    const eqComp = document.getElementById("equaveComponent").querySelector('.p-mult');
+    const eqTuning = document.getElementById("tuning-equave");
+    const eqTable = document.getElementById("inputF");
+
+    const divTuning = document.getElementById("tuning-divisions");
+    const divTable = document.getElementById("inputD");
+
+    const ltd = document.getElementById("ltuning-ed");
+    const ltc = document.getElementById("ltuning-cent");
+
+    ltd.addEventListener('click', ()=> {
+        ltd.style.opacity = "1";
+        ltc.style.opacity = "0.5"
+    });
+
+    ltc.addEventListener('click', ()=> {
+        ltd.style.opacity = ".5";
+        ltc.style.opacity = "1"
+    });
+    
+    function updateEquaves(q){
+        eqComp.value = q;
+        eqTuning.value = q;
+        eqTable.value = q;
+        updateTable();
+    }
+
+    function updateEDivision(d){
+        divTuning.value = d;
+        divTable.value = d;
+        updateTable();
+        colors();
+    }
+
+    [eqComp, eqTuning, eqTable].forEach(el => {
+        el.addEventListener('change', () => {
+            if(eqLinked.checked){
+                updateEquaves(el.value);
+            }
+        });
+    });
+
+    [eqComp, eqTuning, eqTable].forEach(el => {
+        el.addEventListener('mouseenter', () => {
+        if(eqLinked.checked){
+            eqComp.style.background = "rgb(129 218 181)";
+            eqTuning.style.background = "rgb(129 218 181)";
+            eqTable.style.background = "rgb(129 218 181)";
+        }
+        });
+    });
+
+    [eqComp, eqTuning, eqTable].forEach(el => {
+        el.addEventListener('mouseleave', () => {
+        if(eqLinked.checked){
+            eqComp.style.background = "#798e77";
+            eqTuning.style.background = "#798e77";
+            eqTable.style.background = "#798e77";
+        }
+        });
+    });
+
+    [divTuning, divTable].forEach(el => {
+        el.addEventListener('change', () => {
+            if(eqLinked.checked){
+                updateEDivision(el.value);
+            }
+        });
+    });
+
+    [divTuning, divTable].forEach(el => {
+        el.addEventListener('mouseenter', () => {
+        if(eqLinked.checked){
+            divTuning.style.background = "rgb(129 218 181)";
+            divTable.style.background = "rgb(129 218 181)";
+        }
+        });
+    });
+
+    [divTuning, divTable].forEach(el => {
+        el.addEventListener('mouseleave', () => {
+        if(eqLinked.checked){
+            divTuning.style.background = "#798e77";
+            divTable.style.background = "#798e77";
+        }
+        });
+    });
+
+    
+    
+    setTuning();
+
+};
+
+
+function addComponent(freq = 2, sub=false, count=1, decay=.5, gain=.5, equave=false) {
+    
+    const id = `comp-${Date.now()}`;
+    const eqid = componentCount===0||equave===true?"equaveComponent":id;
+    componentCount++;
+    const html = `
+        <div class="component-card" id="${eqid}">
+            <div class="control-group">
+                <label style="display:flex; align-items:center; margin:0;">SUB
+                <input type="checkbox" class="p-sub"></label>
+            </div>
+            <div class="control-group">
+                <label>Multiplier</label>
+                <input type="number" class="p-mult" style="width:60px;" min="0.5" max="8" step="0.001" value="${freq?freq:componentCount === 1 ? 2 : 3}">
+            </div>
+            
+            <div class="control-group">
+                <label>Count</label>
+                <input style="width:28px;" type="number" class="p-count" min="1" max="16" value="${componentCount === 1 ? 2 : 1}">
+            </div>
+            
+            <div class="control-group">
+                <label>Amp Decay</label>
+                <input type="range" class="p-decay" min="0" max="4" step="0.01" value="${decay}">
+            </div>
+            <div class="control-group">
+                <label>Gain</label>
+                <input type="range" class="p-gain" min="0" max="1" step="0.01" value="${gain}">
+            </div>
+           
+            <button style="display:${eqid==="equaveComponent"?'none':'block'}" class="btn btn-del" onclick="removeComponent('${eqid}')">REMOVE</button>
+            <span style="display:${eqid==="equaveComponent"?'block':'none'};font-size:8px;">EQUAVE</span>
+        </div>
+    `;
+    document.getElementById('components-container').insertAdjacentHTML('beforeend', html);
+}
+
+function removeComponent(id) {
+    let el = document.getElementById(id);
+    let total = document.querySelectorAll('.component-card').length;
+    if(el.id=="equaveComponent"){
+            alert("cant delete equave");
+            return;
+        }
+    else if (total > 1) {
+        el.remove();
+    } else {
+        alert("min one component to make sound!");//iiiii
+    }
+}
+
+
+let reverb = 0;
+let revg = 0;
+
+function initAudio() {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+    masterGain.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    bufferLength = analyser.frequencyBinCount;
+
+    draw();
+    draw2();
+}
+
+
+const fileInput = document.querySelector('#IRFile');
+let fileBuffer;
+let reverbOn = document.getElementById('reverbOn').checked;
+fileInput.onchange = async (e) => {
+  const file = e.target.files[0];
+  const arrayBuffer = await file.arrayBuffer();
+  const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+  fileBuffer = audioBuffer;
+
+  const convolver = audioCtx.createConvolver();
+  convolver.buffer = fileBuffer;
+  reverb = convolver;
+
+  const revGain = audioCtx.createGain();
+  revGain.connect(masterGain);
+
+  revg = revGain;
+  
+  //const source = audioCtx.createBufferSource();
+  //source.buffer = audioBuffer;
+  //source.connect(audioCtx.destination);
+  //source.start();
+};
+
+function updateReverb(){
+    if(revg!=0){
+        revg.gain.value = parseFloat(document.getElementById('rev-gain').value);
+    }
+}
+
+
+
+//wit?ha
+const masterCtrl = document.getElementById('masterVol');
+let master = parseFloat(masterCtrl.value);
+masterCtrl.addEventListener('change', ()=>{
+    master = parseFloat(masterCtrl.value);
+});
+
+const attackCtrl = document.getElementById('attack');
+let attack = parseFloat(attackCtrl.value);
+attackCtrl.addEventListener('change', ()=>{
+    attack = parseFloat(attackCtrl.value);
+});
+
+const decayCtrl = document.getElementById('decay');
+let decay = parseFloat(decayCtrl.value);
+decayCtrl.addEventListener('change', ()=>{
+    decay = parseFloat(decayCtrl.value);
+});
+
+const sustainCtrl = document.getElementById('sustainG');
+let sustain = parseFloat(sustainCtrl.value);
+sustainCtrl.addEventListener('change', ()=>{
+    sustain = parseFloat(sustainCtrl.value);
+});
+
+const releaseCtrl = document.getElementById('release');
+let release = parseFloat(releaseCtrl.value);
+releaseCtrl.addEventListener('change', ()=>{
+    release = parseFloat(releaseCtrl.value);
+});
+
+const relrelCtrl = document.getElementById('relative-rel');
+let relrel = parseFloat(relrelCtrl.value);
+relrelCtrl.addEventListener('change', ()=>{
+    relrel = parseFloat(relrelCtrl.value);
+});
+
+const fgainCtrl = document.getElementById('fGain');
+let fGain = parseFloat(fgainCtrl.value);
+fgainCtrl.addEventListener('change', ()=>{
+    fGain = parseFloat(fgainCtrl.value);
+});
+
+const rndphaseCtrl = document.getElementById('randomPhase');
+let randomPhase = rndphaseCtrl.checked;
+rndphaseCtrl.addEventListener('change', ()=>{
+    randomPhase = rndphaseCtrl.checked;
+});
+
+const ringCtrl = document.getElementById('ringOn');
+let ring = ringCtrl.checked;
+ringCtrl.addEventListener('change', ()=>{
+    ring = ringCtrl.checked;
+});
+
+const rfreqCtrl = document.getElementById('ringFreq');
+let ringFreq = parseFloat(rfreqCtrl.value);
+rfreqCtrl.addEventListener('change', ()=>{
+    ringFreq = parseFloat(rfreqCtrl.value);
+});
+
+const rgainCtrl = document.getElementById('ringGain');
+let ringGain = parseFloat(rgainCtrl.value);
+rgainCtrl.addEventListener('change', ()=>{
+    ringGain = parseFloat(rgainCtrl.value);
+});
+
+
+
+//todo let spectra!
+
+
+
+//rudimentary
+
+function playVoice(id, freq, velocityScale = 1) {
+    if (!audioCtx || activeVoices.has(id)) return;
+
+    let vmaster = master*velocityScale;
+
+    const voiceGain = audioCtx.createGain();
+    voiceGain.gain.setValueAtTime(0, audioCtx.currentTime);
+
+
+
+    //fundamental
+    const oFreq = freq;
+    const fOsc = audioCtx.createOscillator();
+    const fOscGain = audioCtx.createGain();
+
+    fOsc.type = 'sine';
+    fOsc.frequency.value = oFreq;
+    fOscGain.gain.value = fGain;//ayayay
+
+    fOsc.connect(fOscGain);
+    fOscGain.connect(voiceGain);
+    fOsc.start(audioCtx.currentTime);
+    
+    const oscillators = [];
+    oscillators.push([fOsc,0,fOscGain]);
+
+    if(ring==true) ringAdd(fOsc,oscillators,audioCtx.currentTime);
+
+
+
+
+    
+    const components = document.querySelectorAll('.component-card');
+
+    components.forEach(comp => {
+        const count = parseInt(comp.querySelector('.p-count').value);
+        if(count>0){
+            const mult = parseFloat(comp.querySelector('.p-mult').value);
+            const decay = parseFloat(comp.querySelector('.p-decay').value);
+            const ggain = parseFloat(comp.querySelector('.p-gain').value);
+            const sub = comp.querySelector('.p-sub').checked;
+
+            for (let i = 0; i < count; i++) {
+                const hFreq = freq * Math.pow(mult, (i+1)*(sub==true?-1:1));
+                if (hFreq > 18000 || hFreq < 20) continue;
+
+                const osc = audioCtx.createOscillator();
+                const oscGain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = hFreq;
+               
+                oscGain.gain.value = Math.exp(-i * decay) *ggain;
+
+                osc.connect(oscGain);
+                oscGain.connect(voiceGain);
+                
+                const startTime = audioCtx.currentTime + (randomPhase ? Math.random() * 0.01 : 0);
+                osc.start(startTime);
+                oscillators.push([osc,i+1,oscGain]);
+
+                //vibrato
+                if(ring==true) ringAdd(osc, oscillators, startTime);
+                
+            }
+        }
+    });
+
+    if(reverbOn==true && reverb!==0){
+        voiceGain.connect(reverb);
+        reverb.connect(revg);
+    }
+    
+
+    voiceGain.connect(masterGain);
+    voiceGain.gain.linearRampToValueAtTime(vmaster, audioCtx.currentTime + attack);
+    voiceGain.gain.linearRampToValueAtTime(vmaster * sustain, audioCtx.currentTime + attack + decay);
+    activeVoices.set(id, { voiceGain, oscillators });
+}
+
+function stopVoice(id) {
+    if (!activeVoices.has(id)) return;
+    const { voiceGain, oscillators } = activeVoices.get(id);
+
+    const now = audioCtx.currentTime;
+    //voiceGain.gain.cancelScheduledValues(now);
+    //voiceGain.gain.setValueAtTime(voiceGain.gain.value, now);
+    //voiceGain.gain.linearRampToValueAtTime(0, now + release);
+
+    oscillators.forEach(o => {
+        o[2].gain.cancelScheduledValues(now);
+        o[2].gain.setValueAtTime(o[2].gain.value, now);
+
+        let newrel = Math.exp(-(o[1]) * relrel) *release;
+        
+        o[2].gain.linearRampToValueAtTime(0, now + ( newrel ) );
+
+        o[0].stop(now + release + 0.05);
+        o[0].onended = () => { o[0].disconnect();};
+    });
+    activeVoices.delete(id);
+  
+}
+
+function ringAdd(osc,oscs,startTime){
+    const vibratoLFO = audioCtx.createOscillator();
+    const vibratoGain = audioCtx.createGain();
+
+    const randomizerLFO = audioCtx.createOscillator();
+    const randomizerGain = audioCtx.createGain();
+
+    vibratoLFO.frequency.value = ringFreq; //  vibrato speed
+    vibratoGain.gain.value = ringGain;    //  cents
+
+    //randomizerLFO.frequency.value = 0.3; //  slow
+    //randomizerGain.gain.value = 2;       // +/- 2Hz
+
+    //randomizerLFO.connect(randomizerGain);
+    //randomizerGain.connect(vibratoLFO.frequency); // modulate speed
+
+    vibratoLFO.connect(vibratoGain);
+    vibratoGain.connect(osc.detune); // modulate pitch
+
+    vibratoLFO.start(startTime);
+    //randomizerLFO.start(startTime);
+
+    oscs.push([vibratoLFO,-1,vibratoGain])
+    //oscillators.push(randomizerLFO)
+}
+
+</script>
+
+
+<!--graphics-->
+<script>
+
+
+//color coding,
+//uses rgb based canonical attractors wheel R O Y G B V M
+//baiscally, keeps rgb red-cyan, and green-magenta definitions as complementaries, but
+//changes the yellow-blue axis, to 2 new, yellow-violet, orange-blue
+//this is the simplest way to make a rough cyclical spectrum render in "log coordinates" without implementing CIE or any wavelenght xyz conversion... is still an rgb gradient, but proportionally more faithfull to perceptual complementaries(binocular color fusion /afterimage /color constancy)
+//im just a color conspiranoid! hail rycv
+
+const mainHueStops = [ //remap Hue wheel{ input, output }
+        { input: 0,     hue: 0   }, 
+        { input: 45, hue: 30  }, 
+        { input: 90, hue: 60  }, 
+        { input: 135,   hue: 120 }  ,
+        { input: 180,     hue: 180 }, 
+        { input: 225, hue: 240 }, 
+        { input: 270, hue: 270 },  
+        { input: 315,   hue: 300 },  
+        { input: 360,   hue: 360 }  
+    ];
+
+// generic linear interpolation function
+function getInterpolatedValue(inputValue, stops) {
+    // edge cases for inputs outside the defined range
+    /*if (inputValue <= stops[0].input) {return stops[0].hue;}
+    if (inputValue >= stops[stops.length - 1].input) {return stops[stops.length - 1].hue;}*/
+    let modh = inputValue%360;
+
+    for (let i = 0; i < stops.length - 1; i++) {
+        const stopA = stops[i];
+        const stopB = stops[i + 1];
+
+        if (modh >= stopA.input && modh <= stopB.input) {
+            const t = (modh - stopA.input) / (stopB.input - stopA.input);
+            // interpolation
+            const interpolatedHue = stopA.hue + t * (stopB.hue - stopA.hue);
+            return interpolatedHue;
+        }
+    }
+    return 0; // fallback,.. should not be reached with ok input and stops
+}
+
+
+function colors(){
+    let chromaon = document.getElementById('colorCode').checked;
+    let ttype = GetTrueOne('ttype');
+
+    const keys = document.querySelectorAll('.key');
+    const mkeys = document.querySelectorAll('.m-key');
+    if(ttype==1||!chromaon){
+
+        for(let i =0; i<keys.length;i++){keys[i].style.borderBottom = `4px solid grey`;}
+
+        for(let i =0; i<mkeys.length;i++){mkeys[i].style.borderBottom = `4px solid grey`;}
+        
+    }else{
+        let divisions = parseInt(document.getElementById('tuning-divisions').value)
+        let hueAngleStep = 360/divisions;
+        let chromaStart = 0;
+        let chromaStartM = 0;
+        //behold! the mapping than can be a single line, but resists!
+        //is just to keep fixed the base freq and keys in each keyboard (pc and midi) at the same color too. (key A, and key 69 i think)
+        if(divisions>=7){
+            chromaStart = (divisions-7)*hueAngleStep;
+        }
+        else {
+            while(divisions<7){
+                divisions+=divisions;
+            }
+            chromaStart = (divisions-7)*hueAngleStep;
+        }
+        let chromaBase = parseFloat(document.getElementById('chroma-base').value)*360;
+
+        let divisionsM = parseInt(document.getElementById('tuning-divisions').value)
+        if(divisionsM>=69){
+            chromaStartM = (divisionsM-69)*hueAngleStep;
+        }
+        else {
+            while(divisionsM<69){
+                divisionsM+=divisionsM;
+            }
+            chromaStartM = (divisionsM-69)*hueAngleStep;
+        }
+
+
+
+
+        for(let i =0; i<keys.length;i++){
+            keys[i].style.borderBottom = `4px solid hsl(${(
+                getInterpolatedValue(chromaBase+chromaStart+(hueAngleStep*i), mainHueStops)
+            )}, 100%, 50%)`;
+        }
+
+        for(let i =0; i<mkeys.length;i++){
+            mkeys[i].style.borderBottom = `4px solid hsl(${(
+                getInterpolatedValue(chromaBase+chromaStartM+(hueAngleStep*i), mainHueStops)
+            )%360}, 100%, 50%)`;
+        }
+    }
+}
+
+
+
+let bufferLength = 256;
+
+const canvas = document.getElementById('oscilloscope');
+const ctx = canvas.getContext('2d');
+
+function draw() {
+    if(!audioCtx || !drawTime) return;
+    requestAnimationFrame(draw);
+    
+    const dataArray = new Uint8Array(bufferLength);
+    analyser.getByteTimeDomainData(dataArray);
+    
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#eeeeee';
+    ctx.beginPath();
+
+    const sliceWidth = canvas.width / bufferLength;
+    let x = 0;
+    for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = v * canvas.height / 2;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        x += sliceWidth;
+    }
+    ctx.lineTo(canvas.width, canvas.height / 2);
+    ctx.stroke();
+}
+
+const canvas2 = document.getElementById('oscilloscope2');
+const ctx2 = canvas2.getContext('2d');
+
+function draw2() {
+    if(!audioCtx||!drawFreq) return;
+    drawVisual = requestAnimationFrame(draw2);
+    
+    //const bufferLength2 = analyser.frequencyBinCount;
+    const dataArray2 = new Uint8Array(bufferLength);
+    analyser.getByteFrequencyData(dataArray2);
+    const WIDTH = canvas2.width;
+    const HEIGHT = canvas2.height;
+
+    ctx2.fillStyle = 'rgb(0,0,0)';
+    ctx2.fillRect(0,0,WIDTH,HEIGHT);
+
+    var barWidth = (WIDTH / bufferLength) * 2.5;
+    var barHeight;
+    var x = 0;
+
+    for(var i = 0; i < bufferLength; i++) {
+        barHeight = dataArray2[i];
+
+        ctx2.fillStyle = 'rgb('+ (barHeight+100) + ','+ (barHeight+100) + ','+ (barHeight+100) + ')';
+        ctx2.fillRect(x, HEIGHT-barHeight/2, barWidth,barHeight/2);
+
+        x += barWidth + 1;
+    }
+};
+
+</script>
+
+
+<!--diss curve-->
+<script>
+    const canvasD = document.getElementById('dissonanceCanvas');
+    const ctxD = canvasD.getContext('2d');
+    const width = canvasD.width;
+    const height = canvasD.height;
+
+    let freq = [1000];//unison
+    let amp = [10.0];
+
+    let n = 1;
+
+    const tuningRuler = document.getElementById('tuning-ruler');
+    const centRuler = document.getElementById('12edo-ruler');
+
+    let equaveD = parseFloat(document.getElementById('tuning-equave').value);
+    let drange = parseFloat(document.getElementById('dissRange').value);
+
+     // sethares dissonance constants,
+     const dstar = 0.24, s1 = 0.0207, s2 = 18.96;
+    const c1 = 5.0, c2 = -5.0;
+    const a1 = -3.51, a2 = -5.75;    
+
+    const unison = 1;
+
+    const startint = 1;
+    let endint = equaveD + drange;
+    const inc = 0.001;
+
+    function setFreqAndAmps(){
+
+        freq = [1000];
+        amp = [10.0];
+        n = 1;
+
+        equaveD = parseFloat(document.getElementById('tuning-equave').value);
+        drange = parseFloat(document.getElementById('dissRange').value);
+        endint = equaveD + drange;
+
+        const componentsD = document.querySelectorAll('.component-card');
+
+        componentsD.forEach(comp => {
+            const count = parseInt(comp.querySelector('.p-count').value);
+            if(count>0){
+                const mult = parseFloat(comp.querySelector('.p-mult').value);
+                const decay = parseFloat(comp.querySelector('.p-decay').value);
+                const ggain = parseFloat(comp.querySelector('.p-gain').value);
+                const sub = comp.querySelector('.p-sub').checked;
+
+                for (let i = 0; i < count; i++) {
+                    const hFreq = 1000 * Math.pow(mult, (i+1)*(sub==true?-1:1));
+                  
+                    const hamp = Math.exp((-i) * decay) *ggain*10.0;
+                    freq.push(hFreq);
+                    amp.push(hamp);
+                }
+            }
+        });
+        n=freq.length;
+    }
+    
+    let alphas = [];
+    let diss = [];
+
+    const paddingX = 15; 
+    const paddingY = 15;
+    const drawWidth = width - (paddingX * 2);
+    const drawHeight = height - (paddingY * 2) -8;
+
+    function drawDissonance(){
+
+        drawDensity();
+        setFreqAndAmps();
+
+        alphas = [];
+        diss = [];
+        
+        for (let alpha = startint; alpha <= endint + 0.01; alpha += inc) {
+            let d = 0;
+            
+            const g = freq.map(f => alpha * f);
+
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    const lij = Math.min(amp[i], amp[j]);
+                    const fmin = Math.min(g[j], freq[i]);
+                    const s = dstar / (s1 * fmin + s2);
+                    const fdif = Math.abs(g[j] - freq[i]);
+                    
+                    const arg1 = a1 * s * fdif;
+                    const arg2 = a2 * s * fdif;
+                    // bounds
+                    const exp1 = arg1 < -88 ? 0 : Math.exp(arg1);
+                    const exp2 = arg2 < -88 ? 0 : Math.exp(arg2);
+
+                    const dnew = lij * (c1 * exp1 + c2 * exp2);
+                    d += dnew;
+                }
+            }
+            alphas.push(alpha);
+            diss.push(d);
+        }
+
+        const maxDiss = Math.max(...diss);
+        const minDiss = Math.min(...diss);
+
+        ctxD.clearRect(0, 0, width, height);
+        ctxD.beginPath();
+        ctxD.strokeStyle = '#ccc'; 
+        ctxD.lineWidth = 1.5;
+        ctxD.lineJoin = 'round';
+
+        for (let k = 0; k < alphas.length; k++) {
+            const x = paddingX + ((Math.log10(alphas[k]) - Math.log10(startint)) / (Math.log10(endint) - Math.log10(startint))) * drawWidth;
+           
+            const normalizedY = (diss[k] - minDiss) / (maxDiss - minDiss);
+            const y = 10+ paddingY + drawHeight - (normalizedY * drawHeight);
+
+            if (k === 0) {
+                ctxD.moveTo(x, y);
+            } else {
+                ctxD.lineTo(x, y);
+            }
+        }
+        
+        ctxD.stroke();
+
+        drawMainMarks();
+        if(centRuler.checked) drawCentRuler();
+        if(tuningRuler.checked)drawEde();
+
+    }
+    
+
+    function drawMainMarks(){
+        ctxD.fillStyle = 'white';        
+        ctxD.font = '8px monospace';
+
+        let unisonpos = paddingX + ((1 - startint) / (endint - startint)) * drawWidth;
+        let eqpos = paddingX + ((equaveD - startint) / (endint - startint)) * drawWidth;
+
+        ctxD.fillText ("1:1", unisonpos, 75);
+
+        ctxD.fillText("1:"+equaveD, eqpos,75)
+    }
+
+    function drawEde(){
+        ctxD.fillStyle = '#ccc';
+        ctxD.font = '8px monospace';
+
+        ctxD.lineWidth = 1.0;
+        ctxD.strokeStyle = '#ccc';
+        ctxD.beginPath();
+    
+        let mark = 1;
+        let stepf = parseFloat(document.getElementById('tuning-equave').value)**(1/ parseFloat(document.getElementById('tuning-divisions').value) );
+
+        let k = 1;
+
+        while(mark<=endint){
+            const pos = paddingX + ((Math.log10( (stepf**(k-1)) ) - Math.log10(startint)) / (Math.log10(endint) - Math.log10(startint))) * drawWidth;
+            ctxD.fillText (k-1, pos+2, 10);
+            ctxD.moveTo (pos,5);   ctxD.lineTo (pos,drawHeight+25);
+            k++;
+            mark*=stepf;
+        }
+        ctxD.stroke();
+    }
+
+    function drawCentRuler(){
+        ctxD.fillStyle = "#666";
+        ctxD.font = '8px monospace';
+
+        ctxD.lineWidth = 1.0;
+        ctxD.strokeStyle = '#666';
+        ctxD.beginPath();
+
+        let tuningCents = parseFloat(document.getElementById('tuning-cents').value);
+        let stepf = 2**(tuningCents/1200);
+
+        let mark = 1;
+        //let stepf = 2**(1/12);
+        let k = 1;
+
+        while(mark<=endint){
+    
+            const pos = paddingX + ((Math.log10( (stepf**(k-1)) ) - Math.log10(startint)) / (Math.log10(endint) - Math.log10(startint))) * drawWidth;
+            ctxD.fillText (k-1, 2+ pos, 20);
+            ctxD.moveTo (pos,15);   ctxD.lineTo (pos,drawHeight+25);
+            k++;
+            mark*=stepf;
+        }
+        ctxD.stroke();
+    }
+    
+
+
+    const canvasID = document.getElementById('densityCanvas');
+    const ctxID = canvasID.getContext('2d');
+    const widthI = canvasID.width;
+    const heightI = canvasID.height;
+
+    let pairs = [[1,1]]
+
+    function intervalDensity(){
+        pairs = [[1,1]];
+
+        equaveD = parseFloat(document.getElementById('tuning-equave').value);
+        drange = parseFloat(document.getElementById('dissRange').value);
+        endint = equaveD + drange;
+
+        const componentsD = document.querySelectorAll('.component-card');
+
+        componentsD.forEach(comp => {
+            const count = parseInt(comp.querySelector('.p-count').value);
+            if(count>0){
+                const mult = parseFloat(comp.querySelector('.p-mult').value);
+                const decay = parseFloat(comp.querySelector('.p-decay').value);
+                const ggain = parseFloat(comp.querySelector('.p-gain').value);
+                const sub = comp.querySelector('.p-sub').checked;
+
+                for (let i = 0; i < count; i++) {
+                    const hFreq = 1 * Math.pow(mult, (i+1)*(sub==true?-1:1));
+                    //if (hFreq > 18000 || hFreq < 20) continue;
+                    const hamp = Math.exp((-i) * decay) *ggain*1.0;
+                    pairs.push([hFreq,hamp])
+                }
+            }
+        });
+  
+        let density = [];
+
+        for(let i = 0; i<pairs.length; i++){
+            let base = pairs[i][0];
+            let binte = pairs[i][1];
+
+            for(let j = 0; j<pairs.length; j++){
+                let interval = base / pairs[j][0];
+                let weight = binte + pairs[j][1];
+                density.push([interval,weight]);
+            }
+        }
+        return density;
+    }
+
+    function drawDensity(){
+
+        let pars = intervalDensity();
+
+        ctxID.clearRect(0, 0, widthI, heightI);
+        ctxID.beginPath();
+        ctxID.strokeStyle = '#ccc'; 
+        ctxID.lineWidth = .5;
+        ctxID.lineJoin = 'round';
+
+        for (let k = 0; k < pars.length; k++) {
+            let current = pars[k][0];
+            if(current<startint||current>endint) continue;
+        
+            const x = paddingX + ((Math.log10(current) - Math.log10(startint)) / (Math.log10(endint) - Math.log10(startint))) * drawWidth;
+
+            ctxID.shadowColor = 'white';
+            ctxID.shadowOffsetX = 0;
+            ctxID.shadowOffsetY = 0;
+   
+            ctxID.shadowBlur = 4;
+            ctxID.moveTo(x, 0);
+            ctxID.lineTo(x, 50);
+ 
+        }
+        ctxID.stroke();
+    }
+
+</script>
+
+
+<!--helpers/general-->
+<script>
+function GetTrueOne(rname){
+    let options = document.getElementsByName(rname);
+    let t;
+    for (t=0; t < options.length ; t++){
+        if(options[t].checked==true){
+            return t;
+        }
+    }
+}
+
+function toggleDisplay(w){
+    let we = document.getElementById(w);
+    if(we.style.display == "block"){
+        we.style.display = "none";
+    } else {we.style.display = "block"; }
+}
+
+document.getElementById('startBtn').addEventListener('click', () => { initAudio(); document.getElementById('startBtn').style.display='none'; });
+
+</script>
+
+<!--nothing interesting down here-->
+
+</body>
+</html>
