@@ -16,35 +16,35 @@
             padding: 5px;
         }
         .app-section{
-            padding: 20px;
-            border-bottom: 1px solid#444;
+            border: 1px solid#444;
+            width: 210px;
+            margin:2px;
+            
         }
         .app-img{
-            display: inline-block;
+            /*display: inline-block;*/
             border:1px dashed #666;
             text-align: center;
             vertical-align: middle;
-            width: 225px;
+            width: 100%;
             height: 150px;
-            background-repeat: no-repeat;
+            /*background-repeat: no-repeat;*/
             background-size: contain;
         }
-        .app-text{
+        /*.app-text{
             display: inline-block;
             height: auto;
             vertical-align: top;
-            width: 800px;
             margin-left:12px;
-        }
+        }*/
         .app-title{
-            font-size:18px;
+            font-size:15px;
             font-weight: bold;
             color:#ccc;
         }
         .app-desc{
             color:#ccc;
-            font-size: 18px;
-            margin:25px 0px;
+            font-size: 14px;
         }
         .links{
             padding: 20px;
@@ -54,21 +54,26 @@
             font-size: 15px;
             word-spacing: 10px;
         }
+        .main {
+            display:flex;
+            flex-wrap:wrap;
+        }
     </style>
 </head>
 <body>
     <div class="full">
-        <div="main">
-            <div class="app-section"> 
+        <div> 
                 <a href="https://xcjb.blogspot.com/">XENEIZE</a>
-            </div>
+        </div>
+        <div class="main">
+            
             <div class="app-section">
                 <div class="app-img" style="background-image: url(aeqvo-demo.jpg);"></div>
                 <div class="app-text">
                     <a><div class="app-title">AEQVO</div></a>
                     <div class="app-desc">Synthesizer designed for controlled scaling symmetries. Experimental app for testing pitch cyclicity("octaveness") keywords: equave, music morphology, pitch dimensionality, tonal gestalts, spectral algebra, Sethares</div>
                     <div class="app-extra"><a href="app/aeqvo.html">APP</a></div>
-                    <div class="app-extra"><a href="xcjb.blogspot.com">Manual/Research (DRAFT)</a></div>
+                    <div class="app-extra"><a href="https://xcjb.blogspot.com/2026/03/spectral-congruence-pitch-cyclicity.html">Manual/Research (DRAFT)</a></div>
                 </div>
             </div>
 
@@ -105,7 +110,9 @@
                 <div class="app-text">
                     <div class="app-title">Spiral Harp</div>
                     <div class="app-desc">Virtual instrument interface: Microtonal Spiral Harp, emulates stringed spiral harps in many configurations (spiderweb-fashioned), auto chords finder, exports scala tuning files. ("stand-alone" old version). </div>
-                    <div class="app-extra"><a href="app/spiral-harp.html">APP</a> <a href="https://www.behance.net/gallery/160887083/Spiderweb-Harp-Spiral-Tuner-Microtonal-Synth" target="_blank">Help</a></div>
+                    <div class="app-extra"><a href="app/spiral-harp.html">APP</a>
+                        <a href="https://xcjb.blogspot.com/2024/07/the-spiral-harp.html" target="_blank">Theory</a>
+                        <a href="https://www.behance.net/gallery/160887083/Spiderweb-Harp-Spiral-Tuner-Microtonal-Synth" target="_blank">Behance</a></div>
                 </div>
             </div>
 
@@ -116,6 +123,8 @@
                     <div class="app-desc">Custom Microtonal Guitars for scale/fretboard learning, ("stand-alone" version). </div>
                     <div class="app-extra"><a href="app/microtonal-guitar.html">APP</a></div>
                     <div class="app-extra"><a href="app/microtonal-guitar-old.html">APP(Old)</a></div>
+                    <div class="app-extra"><a href="https://sfinx-music.blogspot.com/">Manual v3</a></div>
+                    <div class="app-extra"><a href="https://xcjb.blogspot.com/2024/07/sfinx-xenharmonic-guitar-learning-app.html">Manual v2</a></div>
                 </div>
             </div>
  
