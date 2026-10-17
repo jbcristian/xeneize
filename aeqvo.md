@@ -37,8 +37,6 @@
 # Spectral Congruence and Pitch Cyclicity 
 
 Pitch cyclicity (including octave equivalence) can be understood as an emergent perceptual strategy and property of spectral self-similarity under frequency scaling; by designing or analyzing spectra for scaling symmetries one can predict or create alternative perceptual pitch cycles and compatible tuning systems.
-s
-"Aeqvo" screenshot.
 
 
 
